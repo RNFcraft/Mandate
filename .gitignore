@@ -17,3 +17,6 @@ tmp/
 # Test reports
 test-results/
 playwright-report/
+
+# Runtime save games (separate from authored scenarios)
+saves/

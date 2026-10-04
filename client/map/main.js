@@ -5,6 +5,8 @@ import { loadScenario } from '../scenarios/store.js';
 import { prepare, path } from './geometry.js';
 import { TerritoryLOD } from './lod.js';
 import { unpackTopology } from './topology.js';
+import kernel from '../../shared/simulation.cjs';
+import {gameControls} from '../game/controls.js';
 
 try {
   const params = new URLSearchParams(location.search);
@@ -14,7 +16,9 @@ try {
     if (!response.ok) throw new Error(`Map data: ${response.status}`);
     const data=await response.json();return url.endsWith('.topo.json')?unpackTopology(data):data;
   }));
-  const model = new MapModel(geography, await loadScenario(scenarioId));
+  const initial=await loadScenario(scenarioId);
+  const simulation=params.get('editor')==='1'?null:new kernel.Simulation(initial,geography);
+  const model = new MapModel(geography,initial,{simulation});
   const geometry = name => feature(topology, topology.objects[name]).features.map(prepare);
   const regions = geometry('regions');
   const countries = geometry('countries');
@@ -35,6 +39,7 @@ try {
   await refreshPolitical();
   // Public integration surface for future simulation and rendering layers.
   window.mandateMap = map;
+  if(simulation){window.mandateSimulation=simulation;window.mandateGameControls=gameControls(simulation,geography);}
   if (params.get('editor') === '1') {
     const { ScenarioEditor } = await import('../editor/editor.js');
     window.mandateEditor = new ScenarioEditor(map);

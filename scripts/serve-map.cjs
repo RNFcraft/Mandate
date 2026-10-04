@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '../client');
 const scenarios = require('./scenarios.cjs');
+const saves = require('./saves.cjs');
 const political = require('./political.cjs');
 const { validateScenario } = require('../shared/scenario.cjs');
 let territoryIds;
@@ -28,6 +29,7 @@ http.createServer((req, res) => {
     })().catch(error=>{res.writeHead(400,{'Content-Type':'application/json'}).end(JSON.stringify({error:error.message}));});return;
   }
   if (pathname.startsWith('/api/scenarios')) { scenarios(req, res, pathname); return; }
+  if (pathname.startsWith('/api/saves')) { saves(req, res, pathname); return; }
   const file = path.resolve(root, '.' + (pathname === '/' ? '/index.html' : pathname));
   if (!file.startsWith(root + path.sep)) { res.writeHead(403).end(); return; }
   fs.stat(file, (error, stat) => {

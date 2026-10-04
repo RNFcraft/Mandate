@@ -1,0 +1,5 @@
+.game-controls{position:absolute;bottom:12px;left:12px;z-index:2;display:flex;align-items:center;gap:7px;flex-wrap:wrap;max-width:calc(100% - 48px);padding:8px 10px;border:1px solid #61747a;background:#203640e8;color:#e4e6df;font:12px/1.4 system-ui,sans-serif}
+.game-controls button,.game-controls select,.game-controls input{font:inherit;color:inherit;background:#304953;border:1px solid #61747a;padding:4px 6px}
+.game-controls button{cursor:pointer}.game-controls button:disabled{opacity:.5;cursor:wait}
+#game-date{font-variant-numeric:tabular-nums;font-weight:600;min-width:82px}
+#game-save-id{width:120px}#game-saves{max-width:185px}#game-status{font-size:11px;color:#bdcec9}
