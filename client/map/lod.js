@@ -1,5 +1,7 @@
-import {feature,mesh} from 'topojson-client';
+import {feature} from 'topojson-client';
 import {prepare,path} from './geometry.js';
+import borders from '../../shared/borders.cjs';
+import {unpackTopology} from './topology.js';
 const CLOSE=8,MAX_CHUNKS=128,MAX_BYTES=12*1024*1024;
 export class TerritoryLOD {
   constructor(map,manifest){
@@ -28,7 +30,7 @@ export class TerritoryLOD {
       const controller=new AbortController();this.pending.set(c.id,{controller});this.requests++;
       fetch(`/data/adm2/chunks/${c.id}.json`,{signal:controller.signal}).then(async response=>{
         if(!response.ok)throw new Error(`ADM2 chunk ${c.id}: ${response.status}`);
-        const t=await response.json();if(controller.signal.aborted||!this.needed.has(c.id))return;
+        const t=await unpackTopology(await response.json());if(controller.signal.aborted||!this.needed.has(c.id))return;
         const start=performance.now();
         const regions=feature(t,t.objects.territories).features.filter(f=>f.geometry).map(prepare);
         const dependencies=new Set(t.neighbors.flatMap(ids=>ids.map(index=>typeof index==='number'?this.map.model.hierarchy.territories[index].id:index)));
@@ -57,15 +59,12 @@ export class TerritoryLOD {
   detailBorders(entry){
     if(entry.politicalDirty){
       const t=entry.topology;
-      // mesh includes each shared arc once, not thousands of overlaid polygon strokes.
-      entry.internal ||= new Path2D(path(mesh(t,t.objects.territories)));
-      const arcs=[];
-      if(t.neighbors)for(let i=0;i<t.neighbors.length;i++){
-        const ids=t.neighbors[i].map(index=>typeof index==='number'?this.map.model.hierarchy.territories[index].id:index),owner=this.map.model.owners.get(ids[0]);
-        // Offline adjacency also records reserve overlaps; equal owners remain administrative.
-        if(ids.length===1||ids.some(id=>this.map.model.owners.get(id)!==owner))arcs.push([i]);
+      const groups=Object.fromEntries(borders.CLASSES.map(name=>[name,[]]));
+      for(let i=0;i<t.neighbors.length;i++)if(t.drawArcs[i]){
+        const name=borders.borderClass(t.neighbors[i],this.map.model.hierarchy.territories,id=>this.map.model.owners.get(id));groups[name].push([i]);
       }
-      entry.political=new Path2D(path(t.neighbors?feature(t,{type:'MultiLineString',arcs}).geometry:mesh(t,t.objects.territories,(a,b)=>a!==b&&this.map.model.owners.get(a.id)!==this.map.model.owners.get(b.id))));
+      entry.borders=Object.fromEntries(Object.entries(groups).map(([name,arcs])=>[name,new Path2D(path(feature(t,{type:'MultiLineString',arcs}).geometry))]));
+      entry.political=entry.borders.political;
       entry.politicalDirty=false;
     }
     return entry;

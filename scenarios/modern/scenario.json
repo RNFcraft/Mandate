@@ -2,6 +2,14 @@
   "id": "modern",
   "name": "Natural Earth — современный импорт",
   "year": 2026,
-  "version": 1,
-  "geography": "natural-earth-admin1-v1"
+  "version": 3,
+  "geography": "mandate-atomic-v1",
+  "territoryMigration": {
+    "from": "natural-earth-admin1-v1",
+    "newNeutralCount": 110,
+    "inferredResidualOwners": {},
+    "retiredOwnership": {},
+    "retiredControllers": {},
+    "effects": []
+  }
 }

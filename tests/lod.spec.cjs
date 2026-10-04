@@ -6,8 +6,10 @@ async function digest(file){const h=crypto.createHash('sha256');for await(const 
 async function camera(page,lon,lat,zoom){
   await page.evaluate(({lon,lat,zoom})=>{const m=mandateMap;m.zoom=zoom;m.scale=m.baseScale*zoom;m.x=m.width/2-(lon+180)*m.scale;m.y=m.height/2-(90-lat)*m.scale;m.render();},{lon,lat,zoom});
   await page.waitForFunction(()=>mandateMap.lod.pending.size===0&&mandateMap.lod.active.length===mandateMap.lod.needed.size);
+  await page.waitForFunction(()=>mandateMap.lod.level==='close'||mandateMap.background?.scale===mandateMap.scale);
 }
 test('ADM2 LOD, lazy loading, bounded cache, global touring and profiling',async({page})=>{
+  test.setTimeout(180000);
   const errors=[],requests=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
   page.on('request',r=>requests.push(r.url()));
   await page.addInitScript(()=>{window.__lodLongTasks=[];new PerformanceObserver(list=>{for(const entry of list.getEntries())window.__lodLongTasks.push({start:entry.startTime,duration:entry.duration,phase:window.__lodPhase});}).observe({type:'longtask',buffered:true});});
@@ -29,11 +31,12 @@ test('ADM2 LOD, lazy loading, bounded cache, global touring and profiling',async
     });
     measurements.push({name,...data});expect(data.cachedChunks).toBeLessThanOrEqual(128);expect(data.cacheBytes).toBeLessThanOrEqual(12*1024*1024);expect(data.error).toBeNull();expect(data.median).toBeLessThan(50);return data;
   }
-  const far=await measure('world');expect(far.median).toBeLessThan(15);
+  const far=await measure('world');expect(far.median).toBeLessThan(15);expect(far.frameMedian).toBeLessThan(50);
+  expect(await page.evaluate(()=>mandateMap.background.canvas.width<=mandateMap.canvas.width+256&&mandateMap.background.canvas.height<=mandateMap.canvas.height+256)).toBe(true);
   await page.evaluate(()=>{window.__lodLongTasks=[];window.__lodWarm=performance.now();window.__lodPhase='camera';});
   await camera(page,5,49,4);expect(await page.evaluate(()=>mandateMap.lod.level)).toBe('medium');expect(requests.some(url=>url.includes('/chunks/'))).toBe(false);
-  await measure('ADM1 medium');
-  const regions=[['Europe',5,49],['Romania dense',25,46],['India',78,24],['Japan',138,36],['Brazil dense',-47,-22],['USA',-91,38],['date line',179,55]];
+  expect((await measure('ADM1 medium')).frameMedian).toBeLessThan(50);
+  const regions=[['Russia',70,57],['Central Asia',65,44],['Italy',12,43],['Balkans',22,42],['Europe',5,49],['Romania dense',25,46],['India',78,24],['Japan',138,36],['Brazil dense',-47,-22],['USA',-91,38],['date line',179,55]];
   for(const [name,lon,lat]of regions){await page.evaluate(name=>{window.__lodPhase=name;},name);await camera(page,lon,lat,16);const s=await measure(name);expect(s.activeTerritories).toBeGreaterThan(0);}
   await camera(page,5,49,16);
   const before=await page.evaluate(()=>mandateMap.lod.requests);
@@ -70,7 +73,7 @@ test('hierarchy IDs, original source hash and lossless legacy ownership migratio
   for(const id of ['modern','1700']){
     const files=['scenario','countries','ownership'];const before=await Promise.all(files.map(name=>fs.readFile(`scenarios/${id}/${name}.json`,'utf8')));
     const legacy=Object.fromEntries(files.map((name,i)=>[name,JSON.parse(before[i])]));const next=migrateLegacy(legacy,hierarchy);
-    expect(next.scenario.version).toBe(2);
+    expect(next.scenario.version).toBe(3);
     if(legacy.scenario.version===1)expect(hierarchy.territories.every(r=>next.ownership[r.id]===(r.adm1Id?legacy.ownership[r.adm1Id]:null))).toBe(true);
     else expect(next.ownership).toEqual(legacy.ownership);
     expect(await Promise.all(files.map(name=>fs.readFile(`scenarios/${id}/${name}.json`,'utf8')))).toEqual(before);
@@ -79,7 +82,7 @@ test('hierarchy IDs, original source hash and lossless legacy ownership migratio
 test('explicit v2 save preserves a v1 disk backup, capital provenance and independent controllers',async({request})=>{
   const id=`devlegacy-${Date.now()}`;
   const folder=`scenarios/${id}`,backup=`scenarios/.legacy-backups/${id}`;
-  const data={};for(const name of ['scenario','countries','ownership'])data[name]=JSON.parse(await fs.readFile(`scenarios/modern/${name}.json`,'utf8'));
+  const data={};for(const name of ['scenario','countries','ownership'])data[name]=JSON.parse(await fs.readFile(`scenarios/.atomic-backups/modern/${name}.json`,'utf8'));
   data.scenario.id=id;
   const capital=Object.keys(data.ownership).find(key=>data.ownership[key]===data.countries[0].id);
   data.countries[0].capitalRegionId=capital;data.controllers={[capital]:data.countries[1].id};
@@ -87,7 +90,7 @@ test('explicit v2 save preserves a v1 disk backup, capital provenance and indepe
     expect((await request.put(`/api/scenarios/${id}`,{data})).status()).toBe(200);
     const before={};for(const name of ['scenario','countries','ownership','controllers'])before[name]=await fs.readFile(`${folder}/${name}.json`,'utf8');
     const migrated=await(await request.get(`/api/scenarios/${id}`)).json();
-    expect(migrated.scenario.version).toBe(2);expect(migrated.countries[0].legacyCapitalRegionId).toBe(capital);
+    expect(migrated.scenario.version).toBe(3);expect(migrated.countries[0].legacyCapitalRegionId).toBe(capital);
     const target=migrated.countries[0].capitalRegionId;expect(migrated.ownership[target]).toBe(data.countries[0].id);expect(migrated.controllers[target]).toBe(data.countries[1].id);
     expect((await request.put(`/api/scenarios/${id}`,{data:migrated})).status()).toBe(200);
     for(const name of Object.keys(before))expect(await fs.readFile(`${backup}/${name}.json`,'utf8')).toBe(before[name]);

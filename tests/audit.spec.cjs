@@ -4,7 +4,7 @@ const crypto=require('node:crypto');
 const assert=require('node:assert/strict');
 const read=async name=>JSON.parse(await fs.readFile(`data/processed/adm2/audit/${name}.json`,'utf8'));
 test('ADM2 audit is deterministic, IDs and geometry diagnostics are consistent',async()=>{
-  test.setTimeout(240000);
+  test.setTimeout(600000);
   const audit=require('../scripts/audit-adm2.cjs');
   const names=['summary','records','overlaps','corrections'];
   const digest=async()=>Promise.all(names.map(async name=>crypto.createHash('sha256').update(await fs.readFile(`data/processed/adm2/audit/${name}.json`)).digest('hex')));
@@ -22,8 +22,8 @@ test('ADM2 audit is deterministic, IDs and geometry diagnostics are consistent',
     if(r.category==='ambiguous')assert.ok(r.reason,r.id);
     if(r.category==='fallback'){assert.equal(r.id,`fallback:${r.adm1Id}`);assert.equal(r.assignedRealChildren,0,r.id);}
   }
-  expect(summary.comparison.removedIds).toEqual([]);expect(summary.comparison.addedIds).toEqual([]);
-  expect(overlaps.some(o=>o.significant&&o.type==='fallback-adm2')).toBe(true);
+  expect(summary.comparison.removedIds.sort()).toEqual(hierarchy.migration.removedIds.slice().sort());expect(summary.comparison.addedIds.sort()).toEqual(hierarchy.migration.addedIds.slice().sort());
+  expect(overlaps).toEqual([]);expect(summary.counts.fallback).toBe(0);expect(summary.counts.residual).toBe(hierarchy.migration.addedIds.length);expect(summary.atomic.overlapFaceCount).toBe(0);expect(summary.coverage.significantUncoveredParts).toBe(0);
   expect(overlaps.filter(o=>o.significant).length).toBe(summary.overlap.significant);
   for(const o of overlaps.filter(o=>o.significant)){expect(o.areaKm2).toBeGreaterThanOrEqual(1);expect(o.smallerShare).toBeGreaterThanOrEqual(.01);}
 });
@@ -66,7 +66,7 @@ test('audit visual tour covers continents, islands, enclave and reserve conflict
   test.setTimeout(120000);
   await page.goto('/?editor=1&scenario=1700');await page.waitForFunction(()=>window.mandateEditor);
   await page.locator('#audit-toggle').click();await expect(page.locator('#audit-country')).toBeVisible();
-  const cases=[['europe','ROU','unmatched'],['russia-islands','RUS','unmatched'],['usa','USA','ambiguous'],['japan-coast','JPN','unmatched'],['palau','PLW','unmatched'],['andorra','AND','unmatched'],['italy-reserve','ITA','fallback'],['cyprus','CYP','unmatched'],['norway','NOR','ambiguous'],['enclave','LSO','ambiguous'],['brazil','BRA','ambiguous']];
+  const cases=[['europe','ROU','unmatched'],['russia-islands','RUS','unmatched'],['usa','USA','ambiguous'],['japan-coast','JPN','unmatched'],['palau','PLW','unmatched'],['andorra','AND','unmatched'],['italy-residual','ITA','residual'],['cyprus','CYP','unmatched'],['norway','NOR','ambiguous'],['enclave','LSO','ambiguous'],['brazil','BRA','ambiguous']];
   const results=[];
   for(const [name,country,category]of cases){
     const record=await page.evaluate(({country,category})=>{

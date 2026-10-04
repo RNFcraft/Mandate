@@ -9,7 +9,6 @@ const { feature } = require('topojson-client');
 const {gridIndex,countryOf,assess}=require('./adm2-spatial.cjs');
 const ROOT = path.resolve(__dirname, '..');
 process.chdir(ROOT);
-const OUT = 'client/data/adm2';
 const WORK = 'data/processed/adm2';
 const SOURCE = 'data/source/adm2/geoBoundariesCGAZ_ADM2.geojson';
 const polygons = g => g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
@@ -42,16 +41,8 @@ function samples(g,b) {
   }
   return result.length?result:[polygons(g)[0][0][0]];
 }
-let arcNeighbors;
-function subset(t, geometries) {
-  const ids=new Map(),arcs=[];
-  const mapArc=n=>{const key=n<0?~n:n;if(!ids.has(key)){ids.set(key,arcs.length);arcs.push(t.arcs[key]);}const i=ids.get(key);return n<0?~i:i;};
-  const nested=a=>Array.isArray(a)?a.map(nested):mapArc(a);
-  const gs=geometries.map(g=>({...g,arcs:nested(g.arcs)}));
-  return {type:'Topology',transform:t.transform,objects:{territories:{type:'GeometryCollection',geometries:gs}},arcs,neighbors:[...ids.keys()].map(i=>arcNeighbors[i])};
-}
 async function main(){
-  await fs.mkdir(WORK,{recursive:true});await fs.mkdir(OUT,{recursive:true});await fs.mkdir(`${OUT}/chunks`,{recursive:true});
+  await fs.mkdir(WORK,{recursive:true});
   const base=JSON.parse(await fs.readFile('client/data/world.topo.json','utf8'));
   const state=JSON.parse(await fs.readFile('client/data/state.json','utf8'));
   const baseOwners=state.owners;
@@ -111,7 +102,7 @@ async function main(){
   const removedIds=[...legacyLinks.keys()].filter(id=>!currentIds.has(id));
   const addedIds=territories.filter(r=>!legacyLinks.has(r.id)).map(r=>r.id);
   const changedParents=territories.filter(r=>legacyLinks.get(r.id)?.adm1Id!==r.adm1Id).map(r=>({id:r.id,before:legacyLinks.get(r.id)?.adm1Id,after:r.adm1Id}));
-  await fs.writeFile(`${WORK}/migration.json`,JSON.stringify({sourceSha256:sourceHash,removedIds,addedIds,changedParents,idMapping:{}},null,2));
+  await fs.writeFile(`${WORK}/source-migration.json`,JSON.stringify({sourceSha256:sourceHash,removedIds,addedIds,changedParents,idMapping:{}},null,2));
   if(removedIds.length||addedIds.length||changedParents.length)throw new Error('Geography changed from ownership baseline; explicit migration is required before publishing');
   for(const [group,e]of groups)await fs.appendFile(`${WORK}/${group}.geojson`,e.buffer+']}');
   await fs.writeFile(`${WORK}/simplified.geojson`,'{"type":"FeatureCollection","features":[');let first=true;
@@ -123,40 +114,19 @@ async function main(){
     await fs.unlink(`${WORK}/${group}.geojson`);
   }
   await fs.appendFile(`${WORK}/simplified.geojson`,']}');
-  await mapshaper.runCommands(`-i ${WORK}/simplified.geojson name=territories -o ${WORK}/detail.topo.json format=topojson quantization=1000000`);
-  await mapshaper.runCommands(`-i ${WORK}/detail.topo.json -simplify weighted interval=6000 keep-shapes -o ${WORK}/coarse.topo.json format=topojson quantization=40000`);
-  const t=JSON.parse(await fs.readFile(`${WORK}/detail.topo.json`,'utf8'));
+  await mapshaper.runCommands(`-i ${WORK}/simplified.geojson name=territories -o ${WORK}/source-detail.topo.json format=topojson quantization=1000000`);
+  await mapshaper.runCommands(`-i ${WORK}/source-detail.topo.json -simplify weighted interval=6000 keep-shapes -o ${WORK}/source-coarse.topo.json format=topojson quantization=40000`);
+  const t=JSON.parse(await fs.readFile(`${WORK}/source-detail.topo.json`,'utf8'));
   for(const g of t.objects.territories.geometries){g.id=g.properties.id;delete g.properties;}
-  await fs.writeFile(`${WORK}/detail.topo.json`,JSON.stringify(t));
-  const coarse=JSON.parse(await fs.readFile(`${WORK}/coarse.topo.json`,'utf8'));
+  await fs.writeFile(`${WORK}/source-detail.topo.json`,JSON.stringify(t));
+  const coarse=JSON.parse(await fs.readFile(`${WORK}/source-coarse.topo.json`,'utf8'));
   for(const g of coarse.objects.territories.geometries){g.id=g.properties.id;delete g.properties;}
-  await fs.writeFile(`${WORK}/coarse.topo.json`,JSON.stringify(coarse));
-  const meta=new Map(territories.map(r=>[r.id,r])),bins=new Map();
-  arcNeighbors=t.arcs.map(()=>[]);
-  const recordArcs=(arcs,id)=>{for(const arc of arcs)if(Array.isArray(arc))recordArcs(arc,id);else{const i=arc<0?~arc:arc;if(!arcNeighbors[i].includes(id))arcNeighbors[i].push(id);}};
-  const territoryIndex=new Map(territories.map((r,i)=>[r.id,i]));
-  for(const g of t.objects.territories.geometries)if(g.arcs)recordArcs(g.arcs,territoryIndex.get(g.id));
-  for(const g of t.objects.territories.geometries){const r=meta.get(g.id),[x,y]=r.representative,key=`${Math.floor((x+180)/5)}-${Math.floor((y+90)/5)}`;if(!bins.has(key))bins.set(key,[]);bins.get(key).push(g);}
-  const chunks=[];let totalBytes=0;
-  for(const [key,gs]of [...bins].sort((a,b)=>a[0].localeCompare(b[0]))){
-    // Dense cells are split into bounded batches; manifest contains actual geometry bounds.
-    for(let start=0;start<gs.length;start+=400){const geometries=gs.slice(start,start+400),id=`${key}-${start/400}`,b=[180,90,-180,-90];
-      for(const g of geometries){const r=meta.get(g.id);for(let j=0;j<2;j++){b[j]=Math.min(b[j],r.bounds[j]);b[j+2]=Math.max(b[j+2],r.bounds[j+2]);}r.chunkId=id;}
-      const data=JSON.stringify(subset(t,geometries));await fs.writeFile(`${OUT}/chunks/${id}.json`,data);const bytes=Buffer.byteLength(data);totalBytes+=bytes;chunks.push({id,bounds:b,bytes,count:geometries.length});
-    }
-  }
-  await fs.writeFile(`${WORK}/matching.json`,JSON.stringify(territories));
-  const hierarchy={id:'mandate-adm2-v1',adm0:state.countries.map(c=>({id:c.id,name:c.name})),adm1:state.regions.map(r=>({...r,adm0Id:baseOwners[r.id]})),territories:territories.map(({id,name,adm0Id,adm1Id,chunkId,match})=>({id,name,adm0Id,adm1Id,chunkId,...(match==='fallback'?{fallback:true}:{})}))};
-  for(const r of territories)if(!hierarchy.adm0.some(c=>c.id===r.adm0Id))hierarchy.adm0.push({id:r.adm0Id,name:r.adm0Id});
-  const hierarchyData=JSON.stringify(hierarchy);await fs.writeFile(`${OUT}/hierarchy.json`,hierarchyData);
-  const adjacency=await require('./adm2-adjacency.cjs')(WORK,OUT);
-  for(const c of chunks)c.bytes=adjacency.sizes.get(c.id);
-  totalBytes=chunks.reduce((sum,c)=>sum+c.bytes,0);
-  const report={source:SOURCE,sourceBytes:(await fs.stat(SOURCE)).size,sourceSha256:sourceHash,sourceCount:count,territoryCount:territories.length,fallbackCount:territories.filter(r=>r.match==='fallback').length,unmatchedCount:territories.filter(r=>r.match==='unmatched').length,ambiguousCount:territories.filter(r=>r.match==='ambiguous').length,chunkCount:chunks.length,chunkBytes:totalBytes,hierarchyBytes:Buffer.byteLength(hierarchyData),maxChunkBytes:Math.max(...chunks.map(c=>c.bytes)),detailBytes:(await fs.stat(`${WORK}/detail.topo.json`)).size,coarseBytes:(await fs.stat(`${WORK}/coarse.topo.json`)).size};
-  await fs.writeFile(`${OUT}/manifest.json`,JSON.stringify({geography:hierarchy.id,chunks,report}));
-  await fs.writeFile(`${WORK}/report.json`,JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
-  const chunkIds=new Set(chunks.map(c=>c.id+'.json'));
-  for(const file of await fs.readdir(`${OUT}/chunks`))if(/^\d+-\d+-\d+\.json$/.test(file)&&!chunkIds.has(file))await fs.unlink(path.join(OUT,'chunks',file));
+  await fs.writeFile(`${WORK}/source-coarse.topo.json`,JSON.stringify(coarse));
+  await fs.writeFile(`${WORK}/source-matching.json`,JSON.stringify(territories));
+  await fs.writeFile(`${WORK}/report.json`,JSON.stringify({source:SOURCE,sourceBytes:(await fs.stat(SOURCE)).size,sourceSha256:sourceHash,sourceCount:count,unmatchedCount:territories.filter(r=>r.match==='unmatched').length,ambiguousCount:territories.filter(r=>r.match==='ambiguous').length}));
+  const result=await require('./canonical-mesh.cjs').canonical(`${WORK}/source-detail.topo.json`,`${WORK}/source-matching.json`);
+  await require('./mesh-invariants.cjs')();
+  await require('./publish-canonical.cjs').publish(result);
   await fs.unlink(`${WORK}/simplified.geojson`);await fs.unlink(`${WORK}/reduced.geojson`);
 }
 let legacyLinks,legacyRealParents,baselineHash;

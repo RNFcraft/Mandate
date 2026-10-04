@@ -41,7 +41,8 @@ async function handle(req, res, pathname) {
   let data;
   try {
     data = JSON.parse(Buffer.concat(chunks).toString('utf8'));
-    const regions = data.scenario?.version===2 ? (await hierarchy()).territories : (await json(geographyFile)).regions;
+    const h=await hierarchy();
+    const regions = data.scenario?.version===3?h.territories:data.scenario?.version===2&&h.id==='mandate-atomic-v1'?[...h.territories.filter(r=>r.kind==='adm2'),...h.migration.fallbacks.map(r=>({id:r.from}))]:data.scenario?.version===2?h.territories:(await json(geographyFile)).regions;
     validateScenario(data, new Set(regions.map(r => r.id)));
     if (data.scenario.id !== id) throw new Error('ID пути и сценария должны совпадать');
   } catch (error) { reply(res, 400, { error: error.message }); return; }
@@ -53,8 +54,12 @@ async function handle(req, res, pathname) {
     // Preserve a one-time, byte-for-byte v1 backup before an explicit v2 save.
     try {
       const previous=await read(id);
-      if(previous.scenario.version===1&&data.scenario.version===2){
+      if(previous.scenario.version===1&&data.scenario.version>=2){
         const backupRoot=path.join(root,'.legacy-backups');await fs.mkdir(backupRoot,{recursive:true});
+        try{await fs.access(path.join(backupRoot,id));}catch{await fs.cp(folder,path.join(backupRoot,id),{recursive:true,errorOnExist:true,force:false});}
+      }
+      if(previous.scenario.version<3&&data.scenario.version===3){
+        const backupRoot=path.join(root,'.atomic-backups');await fs.mkdir(backupRoot,{recursive:true});
         try{await fs.access(path.join(backupRoot,id));}catch{await fs.cp(folder,path.join(backupRoot,id),{recursive:true,errorOnExist:true,force:false});}
       }
     }catch(error){if(error.code!=='ENOENT')throw error;}

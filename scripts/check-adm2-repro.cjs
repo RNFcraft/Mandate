@@ -3,7 +3,7 @@ const path=require('node:path');
 const crypto=require('node:crypto');
 async function main(){
   process.chdir(path.resolve(__dirname,'..'));
-  const files=['client/data/adm2/hierarchy.json','client/data/adm2/manifest.json',...['detail.topo.json','coarse.topo.json','matching.json','report.json','migration.json'].map(f=>`data/processed/adm2/${f}`)];
+  const files=['client/data/adm2/derived.topo.json',...['atomic.topo.json','matching.json','migration.json','report.json','excluded.json','invariants.json','scenario-migration.json','coverage-exceptions.json'].map(f=>`data/processed/canonical/${f}`),'client/data/adm2/hierarchy.json','client/data/adm2/manifest.json',...['detail.topo.json','coarse.topo.json','matching.json','report.json','migration.json'].map(f=>`data/processed/adm2/${f}`)];
   for(const f of (await fs.readdir('client/data/adm2/chunks')).sort())files.push(`client/data/adm2/chunks/${f}`);
   for(const id of ['modern','1700'])for(const f of (await fs.readdir(`scenarios/${id}`)).filter(f=>f.endsWith('.json')).sort())files.push(`scenarios/${id}/${f}`);
   const hashes={};for(const f of files)hashes[f]=crypto.createHash('sha256').update(await fs.readFile(f)).digest('hex');

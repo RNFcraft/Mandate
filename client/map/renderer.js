@@ -46,28 +46,61 @@ export class WorldMap {
     this.pending=true;
     requestAnimationFrame(()=>{this.pending=false;this.render();});
   }
+  strokeBorders(ctx,paths,level){
+    const styles={adm2:['#475552',.5],adm1:['#394b4b',.8],country:['#31423f',1.2],political:['#202d32',2.2],coastline:['#202d32',1.3]};
+    ctx.lineJoin='round';
+    for(const [name,p]of Object.entries(paths||{})){
+      if(level!=='close'&&name==='adm2'||level==='far'&&(name==='adm1'||name==='country'))continue;
+      const [color,width]=styles[name];ctx.strokeStyle=color;ctx.lineWidth=width/this.scale;ctx.stroke(p);
+    }
+  }
+  globalBackground(ctx){
+    // Cache the exact static vector layer in one bounded viewport bitmap. During
+    // gestures translate/scale it immediately, then redraw at the settled scale.
+    // Selection, DEV overlays and close atoms stay vector and independent.
+    const rx=this.canvas.width/this.width,ry=this.canvas.height/this.height,pad=128;
+    const key=[this.lod.level,this.model.revision,this.politicalGeneration||0,!!this.audit?.enabled,!!this.politicalPending,this.width,this.height].join(':');
+    const view=[...this.screenToWorld(0,0),...this.screenToWorld(this.width,this.height)];
+    let cache=this.background;
+    if(!cache||cache.key!==key||view[0]<cache.bounds[0]||view[1]<cache.bounds[1]||view[2]>cache.bounds[2]||view[3]>cache.bounds[3]){
+      clearTimeout(this.backgroundTimer);this.backgroundTarget=null;
+      const canvas=document.createElement('canvas');canvas.width=this.canvas.width+pad*2;canvas.height=this.canvas.height+pad*2;
+      const c=canvas.getContext('2d');c.fillStyle='#182c39';c.fillRect(0,0,canvas.width,canvas.height);
+      c.setTransform(rx*this.scale,0,0,ry*this.scale,this.x*rx+pad,this.y*ry+pad);
+      const bounds=[...this.screenToWorld(-pad/rx,-pad/ry),...this.screenToWorld(this.width+pad/rx,this.height+pad/ry)];
+      const visible=r=>r.bounds[1][0]>=bounds[0]&&r.bounds[0][0]<=bounds[2]&&r.bounds[1][1]>=bounds[1]&&r.bounds[0][1]<=bounds[3];
+      for(const r of this.geometry.countries)if(visible(r)){c.fillStyle='#727c78';c.fill(r.path,'evenodd');}
+      if(!this.audit?.enabled)for(const r of this.politicalFeatures||[])if(visible(r)){c.fillStyle=this.model.countries.get(r.owner)?.color||'#727c78';c.fill(r.path,'evenodd');}
+      if(!this.politicalPending)this.strokeBorders(c,this.classifiedBorders,this.lod.level);
+      this.background=cache={key,canvas,bounds,scale:this.scale,x:this.x,y:this.y};
+    }
+    if(cache.scale!==this.scale&&this.backgroundTarget!==this.scale){
+      this.backgroundTarget=this.scale;clearTimeout(this.backgroundTimer);
+      this.backgroundTimer=setTimeout(()=>{this.background=null;this.invalidate();},120);
+    }
+    const ratio=this.scale/cache.scale;
+    ctx.resetTransform();ctx.drawImage(cache.canvas,(this.x-cache.x*ratio)*rx-pad*ratio,(this.y-cache.y*ratio)*ry-pad*ratio,cache.canvas.width*ratio,cache.canvas.height*ratio);
+    ctx.setTransform(rx*this.scale,0,0,ry*this.scale,this.x*rx,this.y*ry);
+  }
   addLayer(layer) { this.layers.push(layer); this.invalidate(); return ()=>{this.layers=this.layers.filter(l=>l!==layer);this.invalidate();}; }
   render() {
     const start=performance.now();
     this.lod?.update();
+    if(this.lod?.level==='close'){clearTimeout(this.backgroundTimer);this.backgroundTarget=null;}
     const ctx=this.ctx;
     ctx.resetTransform();ctx.fillStyle='#182c39';ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
     ctx.setTransform(this.canvas.width/this.width*this.scale,0,0,this.canvas.height/this.height*this.scale,this.x*this.canvas.width/this.width,this.y*this.canvas.height/this.height);
     const visible=r=>r.bounds[1][0]*this.scale+this.x>=0 && r.bounds[0][0]*this.scale+this.x<=this.width && r.bounds[1][1]*this.scale+this.y>=0 && r.bounds[0][1]*this.scale+this.y<=this.height;
     const detailReady=this.lod?.level==='close'&&this.lod.active.length===this.lod.needed.size&&!this.lod.deferred;
-    for(const c of this.geometry.countries) if(visible(c)) {ctx.fillStyle='#727c78';ctx.fill(c.path,'evenodd');}
-    if(!this.audit?.enabled&&!detailReady)for(const r of this.politicalFeatures||[])if(visible(r)){ctx.fillStyle=this.model.countries.get(r.owner)?.color||'#727c78';ctx.fill(r.path,'evenodd');}
+    if(this.lod?.level!=='close')this.globalBackground(ctx);
+    else{
+      for(const c of this.geometry.countries)if(visible(c)){ctx.fillStyle='#727c78';ctx.fill(c.path,'evenodd');}
+      if(!this.audit?.enabled&&!detailReady)for(const r of this.politicalFeatures||[])if(visible(r)){ctx.fillStyle=this.model.countries.get(r.owner)?.color||'#727c78';ctx.fill(r.path,'evenodd');}
+    }
     if(this.lod?.level==='close')for(const chunk of this.lod.active)for(const r of chunk.regions)if(visible(r)){ctx.fillStyle=this.audit?.enabled?this.audit.color(r.id):this.model.countries.get(this.model.owners.get(r.id))?.color||'#727c78';ctx.fill(r.path,'evenodd');}
     for(const r of this.interactive||[])if(visible(r)&&(r.id===this.selectedId||r.id===this.hoveredId)){ctx.fillStyle=r.id===this.selectedId?'rgba(255,226,164,0.38)':'rgba(255,247,217,0.19)';ctx.fill(r.path,'evenodd');}
     ctx.lineJoin='round';
-    if(this.lod?.level!=='far'){
-      ctx.strokeStyle='#394b4b';ctx.lineWidth=0.65/this.scale;
-      if(this.lod?.level==='close'){for(const r of this.geometry.regions)if(visible(r))ctx.stroke(r.path);}
-      else ctx.stroke(this.geometry.regionalBorders);
-    }
-    if(this.lod?.level==='close')for(const chunk of this.lod.active){const borders=this.lod.detailBorders(chunk);ctx.strokeStyle='#475552';ctx.lineWidth=.5/this.scale;ctx.stroke(borders.internal);}
-    ctx.strokeStyle='#202d32';ctx.lineWidth=2.2/this.scale;if(this.ownershipBorders&&!this.politicalPending&&this.lod?.level!=='close')ctx.stroke(this.ownershipBorders);
-    if(this.lod?.level==='close')for(const chunk of this.lod.active){ctx.stroke(this.lod.detailBorders(chunk).political);}
+    if(this.lod?.level==='close')for(const chunk of this.lod.active)this.strokeBorders(ctx,this.lod.detailBorders(chunk).borders,'close');
     const selected=(this.interactive||[]).find(r=>r.id===this.selectedId);
     if(selected){ctx.strokeStyle='#e5c990';ctx.lineWidth=2/this.scale;ctx.stroke(selected.path);}
     for(const layer of this.layers) {ctx.save();layer(ctx,this);ctx.restore();}

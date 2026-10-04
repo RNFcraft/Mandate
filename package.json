@@ -9,7 +9,9 @@
     "start": "node scripts/serve-map.cjs",
     "prestart": "npm run build",
     "build:adm2": "node --max-old-space-size=8192 scripts/build-adm2.cjs",
-    "audit:adm2": "node --max-old-space-size=8192 scripts/audit-adm2.cjs"
+    "audit:adm2": "node --max-old-space-size=8192 scripts/audit-adm2.cjs",
+    "verify:mesh": "node --max-old-space-size=8192 scripts/mesh-invariants.cjs",
+    "migrate:atomic": "node scripts/migrate-atomic-scenarios.cjs"
   },
   "keywords": [],
   "author": "",
