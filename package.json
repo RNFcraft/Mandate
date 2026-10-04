@@ -8,7 +8,8 @@
     "build": "node scripts/build-map.cjs",
     "start": "node scripts/serve-map.cjs",
     "prestart": "npm run build",
-    "build:adm2": "node --max-old-space-size=8192 scripts/build-adm2.cjs"
+    "build:adm2": "node --max-old-space-size=8192 scripts/build-adm2.cjs",
+    "audit:adm2": "node --max-old-space-size=8192 scripts/audit-adm2.cjs"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +22,8 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
-    "esbuild": "^0.28.2"
+    "esbuild": "^0.28.2",
+    "polygon-clipping": "^0.15.7"
   },
   "overrides": {
     "fflate": "^0.8.3",

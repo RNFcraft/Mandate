@@ -41,7 +41,7 @@ async function main() {
     await fs.writeFile(`${folder}/ownership.json`, JSON.stringify(ownership, null, 2));
     await fs.writeFile(`${folder}/scenario.json`, JSON.stringify(scenario, null, 2));
   }
-  await esbuild.build({ entryPoints: ['client/map/main.js'], outfile: 'client/map.bundle.js', bundle: true, format: 'esm', minify: true, sourcemap: true });
+  await esbuild.build({ entryPoints: ['client/map/main.js'], outfile: 'client/map.bundle.js', bundle: true, format: 'esm', minify: true, sourcemap: true, external: ['/editor/audit.js'] });
   console.log(`Built ${countries.length} countries and ${regions.length} regions.`);
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

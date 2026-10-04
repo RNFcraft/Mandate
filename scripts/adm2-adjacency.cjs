@@ -1,5 +1,11 @@
 const fs=require('node:fs/promises');
 const {feature}=require('topojson-client');
+async function writeChunk(file,json){
+  for(let attempt=0;attempt<5;attempt++)try{await fs.writeFile(file,json);return;}catch(error){
+    if(!['UNKNOWN','EBUSY','EPERM','EACCES'].includes(error.code)||attempt===4)throw error;
+    await new Promise(resolve=>setTimeout(resolve,100*(attempt+1)));
+  }
+}
 function inRing(r,x,y){let hit=false;for(let i=0,j=r.length-1;i<r.length;j=i++){const a=r[i],b=r[j];if((a[1]>y)!==(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])hit=!hit;}return hit;}
 const inside=(g,x,y)=>(g.type==='Polygon'?[g.coordinates]:g.coordinates).some(p=>inRing(p[0],x,y)&&!p.slice(1).some(r=>inRing(r,x,y)));
 module.exports=async function adjacency(work,out){
@@ -33,7 +39,7 @@ module.exports=async function adjacency(work,out){
   const sizes=new Map();
   for(const file of files){const chunk=JSON.parse(await fs.readFile(`${out}/chunks/${file}`,'utf8'));
     chunk.neighbors=chunk.arcs.map(arc=>lookup.get(JSON.stringify(arc))||[]);
-    const json=JSON.stringify(chunk),size=Buffer.byteLength(json);await fs.writeFile(`${out}/chunks/${file}`,json);bytes+=size;maxBytes=Math.max(maxBytes,size);sizes.set(file.slice(0,-5),size);
+    const json=JSON.stringify(chunk),size=Buffer.byteLength(json);await writeChunk(`${out}/chunks/${file}`,json);bytes+=size;maxBytes=Math.max(maxBytes,size);sizes.set(file.slice(0,-5),size);
   }
   return {bytes,maxBytes,sizes,overlapArcs};
 };

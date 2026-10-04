@@ -9,6 +9,13 @@ let territoryIds;
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.json': 'application/json', '.css': 'text/css' };
 http.createServer((req, res) => {
   const pathname = new URL(req.url, 'http://localhost').pathname;
+  if (pathname.startsWith('/api/adm2-audit/')) {
+    // Explicit DEV request; private audit files are never in the static client root.
+    const name=pathname.slice('/api/adm2-audit/'.length);
+    if(req.method!=='GET'||req.headers['x-mandate-dev']!=='1'||!['summary','records','overlaps'].includes(name)){res.writeHead(403).end();return;}
+    const file=path.resolve(__dirname,`../data/processed/adm2/audit/${name}.json`);
+    fs.stat(file,(error,stat)=>{if(error||!stat.isFile()){res.writeHead(404,{'Content-Type':'application/json'}).end(JSON.stringify({error:'Run npm run audit:adm2 first'}));return;}res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});fs.createReadStream(file).pipe(res);});return;
+  }
   if (pathname === '/api/political' && req.method === 'POST') {
     (async()=>{
       const chunks=[];let size=0;

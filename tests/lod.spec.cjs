@@ -70,7 +70,9 @@ test('hierarchy IDs, original source hash and lossless legacy ownership migratio
   for(const id of ['modern','1700']){
     const files=['scenario','countries','ownership'];const before=await Promise.all(files.map(name=>fs.readFile(`scenarios/${id}/${name}.json`,'utf8')));
     const legacy=Object.fromEntries(files.map((name,i)=>[name,JSON.parse(before[i])]));const next=migrateLegacy(legacy,hierarchy);
-    expect(next.scenario.version).toBe(2);expect(hierarchy.territories.every(r=>next.ownership[r.id]===(r.adm1Id?legacy.ownership[r.adm1Id]:null))).toBe(true);
+    expect(next.scenario.version).toBe(2);
+    if(legacy.scenario.version===1)expect(hierarchy.territories.every(r=>next.ownership[r.id]===(r.adm1Id?legacy.ownership[r.adm1Id]:null))).toBe(true);
+    else expect(next.ownership).toEqual(legacy.ownership);
     expect(await Promise.all(files.map(name=>fs.readFile(`scenarios/${id}/${name}.json`,'utf8')))).toEqual(before);
   }
 });

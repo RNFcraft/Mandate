@@ -6,6 +6,7 @@ export class ScenarioEditor {
     this.selectedCountry = [...this.model.countries.keys()][0] || '';
     const style = document.createElement('style');
     style.textContent = `.dev-panel{position:fixed;right:12px;top:12px;bottom:12px;width:270px;box-sizing:border-box;padding:12px;overflow:auto;background:#20333f;color:#e2e2d0;font:13px system-ui;border:1px solid #72807d}.dev-panel h2{font-size:15px;margin:0 0 10px}.dev-panel label{display:block;margin:7px 0}.dev-panel input,.dev-panel select,.dev-panel button{box-sizing:border-box;max-width:100%;background:#314854;color:#eeeeDC;border:1px solid #778482;padding:5px;font:inherit}.dev-panel input:not([type=color]),.dev-panel select{width:100%}.dev-panel button{cursor:pointer;margin:3px 2px 3px 0}.dev-panel button:disabled{opacity:.45;cursor:default}.dev-panel hr{border:0;border-top:1px solid #61716f}.dev-panel p{font-size:12px;line-height:1.4}.dev-panel output{display:block;white-space:pre-wrap;margin:8px 0;font-size:12px}.dev-panel .error{color:#f0aaa0}`;
+    style.textContent += '.dev-panel input[type=checkbox]{width:auto}.dev-panel.audit-active > :not(#audit-toggle):not(#audit-panel):not(#status){display:none}';
     document.head.append(style);
     this.panel = document.createElement('aside'); this.panel.className = 'dev-panel';
     this.panel.innerHTML = `<h2>DEV · Сценарии</h2>
@@ -26,12 +27,18 @@ export class ScenarioEditor {
       <hr><label>Режим<select id="edit-mode"><option value="territory">Территории</option><option value="capital">Столица</option><option value="erase">Удалить владение</option><option value="pan">Перемещение</option></select></label>
       <button id="undo">Undo</button><button id="redo">Redo</button>
       <p>ЛКМ / drag: покраска. Zoom ≥ 8×: ADM2; ниже — все дочерние ADM2 выбранного ADM1. ПКМ / средняя кнопка: перенос. Колесо: zoom. Столица на близком масштабе назначается точно.</p>
-      <output id="lod-info"></output><output id="region-info"></output><output id="status" role="status"></output>`;
+      <output id="lod-info"></output><output id="region-info"></output><button id="audit-toggle">ADM2 AUDIT</button><div id="audit-panel" hidden></div><output id="status" role="status"></output>`;
     document.body.append(this.panel);
     this.populateMetadata(); this.refreshCountries();
     this.map.editMode = 'territory';
     this.map.editorGesture = (phase, id) => this.gesture(phase, id);
     this.el('edit-mode').onchange = e => { this.map.editMode = e.target.value; };
+    this.el('audit-toggle').onclick = async () => {
+      try {
+        if(!this.audit){const { ADM2Audit }=await import('/editor/audit.js');this.audit=new ADM2Audit(this);await this.audit.load();}
+        this.audit.toggle();
+      }catch(e){this.audit=null;this.message(e.message,true);}
+    };
     this.el('country-list').onchange = e => { this.selectedCountry = e.target.value; this.refreshInfo(); };
     this.el('country-form').onsubmit = e => {
       e.preventDefault(); if (this.busy) return;
@@ -104,6 +111,7 @@ export class ScenarioEditor {
     this.populateMetadata(); this.refreshCountries(); this.updateHistory(); this.message(redo ? 'Операция повторена.' : 'Операция отменена.');
   }
   gesture(phase, id) {
+    if(this.audit?.enabled){if(phase==='begin'){this.map.selectedId=id;this.audit.inspect(id);this.map.invalidate();}return;}
     if (this.busy) return;
     if (phase === 'begin') { this.gestureBefore = this.snapshot(); this.painted = new Set(); }
     if (phase === 'end') {

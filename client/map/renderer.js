@@ -56,8 +56,8 @@ export class WorldMap {
     const visible=r=>r.bounds[1][0]*this.scale+this.x>=0 && r.bounds[0][0]*this.scale+this.x<=this.width && r.bounds[1][1]*this.scale+this.y>=0 && r.bounds[0][1]*this.scale+this.y<=this.height;
     const detailReady=this.lod?.level==='close'&&this.lod.active.length===this.lod.needed.size&&!this.lod.deferred;
     for(const c of this.geometry.countries) if(visible(c)) {ctx.fillStyle='#727c78';ctx.fill(c.path,'evenodd');}
-    if(!detailReady)for(const r of this.politicalFeatures||[])if(visible(r)){ctx.fillStyle=this.model.countries.get(r.owner)?.color||'#727c78';ctx.fill(r.path,'evenodd');}
-    if(this.lod?.level==='close')for(const chunk of this.lod.active)for(const r of chunk.regions)if(visible(r)){ctx.fillStyle=this.model.countries.get(this.model.owners.get(r.id))?.color||'#727c78';ctx.fill(r.path,'evenodd');}
+    if(!this.audit?.enabled&&!detailReady)for(const r of this.politicalFeatures||[])if(visible(r)){ctx.fillStyle=this.model.countries.get(r.owner)?.color||'#727c78';ctx.fill(r.path,'evenodd');}
+    if(this.lod?.level==='close')for(const chunk of this.lod.active)for(const r of chunk.regions)if(visible(r)){ctx.fillStyle=this.audit?.enabled?this.audit.color(r.id):this.model.countries.get(this.model.owners.get(r.id))?.color||'#727c78';ctx.fill(r.path,'evenodd');}
     for(const r of this.interactive||[])if(visible(r)&&(r.id===this.selectedId||r.id===this.hoveredId)){ctx.fillStyle=r.id===this.selectedId?'rgba(255,226,164,0.38)':'rgba(255,247,217,0.19)';ctx.fill(r.path,'evenodd');}
     ctx.lineJoin='round';
     if(this.lod?.level!=='far'){

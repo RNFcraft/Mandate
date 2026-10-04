@@ -6,6 +6,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const mapshaper = require('mapshaper');
 const { feature } = require('topojson-client');
+const {gridIndex,countryOf,assess}=require('./adm2-spatial.cjs');
 const ROOT = path.resolve(__dirname, '..');
 process.chdir(ROOT);
 const OUT = 'client/data/adm2';
@@ -57,6 +58,7 @@ async function main(){
   const countryIds=new Set(state.countries.map(c=>c.id)),countryParents=new Map();
   for(const [id,country]of Object.entries(baseOwners)){if(!countryParents.has(country))countryParents.set(country,[]);countryParents.get(country).push(id);}
   const adm1=feature(base,base.objects.regions).features;
+  const areaCandidates=gridIndex(adm1);
   const grid=new Map();
   for(const f of adm1){const b=bounds(f.geometry);for(let x=Math.floor(b[0]/5);x<=Math.floor(b[2]/5);x++)for(let y=Math.floor(b[1]/5);y<=Math.floor(b[3]/5);y++){const key=`${x},${y}`;if(!grid.has(key))grid.set(key,[]);grid.get(key).push(f);}}
   const groups=new Map(), territories=[], seen=new Set(), matched=new Set();let count=0;
@@ -71,26 +73,46 @@ async function main(){
     if(!p.shapeID||!p.shapeGroup)throw new Error('ADM2 source has no stable source ID');
     if(!/^[A-Za-z0-9_-]{1,32}$/.test(p.shapeGroup))throw new Error('Invalid source country tag');
     const id=`gb:${p.shapeGroup}:${p.shapeID}`;if(seen.has(id))throw new Error(`Duplicate ADM2 ID ${id}`);seen.add(id);
+    const sourceCountry=countryOf(p.shapeGroup);
     const b=bounds(f.geometry),points=samples(f.geometry,b),votes=new Map();
     for(const [x,y] of points){const candidates=grid.get(`${Math.floor(x/5)},${Math.floor(y/5)}`)||[];
       const hits=candidates.filter(c=>contains(c.geometry,x,y));
-      const hit=hits.find(c=>baseOwners[c.id]===p.shapeGroup)||(!countryIds.has(p.shapeGroup)?hits[0]:null);if(hit)votes.set(hit.id,(votes.get(hit.id)||0)+1);
+      const hit=hits.find(c=>baseOwners[c.id]===sourceCountry);if(hit)votes.set(hit.id,(votes.get(hit.id)||0)+1);
     }
     let parent=[...votes.entries()].sort((a,c)=>c[1]-a[1]||a[0].localeCompare(c[0]))[0];
-    if(!parent&&countryParents.get(p.shapeGroup)?.length===1)parent=[countryParents.get(p.shapeGroup)[0],points.length];
-    const adm1Id=parent?.[0]||null,adm0Id=adm1Id?baseOwners[adm1Id]:p.shapeGroup;
+    if(!parent&&countryParents.get(sourceCountry)?.length===1)parent=[countryParents.get(sourceCountry)[0],points.length];
+    // Preserve existing unresolved legacy links explicitly, never infer a new foreign
+    // ADM1 for an unrecognised source tag. This keeps authored ownership compatible.
+    const legacy=legacyLinks.get(id);
+    if(!countryParents.has(sourceCountry)&&legacy?.adm1Id)parent=[legacy.adm1Id,0];
+    let assessment,error;
+    try{assessment=assess(f.geometry,areaCandidates(b),sourceCountry,baseOwners);}catch(e){error=e.message;}
+    // A geometry-only correction must have near-total coverage and no close rival.
+    // Reserve-only parents remain suggestions to avoid removing authored base IDs.
+    if(assessment?.strong&&legacyRealParents.has(assessment.scores[0].id))parent=[assessment.scores[0].id,points.length];
+    const adm1Id=parent?.[0]||null,adm0Id=adm1Id?baseOwners[adm1Id]:sourceCountry;
+    const score=assessment?.scores.find(s=>s.id===adm1Id)?.share||0;
+    const confidence=Number(Math.min(score,assessment?.margin||0).toFixed(6));
+    const match=!adm1Id?'unmatched':assessment?.strong&&assessment.scores[0].id===adm1Id?'area-confident':'ambiguous';
     if(adm1Id)matched.add(adm1Id);
-    territories.push({id,name:p.shapeName||id,adm0Id,adm1Id,sourceAdm0Id:p.shapeGroup,bounds:b,representative:points[Math.floor(points.length/2)],match:adm1Id?'interior-majority':'unmatched',confidence:parent?parent[1]/points.length:0});
+    territories.push({id,name:p.shapeName||id,adm0Id,adm1Id,sourceAdm0Id:p.shapeGroup,bounds:b,representative:points[Math.floor(points.length/2)],match,confidence,margin:Number((assessment?.margin||0).toFixed(6)),candidates:assessment?.scores.map(s=>({id:s.id,share:Number(s.share.toFixed(6))}))||[],...(error?{geometryError:error}:{}),...(!countryParents.has(sourceCountry)&&legacy?.adm1Id?{legacyUnresolved:true}:{})});
     f.id=id;f.properties={id};await append(p.shapeGroup,JSON.stringify(f));
     if(++count%5000===0)console.log(`Streamed ${count} ADM2`);
   }
   const sourceHash=hash.digest('hex');
+  if(sourceHash!==baselineHash)throw new Error('ADM2 source differs from compatibility baseline; create an explicit migration before publishing');
   // Explicit fallback territorial units preserve every legacy ADM1 in countries with missing ADM2 coverage.
   for(const f of adm1)if(!matched.has(f.id)){
     const id=`fallback:${f.id}`,b=bounds(f.geometry),points=samples(f.geometry,b);
     territories.push({id,name:state.regions.find(r=>r.id===f.id).name,adm0Id:baseOwners[f.id],adm1Id:f.id,bounds:b,representative:points[0],match:'fallback',confidence:1});
     await append('fallback',JSON.stringify({...f,id,properties:{id}}));
   }
+  const currentIds=new Set(territories.map(r=>r.id));
+  const removedIds=[...legacyLinks.keys()].filter(id=>!currentIds.has(id));
+  const addedIds=territories.filter(r=>!legacyLinks.has(r.id)).map(r=>r.id);
+  const changedParents=territories.filter(r=>legacyLinks.get(r.id)?.adm1Id!==r.adm1Id).map(r=>({id:r.id,before:legacyLinks.get(r.id)?.adm1Id,after:r.adm1Id}));
+  await fs.writeFile(`${WORK}/migration.json`,JSON.stringify({sourceSha256:sourceHash,removedIds,addedIds,changedParents,idMapping:{}},null,2));
+  if(removedIds.length||addedIds.length||changedParents.length)throw new Error('Geography changed from ownership baseline; explicit migration is required before publishing');
   for(const [group,e]of groups)await fs.appendFile(`${WORK}/${group}.geojson`,e.buffer+']}');
   await fs.writeFile(`${WORK}/simplified.geojson`,'{"type":"FeatureCollection","features":[');let first=true;
   for(const group of [...groups.keys()].sort()){
@@ -130,11 +152,15 @@ async function main(){
   const adjacency=await require('./adm2-adjacency.cjs')(WORK,OUT);
   for(const c of chunks)c.bytes=adjacency.sizes.get(c.id);
   totalBytes=chunks.reduce((sum,c)=>sum+c.bytes,0);
-  const report={source:SOURCE,sourceBytes:(await fs.stat(SOURCE)).size,sourceSha256:sourceHash,sourceCount:count,territoryCount:territories.length,fallbackCount:territories.filter(r=>r.match==='fallback').length,unmatchedCount:territories.filter(r=>r.match==='unmatched').length,ambiguousCount:territories.filter(r=>r.confidence<1&&r.adm1Id).length,chunkCount:chunks.length,chunkBytes:totalBytes,hierarchyBytes:Buffer.byteLength(hierarchyData),maxChunkBytes:Math.max(...chunks.map(c=>c.bytes)),detailBytes:(await fs.stat(`${WORK}/detail.topo.json`)).size,coarseBytes:(await fs.stat(`${WORK}/coarse.topo.json`)).size};
+  const report={source:SOURCE,sourceBytes:(await fs.stat(SOURCE)).size,sourceSha256:sourceHash,sourceCount:count,territoryCount:territories.length,fallbackCount:territories.filter(r=>r.match==='fallback').length,unmatchedCount:territories.filter(r=>r.match==='unmatched').length,ambiguousCount:territories.filter(r=>r.match==='ambiguous').length,chunkCount:chunks.length,chunkBytes:totalBytes,hierarchyBytes:Buffer.byteLength(hierarchyData),maxChunkBytes:Math.max(...chunks.map(c=>c.bytes)),detailBytes:(await fs.stat(`${WORK}/detail.topo.json`)).size,coarseBytes:(await fs.stat(`${WORK}/coarse.topo.json`)).size};
   await fs.writeFile(`${OUT}/manifest.json`,JSON.stringify({geography:hierarchy.id,chunks,report}));
   await fs.writeFile(`${WORK}/report.json`,JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
   const chunkIds=new Set(chunks.map(c=>c.id+'.json'));
   for(const file of await fs.readdir(`${OUT}/chunks`))if(/^\d+-\d+-\d+\.json$/.test(file)&&!chunkIds.has(file))await fs.unlink(path.join(OUT,'chunks',file));
   await fs.unlink(`${WORK}/simplified.geojson`);await fs.unlink(`${WORK}/reduced.geojson`);
 }
-main().catch(e=>{console.error(e);process.exitCode=1;});
+let legacyLinks,legacyRealParents,baselineHash;
+// The checked-in baseline linkage fixes compatibility decisions across clean builds.
+fs.readFile('data/map/adm2-baseline-links.json','utf8').then(text=>{
+  const baseline=JSON.parse(text);baselineHash=baseline.sourceSha256;legacyLinks=new Map(baseline.territories.map(r=>[r.id,r]));legacyRealParents=new Set(baseline.territories.filter(r=>r.match!=='fallback'&&r.adm1Id).map(r=>r.adm1Id));return main();
+}).catch(e=>{console.error(e);process.exitCode=1;});
