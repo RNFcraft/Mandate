@@ -1,0 +1,18 @@
+[
+  {
+    "id": "RU",
+    "name": "Российская империя",
+    "shortName": "РИ",
+    "color": "#ffd500",
+    "governmentType": "absolute_monarchy",
+    "capitalRegionId": "RUS-2387"
+  },
+  {
+    "id": "US",
+    "name": "Соединённые штаты Америки",
+    "shortName": "США",
+    "color": "#0040ff",
+    "governmentType": "absolute_monarchy",
+    "capitalRegionId": "USA-3546"
+  }
+]

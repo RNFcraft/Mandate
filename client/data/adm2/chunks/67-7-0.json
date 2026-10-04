@@ -1,0 +1,1 @@
+{"type":"Topology","transform":{"scale":[0.00036000036000036,0.00017361503361503365],"translate":[-180,-89.99893]},"objects":{"territories":{"type":"GeometryCollection","geometries":[{"arcs":[[0]],"type":"Polygon","id":"fallback:AUS+00?"}]}},"arcs":[[[941368,204408],[170,-230],[-170,-790],[-170,-140],[170,1160]]],"neighbors":[[49619]]}

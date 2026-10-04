@@ -1,0 +1,19 @@
+node_modules/
+
+# LLM
+*.gguf
+
+# Raw GIS data
+data/source/
+
+# Generated map data
+data/generated/
+data/processed/
+
+# Logs / temp
+*.log
+tmp/
+
+# Test reports
+test-results/
+playwright-report/

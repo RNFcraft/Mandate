@@ -1,0 +1,30 @@
+{
+  "name": "game",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "build": "node scripts/build-map.cjs",
+    "start": "node scripts/serve-map.cjs",
+    "prestart": "npm run build",
+    "build:adm2": "node --max-old-space-size=8192 scripts/build-adm2.cjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "d3-geo": "^3.1.1",
+    "mapshaper": "^0.6.113",
+    "topojson-client": "^3.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "esbuild": "^0.28.2"
+  },
+  "overrides": {
+    "fflate": "^0.8.3",
+    "adm-zip": "^0.6.1"
+  }
+}
