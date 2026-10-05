@@ -219,3 +219,74 @@ UI play/pause/speed/save/reload/load, DEV и неизменность сцена
 Полный запуск: `npm test`; отдельная проверка: `npx playwright test tests/simulation.spec.cjs`.
 Ограничения: локальная однопользовательская симуляция, один поддерживаемый save format,
 нет игровых систем, командного журнала replay или multiplayer authority.
+# Population System v1
+
+Current 1700 population data is not yet historically populated.
+
+Population is simulation authority in `systems.population`, separate from geometry,
+ownership and editor state. Only authored cohorts exist: no territory × registry
+Cartesian product and no synthetic demographic data in real scenarios.
+
+Optional `scenarios/<id>/population.json` has the exact schema:
+
+```json
+{
+  "version": 1,
+  "cultures": [{"id": "culture-a", "name": "Culture A"}],
+  "religions": [{"id": "religion-a", "name": "Religion A"}],
+  "strata": [{"id": "stratum-a", "name": "Stratum A"}],
+  "cohorts": [{
+    "id": "pop-001", "territoryId": "<canonical territory ID>",
+    "cultureId": "culture-a", "religionId": "religion-a", "stratumId": "stratum-a",
+    "settlement": "rural", "count": 0, "literacyBps": 0,
+    "birthRateBps": 0, "deathRateBps": 0
+  }]
+}
+```
+
+This is a schema example, not historical data. Registry/cohort IDs use safe tags;
+registry names are nonempty strings up to 160 characters. IDs and demographic
+tuples (territory, culture, religion, stratum, settlement) must be unique.
+Settlement is `rural` or `urban`; counts are nonnegative safe integers; literacy
+and annual birth/death rates are integer basis points in 0..10000. Only rates are
+optional, explicitly defaulting to zero. Unknown fields/references are rejected.
+
+Runtime structure is the same dataset with both rates always present, integer
+`birthRemainder` and `deathRemainder` (0..119999) per cohort, plus
+`stats: {monthsProcessed: 0, births: 0, deaths: 0}`. Counts are the sole population
+authority; totals are derived. Existing GameState/save versions remain unchanged.
+
+One update processes the completed month when a daily tick enters its successor's
+first day: January 31 → February 1 processes January. Monthly systems run in
+explicit order before that tick's clock/RNG commit; daily diagnostic system order
+and xorshift RNG are unchanged. For each rate, using the count at the start of
+the month: `numerator = count * rateBps + remainder`,
+`change = numerator / 120000` (integer floor), `remainder = numerator % 120000`.
+Births and deaths both use the old count; new count is old count + births − deaths.
+Temporary BigInt arithmetic prevents precision loss; saved state remains JSON
+Numbers. Overflow rejects the monthly update before its mutation. Earlier ticks
+in a batched step remain committed if a later tick fails. Literacy is unchanged.
+
+Daily population overhead is a calendar-boundary check; monthly work is O(cohorts).
+No world cloning/serialization occurs per tick. Step grouping and real-time
+delivery do not change results. A lightweight `populationUpdated` notification
+contains `{type, date, births, deaths, netChange}` after the boundary tick commits;
+it contains no world/cohort arrays and does not invalidate political geometry.
+
+`simulation.populationSummary(territoryId?)` returns detached derived
+`{total, urban, rural, literacyBps, byCulture, byReligion, byStratum}`. Literacy is
+population-weighted with exact integer arithmetic, rounded down (zero if total
+is zero). No country totals are stored. Pure helpers live in
+`shared/population.cjs`: validation, initialization, monthly advance and summary.
+
+Normal scenario loading requests `/api/scenarios/<id>?population=1`. A missing
+asset yields `{version:1,cultures:[],religions:[],strata:[],cohorts:[]}`; malformed
+or invalid authored data fails clearly. Editor requests keep the existing response
+shape; editor folder replacement preserves population.json byte for byte and
+ignores runtime population input. No population editor is provided.
+
+Saves include exact cohorts, registries, rates, literacy, remainders and cumulative
+stats through GameState. Old saves without population remain unchanged and safe:
+monthly population work is skipped, summaries return zero, and no scenario data
+is injected on load. Current limitations: authored aggregate natural growth only;
+no age/sex model, education, migration, conversion, economy or historical import.

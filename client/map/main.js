@@ -16,7 +16,7 @@ try {
     if (!response.ok) throw new Error(`Map data: ${response.status}`);
     const data=await response.json();return url.endsWith('.topo.json')?unpackTopology(data):data;
   }));
-  const initial=await loadScenario(scenarioId);
+  const initial=await loadScenario(scenarioId,{population:params.get('editor')!=='1'});
   const simulation=params.get('editor')==='1'?null:new kernel.Simulation(initial,geography);
   const model = new MapModel(geography,initial,{simulation});
   const geometry = name => feature(topology, topology.objects[name]).features.map(prepare);

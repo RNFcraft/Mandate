@@ -1,5 +1,6 @@
 // Portable deterministic kernel. No DOM, rendering, filesystem or wall clock.
 const {validateScenario,migrateLegacy}=require('./scenario.cjs');
+const population=require('./population.cjs');
 const SPEEDS=Object.freeze([1,5,20,100]);
 const STATE_VERSION=1;
 const uint=n=>Number.isInteger(n)&&n>=0&&n<=0xffffffff;
@@ -39,12 +40,14 @@ function validateGameState(state,hierarchy){
   if(!state.systems||Array.isArray(state.systems)||typeof state.systems!=='object')throw new Error('Invalid system state');
   fields(state.systems.tickProbe,['ticks','lastRandom']);
   if(state.systems.tickProbe.ticks!==state.clock.tick||!uint(state.systems.tickProbe.lastRandom))throw new Error('Invalid tick probe');
+  if(Object.hasOwn(state.systems,'population'))population.validatePopulationState(state.systems.population,hierarchy);
   return state;
 }
 function initializeGameState(scenario,hierarchy,seed=1){
   if(!uint(seed))throw new Error('Seed must be an unsigned 32-bit integer');
   const data=migrateLegacy(scenario,hierarchy);
   const state={version:STATE_VERSION,geography:hierarchy.id,game:{scenario:structuredClone(data.scenario)},clock:{tick:0,date:{year:data.scenario.year,month:1,day:1},paused:true,speed:1},rng:{seed,state:seed||0x6d2b79f5},countries:structuredClone(data.countries),ownership:structuredClone(data.ownership),controllers:structuredClone(data.controllers||{}),systems:{tickProbe:{ticks:0,lastRandom:0}}};
+  state.systems.population=population.initializePopulation(scenario.population,hierarchy);
   validateGameState(state,hierarchy);return state;
 }
 function readOnlyMap(get){
@@ -52,7 +55,8 @@ function readOnlyMap(get){
 }
 function freeze(value){if(value&&typeof value==='object'){for(const child of Object.values(value))freeze(child);Object.freeze(value);}return value;}
 // Trusted system order is explicit. This probe has no gameplay consequences.
-const SYSTEMS=Object.freeze([state=>{state.rng.state=nextRandom(state.rng.state);state.systems.tickProbe.ticks++;state.systems.tickProbe.lastRandom=state.rng.state;}]);
+const DAILY_SYSTEMS=Object.freeze([state=>{state.rng.state=nextRandom(state.rng.state);state.systems.tickProbe.ticks++;state.systems.tickProbe.lastRandom=state.rng.state;}]);
+const MONTHLY_SYSTEMS=Object.freeze([state=>population.advancePopulationMonth(state.systems.population)]);
 class Simulation {
   #state;#hierarchy;#owners;#countries;#listeners=new Set();
   constructor(scenario,hierarchy,{seed=1}={}){
@@ -74,6 +78,7 @@ class Simulation {
   }
   snapshot(){return structuredClone(this.#state);}
   serialize(){return JSON.stringify(this.#state);}
+  populationSummary(territoryId){return population.summarizePopulation(this.#state.systems.population,territoryId);}
   load(state){
     validateGameState(state,this.#hierarchy);const next=structuredClone(state);this.#install(next);
     this.#emit('stateChanged',{kind:'loaded',ownershipIds:null});this.#emit('gameLoaded',{clock:this.clock});
@@ -84,7 +89,13 @@ class Simulation {
   step(count=1){
     if(!Number.isInteger(count)||count<1||count>1000||ordinal(this.#state.clock.date)+count>ordinal({year:9999,month:12,day:31}))throw new Error('Invalid step count or calendar limit');
     // Only small clock/system fields change per tick; never clone/serialize the world.
-    for(let i=0;i<count;i++){for(const system of SYSTEMS)system(this.#state);this.#state.clock.tick++;this.#state.clock.date=nextDay(this.#state.clock.date);}
+    for(let i=0;i<count;i++){
+      const date=nextDay(this.#state.clock.date);let update;
+      // Monthly work is staged before committing this day's clock/RNG.
+      if(date.day===1)for(const system of MONTHLY_SYSTEMS)update=system(this.#state);
+      for(const system of DAILY_SYSTEMS)system(this.#state);this.#state.clock.tick++;this.#state.clock.date=date;
+      if(update)this.#emit('populationUpdated',{date:Object.freeze({...date}),...update});
+    }
     this.#emit('timeAdvanced',{steps:count,clock:this.clock});this.#emit('stateChanged',{kind:'time',ownershipIds:[]});
   }
   submit(command){

@@ -2,6 +2,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 const { TAG, validateScenario, migrateLegacy } = require('../shared/scenario.cjs');
+const {emptyPopulation,validatePopulationScenario}=require('../shared/population.cjs');
 const root = path.resolve(__dirname, '../scenarios');
 const geographyFile = path.resolve(__dirname, '../client/data/geography.json');
 const hierarchyFile = path.resolve(__dirname, '../client/data/adm2/hierarchy.json');
@@ -27,7 +28,15 @@ async function handle(req, res, pathname) {
   const match = /^\/api\/scenarios\/([A-Za-z0-9][A-Za-z0-9_-]{0,63})$/.exec(pathname);
   if (!match) { reply(res, 404, { error: 'Неизвестный маршрут' }); return; }
   const id = match[1];
-  if (req.method === 'GET') { reply(res, 200, migrateLegacy(await read(id), await hierarchy())); return; }
+  if (req.method === 'GET') {
+    const h=await hierarchy(),data=migrateLegacy(await read(id),h);
+    if(new URL(req.url,'http://localhost').searchParams.get('population')!=='1'){reply(res,200,data);return;}
+    let population;
+    try{population=await json(path.join(root,id,'population.json'));}
+    catch(error){if(error.code==='ENOENT')population=emptyPopulation();else if(error instanceof SyntaxError){reply(res,400,{error:'Population: malformed population.json'});return;}else throw error;}
+    try{validatePopulationScenario(population,h);}catch(error){reply(res,400,{error:error.message});return;}
+    reply(res,200,{...data,population});return;
+  }
   if (req.method !== 'PUT') { reply(res, 405, { error: 'Метод не поддерживается' }); return; }
   if (process.env.MANDATE_DEV_EDITOR === '0') { reply(res, 403, { error: 'DEV-сохранение отключено' }); return; }
   // Local development API accepts writes only from this server's origin.
@@ -63,6 +72,8 @@ async function handle(req, res, pathname) {
         try{await fs.access(path.join(backupRoot,id));}catch{await fs.cp(folder,path.join(backupRoot,id),{recursive:true,errorOnExist:true,force:false});}
       }
     }catch(error){if(error.code!=='ENOENT')throw error;}
+    // Population is an independent authored asset, never supplied by the editor.
+    try{await fs.copyFile(path.join(folder,'population.json'),path.join(stage,'population.json'));}catch(error){if(error.code!=='ENOENT')throw error;}
     for (const [name, value] of Object.entries(data)) if (['scenario', 'countries', 'ownership', 'controllers'].includes(name)) await fs.writeFile(path.join(stage, `${name}.json`), JSON.stringify(value, null, 2));
     try { await fs.rename(folder, backup); backedUp = true; } catch (error) { if (error.code !== 'ENOENT') throw error; }
     try { await fs.rename(stage, folder); published = true; } catch (error) { if (backedUp) await fs.rename(backup, folder); throw error; }
