@@ -31,7 +31,7 @@ function validate(data,hierarchy,runtime){
     if(!['rural','urban'].includes(c.settlement))fail('invalid settlement');
     const tuple=JSON.stringify([c.territoryId,c.cultureId,c.religionId,c.stratumId,c.settlement]);if(tuples.has(tuple))fail('duplicate demographic tuple');tuples.add(tuple);
     if(!safe(c.count))fail('invalid count');total+=BigInt(c.count);
-    if(!bps(c.literacyBps))fail('invalid literacyBps');
+    if(c.literacyBps!==null&&!bps(c.literacyBps))fail('invalid literacyBps');
     for(const key of ['birthRateBps','deathRateBps'])if((runtime||Object.hasOwn(c,key))&&!bps(c[key]))fail(`invalid ${key}`);
     if(runtime)for(const key of ['birthRemainder','deathRemainder'])if(!Number.isInteger(c[key])||c[key]<0||c[key]>=DENOMINATOR)fail(`invalid ${key}`);
   }
@@ -59,12 +59,14 @@ function advancePopulationMonth(state){
   return {births:number(births),deaths:number(deaths),netChange:Number(births-deaths)};
 }
 function summarizePopulation(state,territoryId){
-  const result={total:0,urban:0,rural:0,literacyBps:0,byCulture:{},byReligion:{},byStratum:{}};let weighted=0n;
+  const result={total:0,urban:0,rural:0,literacyBps:0,byCulture:{},byReligion:{},byStratum:{}};let weighted=0n,unknown=false;
   for(const c of state?.cohorts||[]){
     if(territoryId!==undefined&&c.territoryId!==territoryId)continue;
-    result.total+=c.count;result[c.settlement]+=c.count;weighted+=BigInt(c.count)*BigInt(c.literacyBps);
+    result.total+=c.count;result[c.settlement]+=c.count;
+    if(c.count>0&&c.literacyBps===null)unknown=true;
+    else if(c.literacyBps!==null)weighted+=BigInt(c.count)*BigInt(c.literacyBps);
     for(const [key,id] of [['byCulture',c.cultureId],['byReligion',c.religionId],['byStratum',c.stratumId]])result[key][id]=(Object.hasOwn(result[key],id)?result[key][id]:0)+c.count;
   }
-  if(result.total)result.literacyBps=Number(weighted/BigInt(result.total));return result;
+  if(result.total)result.literacyBps=unknown?null:Number(weighted/BigInt(result.total));return result;
 }
 module.exports={DENOMINATOR,emptyPopulation,validatePopulationScenario,initializePopulation,validatePopulationState,advancePopulationMonth,summarizePopulation};

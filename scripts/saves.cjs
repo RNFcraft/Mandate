@@ -3,6 +3,8 @@ const path=require('node:path');
 const {randomUUID}=require('node:crypto');
 const {validateSave,validSaveId:validId}=require('../shared/save.cjs');
 const ROOT=path.resolve(__dirname,'../saves');
+// Up to two baseline cohorts per 52k atoms can exceed the old 16 MiB ceiling.
+const MAX_SAVE_BYTES=64*1024*1024;
 let hierarchyPromise,queue=Promise.resolve();
 const hierarchy=()=>hierarchyPromise||=fs.readFile(path.resolve(__dirname,'../client/data/adm2/hierarchy.json'),'utf8').then(JSON.parse);
 function reply(res,status,value){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}).end(JSON.stringify(value));}
@@ -27,7 +29,7 @@ async function handle(req,res,pathname){
   if(req.method!=='PUT'){reply(res,405,{error:'Method not allowed'});return;}
   if(req.headers.origin&&req.headers.origin!==`http://${req.headers.host}`){reply(res,403,{error:'Invalid request origin'});return;}
   if(!(req.headers['content-type']||'').startsWith('application/json')){reply(res,415,{error:'Expected JSON'});return;}
-  const parts=[];let size=0;for await(const part of req){size+=part.length;if(size>16*1024*1024){reply(res,413,{error:'Save is too large'});return;}parts.push(part);}
+  const parts=[];let size=0;for await(const part of req){size+=part.length;if(size>MAX_SAVE_BYTES){reply(res,413,{error:'Save is too large'});return;}parts.push(part);}
   const save=JSON.parse(Buffer.concat(parts).toString('utf8'));validateSave(save,await hierarchy());
   const folder=folderOf(id),target=path.join(folder,'save.json'),temporary=path.join(folder,`.save-${randomUUID()}.tmp`);
   await noLink(ROOT);await fs.mkdir(ROOT,{recursive:true});await noLink(folder);await fs.mkdir(folder,{recursive:true});await noLink(target);

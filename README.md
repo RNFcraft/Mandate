@@ -248,7 +248,8 @@ This is a schema example, not historical data. Registry/cohort IDs use safe tags
 registry names are nonempty strings up to 160 characters. IDs and demographic
 tuples (territory, culture, religion, stratum, settlement) must be unique.
 Settlement is `rural` or `urban`; counts are nonnegative safe integers; literacy
-and annual birth/death rates are integer basis points in 0..10000. Only rates are
+is integer basis points in 0..10000 or `null` (unknown). Annual birth/death rates
+are integer basis points in 0..10000. Only rates are
 optional, explicitly defaulting to zero. Unknown fields/references are rejected.
 
 Runtime structure is the same dataset with both rates always present, integer
@@ -276,17 +277,115 @@ it contains no world/cohort arrays and does not invalidate political geometry.
 `simulation.populationSummary(territoryId?)` returns detached derived
 `{total, urban, rural, literacyBps, byCulture, byReligion, byStratum}`. Literacy is
 population-weighted with exact integer arithmetic, rounded down (zero if total
-is zero). No country totals are stored. Pure helpers live in
+is zero; null if any positive-count cohort has unknown literacy). Zero-person
+unknown cohorts do not affect literacy. No country totals are stored. Pure helpers live in
 `shared/population.cjs`: validation, initialization, monthly advance and summary.
 
 Normal scenario loading requests `/api/scenarios/<id>?population=1`. A missing
 asset yields `{version:1,cultures:[],religions:[],strata:[],cohorts:[]}`; malformed
 or invalid authored data fails clearly. Editor requests keep the existing response
 shape; editor folder replacement preserves population.json byte for byte and
-ignores runtime population input. No population editor is provided.
+ignores runtime population input. The independent population.meta.json asset is
+also preserved byte for byte. No population editor is provided.
 
 Saves include exact cohorts, registries, rates, literacy, remainders and cumulative
 stats through GameState. Old saves without population remain unchanged and safe:
 monthly population work is skipped, summaries return zero, and no scenario data
 is injected on load. Current limitations: authored aggregate natural growth only;
 no age/sex model, education, migration, conversion, economy or historical import.
+
+## Population Baseline 1700 v1 (offline importer)
+
+Mandate scenarios prioritize historical plausibility, internal simulation
+consistency and gameplay, not exact historical reconstruction. HYDE 3.2 supplies
+baseline spatial total/urban/rural population, not culture or religion. Atomic
+territory counts are deterministic game-oriented downscaling of a coarse
+historical reconstruction. Exact integer counts do not imply historical census
+precision. Later gameplay rules may explicitly transform this baseline through
+version-controlled adjustments; no such multipliers or caps are applied in v1.
+
+Sources: [HYDE dataset](https://doi.org/10.17026/DANS-25G-GEZ3),
+[HYDE 3.2 paper](https://essd.copernicus.org/articles/9/927/2017/)
+(DOI 10.5194/essd-9-927-2017). The roughly 600-million order of magnitude around
+1700 is a reference only, never a rescaling target.
+
+Raw files belong in ignored data/source/population/hyde32/. No automatic downloads.
+Extract the three HYDE 3.2 baseline **1700 CE people-per-cell** ESRI ASCII grids:
+total, urban and rural. Do not supply population density (people/km2), other years,
+or land-use layers. ASCII has no year/unit metadata: selecting the right files is
+an explicit input responsibility. Plain .asc and gzip-compressed .asc.gz are
+supported; ZIP, GeoTIFF and NetCDF must first be extracted/converted externally.
+Global CLI inputs must use matching 4320 x 2160 grids, 5 arc minutes, longitude/
+latitude origin -180/-90. Missing inputs fail with all expected paths and create
+no population assets. Invalid rows/headers/mismatched grids also fail.
+
+PowerShell example (replace file placeholders with your extracted filenames):
+
+```powershell
+node scripts/import-population-1700.cjs `
+  --total "data/source/population/hyde32/<total-file.asc>" `
+  --urban "data/source/population/hyde32/<urban-file.asc>" `
+  --rural "data/source/population/hyde32/<rural-file.asc>"
+```
+
+Options: --strict rejects any unresolved positive population;
+--max-unresolved-pct 0.05 and --max-anomaly-pct 0.05 explicitly set tolerated
+percentages (defaults both 0.05%). --output defaults to scenarios/1700;
+--audit defaults to data/generated/population/1700. Output folders must stay
+inside this repository and separate scenario assets from diagnostics.
+
+Stages live in scripts/population-raster.cjs (streamed ASCII into Float64 grids),
+scripts/population-baseline.cjs (allocate, normalize, build cohorts), and
+scripts/import-population-1700.cjs (CLI, provenance, audit and publication).
+Exact polygons are data/processed/canonical/atomic.topo.json. Their hash must
+match the successful canonical mesh invariant report, and IDs must exactly
+match client/data/adm2/hierarchy.json. No display, FAR, political or alternative
+geography is substituted. A one-degree grid indexes individual polygon parts;
+positive cells intersect polygon interiors including holes. Equal-area overlap
+uses the existing cylindrical longitude/sin(latitude) approximation consistently.
+All cell mass is normalized over game-land intersections, including partial
+coastal cells. Zero-overlap cells may go to the nearest polygon boundary within
+one local equirectangular cell diagonal from the cell center; longitude wraps,
+and equal-distance ties use ASCII territory ID. Other cells remain unresolved.
+
+NODATA becomes zero without an anomaly. Negative/NaN/infinite source values are
+replaced by zero and listed in audit; raw finite total and cleaned total are
+reported separately (nonfinite source mass is unknowable). Urban share is
+urban/(urban+rural), independently of total mass. A missing split becomes rural
+and is audited. The anomaly threshold counts positive total mass in cells with
+invalid source values or missing settlement split, without double counting.
+Unresolved mass is reported and, if tolerated, excluded explicitly from the
+chosen target: round(cleaned mass assigned to game land). Global Hamilton
+apportionment selects integer territory counts with stable ASCII ID ties; a
+second Hamilton split selects rural/urban counts per territory (rural wins exact
+settlement ties). The chosen normalized target is conserved exactly. Failures
+with allocation diagnostics write audit only, never publish scenario population.
+Broad sanity requires total >100 million and <2 billion, urban < total, rural >0
+and at least one populated territory. No country population rescaling occurs.
+
+Successful real import publishes population.json and population.meta.json with
+rollback on normal publication I/O failure. Two-file publication is not a crash-
+atomic transaction; interrupted processes may leave .bak/.tmp files for manual
+recovery. Output JSON has stable ordering, SHA256-derived cohort IDs with collision
+checks, source byte hashes, geography/hierarchy hashes and recorded normalization
+rules/thresholds. No local absolute paths, wall-clock timestamps or raw files
+enter these assets. At most one positive rural and one positive urban cohort per
+territory; culture/religion/stratum are unclassified (composition not generated),
+literacy is null (unknown), and rates are omitted. Natural growth is disabled by
+the existing zero-rate defaults until a separate demographic model is authored.
+Numeric literacy scenarios/saves remain compatible; unknown stays unknown through
+save/load and monthly ticks. Runtime/save architecture and formats are unchanged.
+The local runtime save body limit is 64 MiB: two cohorts per 52k atoms can need
+about 30 MiB of cohort JSON alone. Scenario editor payload limits remain unchanged.
+
+Ignored audit contains summary.json, fallback-cells.jsonl, unresolved-cells.jsonl,
+rural-fallback-cells.jsonl, invalid-source-values.jsonl, territories.json,
+largest-territories.json, country-summary.json and region-examples.json.
+Country totals derive from scenario ownership for diagnostics only. Region examples
+use explicit, nonexclusive geographic boxes (Europe, India, China, Japan, North/
+South America, Africa, Siberia/Central Asia), with bbox-midpoint membership; they
+are approximate developer checks, not political or demographic authority.
+Performance report includes wall time, process peak RSS, cells, cohort counts,
+totals and population.json size. Full HYDE performance is unmeasured until actual
+source files are supplied. Tests use tiny synthetic rasters only, isolated test
+folders, and never publish synthetic values into real scenario 1700.

@@ -73,7 +73,7 @@ async function handle(req, res, pathname) {
       }
     }catch(error){if(error.code!=='ENOENT')throw error;}
     // Population is an independent authored asset, never supplied by the editor.
-    try{await fs.copyFile(path.join(folder,'population.json'),path.join(stage,'population.json'));}catch(error){if(error.code!=='ENOENT')throw error;}
+    for(const asset of ['population.json','population.meta.json'])try{await fs.copyFile(path.join(folder,asset),path.join(stage,asset));}catch(error){if(error.code!=='ENOENT')throw error;}
     for (const [name, value] of Object.entries(data)) if (['scenario', 'countries', 'ownership', 'controllers'].includes(name)) await fs.writeFile(path.join(stage, `${name}.json`), JSON.stringify(value, null, 2));
     try { await fs.rename(folder, backup); backedUp = true; } catch (error) { if (error.code !== 'ENOENT') throw error; }
     try { await fs.rename(stage, folder); published = true; } catch (error) { if (backedUp) await fs.rename(backup, folder); throw error; }
