@@ -348,12 +348,20 @@ coastal cells. Zero-overlap cells may go to the nearest polygon boundary within
 one local equirectangular cell diagonal from the cell center; longitude wraps,
 and equal-distance ties use ASCII territory ID. Other cells remain unresolved.
 
-NODATA becomes zero without an anomaly. Negative/NaN/infinite source values are
+All three grids must declare identical NODATA semantics/value (including all
+omitting the header or all declaring NaN); mismatch fails before allocation.
+The common convention is recorded in audit. NODATA becomes zero without an anomaly. Negative/NaN/infinite source values are
 replaced by zero and listed in audit; raw finite total and cleaned total are
 reported separately (nonfinite source mass is unknowable). Urban share is
 urban/(urban+rural), independently of total mass. A missing split becomes rural
 and is audited. The anomaly threshold counts positive total mass in cells with
 invalid source values or missing settlement split, without double counting.
+Cells with cleaned total zero and positive urban/rural signal are also audited
+as settlementWithoutTotalCells; their urban+rural signal mass is accumulated as
+settlementWithoutTotalPopulation and added to anomalyPopulation. This signal
+never creates game population. Anomaly percentage uses cleaned total mass as
+the denominator; with no cleaned total and any anomaly signal it is 100%.
+The existing maxAnomalyPct threshold applies to the combined anomaly mass.
 Unresolved mass is reported and, if tolerated, excluded explicitly from the
 chosen target: round(cleaned mass assigned to game land). Global Hamilton
 apportionment selects integer territory counts with stable ASCII ID ties; a
@@ -379,7 +387,8 @@ The local runtime save body limit is 64 MiB: two cohorts per 52k atoms can need
 about 30 MiB of cohort JSON alone. Scenario editor payload limits remain unchanged.
 
 Ignored audit contains summary.json, fallback-cells.jsonl, unresolved-cells.jsonl,
-rural-fallback-cells.jsonl, invalid-source-values.jsonl, territories.json,
+rural-fallback-cells.jsonl, settlement-without-total-cells.jsonl,
+invalid-source-values.jsonl, territories.json,
 largest-territories.json, country-summary.json and region-examples.json.
 Country totals derive from scenario ownership for diagnostics only. Region examples
 use explicit, nonexclusive geographic boxes (Europe, India, China, Japan, North/

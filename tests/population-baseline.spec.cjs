@@ -3,7 +3,7 @@ const fs=require('node:fs/promises'),path=require('node:path'),crypto=require('n
 const {execFileSync}=require('node:child_process');
 const {parseAscii,readAscii,sameGrid,clean}=require('../scripts/population-raster.cjs');
 const {box,spatialIndex,allocate,apportion,normalize,buildCohorts,createBaseline}=require('../scripts/population-baseline.cjs');
-const {argsOf,publishPopulation}=require('../scripts/import-population-1700.cjs');
+const {argsOf,publishPopulation,writeAudit}=require('../scripts/import-population-1700.cjs');
 const {Simulation}=require('../shared/simulation.cjs');
 const {makeSave}=require('../shared/save.cjs');
 const {validatePopulationScenario,initializePopulation,summarizePopulation}=require('../shared/population.cjs');
@@ -51,6 +51,37 @@ test('Hamilton apportionment is integer, conservative and uses stable ASCII ID t
 });
 test('urban/rural shares normalize independently of total signal',async()=>{
   const result=await resultOf([100],[2],[6]);expect(result.meta.generated).toMatchObject({total:100,urban:25,rural:75});expect(result.audit.shareMismatchCells).toBe(1);expect(result.audit.anomalyPopulation).toBe(0);
+});
+for(const layer of ['urban','rural'])test(`zero total with positive ${layer} signal is audited without adding population`,async()=>{
+  const urban=[0,layer==='urban'?2:0],rural=[10000,layer==='rural'?2:0],rasters=await inputs([10000,0],urban,rural),result=createBaseline(rasters,features,hierarchy,options);
+  expect(result.audit.settlementWithoutTotalCells).toEqual([{index:1,x:1,y:0,urban:urban[1],rural:rural[1],reason:'cleaned total == 0 but urban or rural > 0'}]);
+  expect(result.audit.settlementWithoutTotalPopulation).toBe(2);expect(result.audit.anomalyPopulation).toBe(2);expect(result.meta.audit.settlementWithoutTotalCells).toBe(1);expect(result.meta.audit.settlementWithoutTotalPopulation).toBe(2);
+  expect(result.meta.generated).toMatchObject({total:10000,urban:0,rural:10000});expect(result.population.cohorts.reduce((n,c)=>n+c.count,0)).toBe(10000);
+});
+test('significant settlement-without-total anomaly fails default threshold, including an entirely missing total layer',async()=>{
+  const allocation=allocate(await inputs([100,0],[0,1],[100,1]),features);expect(allocation.audit.anomalyPct).toBe(2);expect(()=>normalize(allocation,{sanity:false})).toThrow('anomaly');
+  const zero=allocate(await inputs([0],[2],[3]),features);expect(zero.audit.settlementWithoutTotalPopulation).toBe(5);expect(zero.audit.anomalyPct).toBe(100);expect(()=>normalize(zero,{sanity:false})).toThrow('anomaly');expect(zero.rows).toEqual([]);
+});
+test('tiny settlement-without-total anomaly passes only within configured anomaly budget and conserves total signal',async()=>{
+  const allocation=allocate(await inputs([10000,0],[0,1],[10000,1]),features);expect(allocation.audit.anomalyPct).toBe(0.02);
+  expect(()=>normalize(allocation,{sanity:false,maxAnomalyPct:0.019})).toThrow('anomaly');expect(normalize(allocation,{sanity:false,maxAnomalyPct:0.02}).target).toBe(10000);expect(normalize(allocation,{sanity:false}).target).toBe(10000);
+});
+test('settlement-without-total records are written to JSONL and summary, including failure audit',async()=>{
+  const allocation=allocate(await inputs([100,0],[0,1],[100,2]),features),folder=await temp();
+  try{let rejected;try{normalize(allocation,{sanity:false});}catch(error){rejected=error;}expect(rejected).toBeTruthy();await writeAudit(rejected.audit,folder);
+    expect(JSON.parse((await fs.readFile(path.join(folder,'settlement-without-total-cells.jsonl'),'utf8')).trim())).toEqual(allocation.audit.settlementWithoutTotalCells[0]);
+    const summary=JSON.parse(await fs.readFile(path.join(folder,'summary.json'),'utf8'));expect(summary.settlementWithoutTotalCells).toBe(1);expect(summary.settlementWithoutTotalPopulation).toBe(3);expect(summary.anomalyPopulation).toBe(3);
+  }finally{await cleanup(folder);}
+});
+for(const nodata of [-1,null,NaN])test(`NODATA mismatch ${String(nodata)} rejects before spatial allocation`,async()=>{
+  const rasters=await inputs([100]);rasters.urban=await parseAscii(ascii([0]).replace('NODATA_value -9999\n',nodata===null?'':`NODATA_value ${nodata}\n`));
+  expect(()=>allocate(rasters,features,{query:()=>{throw Error('Spatial allocation must not run');}})).toThrow('mismatched NODATA');
+});
+test('matching NODATA semantics pass for numeric sentinel, absent header and NaN sentinel',async()=>{
+  for(const nodata of [-9999,null,NaN]){
+    const rasters=await inputs([100]);for(const key of ['total','urban','rural'])rasters[key]=await parseAscii(ascii([key==='urban'?0:100]).replace('NODATA_value -9999\n',nodata===null?'':`NODATA_value ${nodata}\n`));
+    const allocation=allocate(rasters,features);expect(normalize(allocation,{sanity:false}).target).toBe(100);expect(allocation.audit.nodataCompatibility.value).toEqual(Number.isNaN(nodata)?'NaN':nodata);
+  }
 });
 test('missing settlement signal falls back to rural with audit and configurable anomaly threshold',async()=>{
   const rasters=await inputs([100],[0],[0]),allocation=allocate(rasters,features);expect(allocation.audit.ruralFallbackCells).toHaveLength(1);expect(allocation.audit.anomalyPopulation).toBe(100);expect(()=>normalize(allocation,{sanity:false})).toThrow('anomaly');

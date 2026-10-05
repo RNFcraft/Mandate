@@ -36,16 +36,26 @@ function nearest(query,x,y,w){
 }
 function allocate(rasters,features,options={}){
   sameGrid([rasters.total,rasters.urban,rasters.rural]);const g=rasters.total,query=options.query||spatialIndex(features);
-  const totals=new Map(),raw=sum(),source=sum(),assigned=sum(),fallbackMass=sum(),unresolvedMass=sum(),anomalyMass=sum(),ruralFallbackMass=sum();
-  const audit={sourceCells:g.values.length,positiveSourceCells:0,fallbackCells:[],unresolvedCells:[],ruralFallbackCells:[],invalidSourceValues:[],shareMismatchCells:0};
+  const totals=new Map(),raw=sum(),source=sum(),assigned=sum(),fallbackMass=sum(),unresolvedMass=sum(),anomalyMass=sum(),ruralFallbackMass=sum(),settlementWithoutTotalMass=sum();
+  const audit={sourceCells:g.values.length,positiveSourceCells:0,fallbackCells:[],unresolvedCells:[],ruralFallbackCells:[],settlementWithoutTotalCells:[],invalidSourceValues:[],shareMismatchCells:0};
+  audit.nodataCompatibility={rule:'identical semantics/value across total/urban/rural',value:g.nodata===null||Number.isFinite(g.nodata)?g.nodata:String(g.nodata)};
   for(let index=0;index<g.values.length;index++){
     const values={};let invalid=false;
     for(const key of ['total','urban','rural']){const cell=clean(rasters[key],index);values[key]=cell.value;if(cell.invalid){invalid=true;audit.invalidSourceValues.push({index,layer:key,value:cell.original,action:'replace with zero'});}}
     const original=g.values[index];if(Number.isFinite(original)&&!clean(g,index).nodata)raw.add(original);
-    const total=values.total;if(total===0)continue;source.add(total);audit.positiveSourceCells++;
-    const row=Math.floor(index/g.ncols),col=index%g.ncols,x=g.x+col*g.cellsize,y=g.y+(g.nrows-row-1)*g.cellsize,w=g.cellsize;
-    const settlement=values.urban+values.rural;const urbanShare=settlement>0?values.urban/settlement:0;
+    const total=values.total,settlement=values.urban+values.rural;
     if(!Number.isFinite(settlement))throw Error(`Source settlement overflow at cell ${index}`);
+    if(total===0){
+      if(settlement>0){
+        const x=g.x+(index%g.ncols)*g.cellsize,y=g.y+(g.nrows-Math.floor(index/g.ncols)-1)*g.cellsize;
+        audit.settlementWithoutTotalCells.push({index,x,y,urban:values.urban,rural:values.rural,reason:'cleaned total == 0 but urban or rural > 0'});
+        settlementWithoutTotalMass.add(settlement);anomalyMass.add(settlement);
+      }
+      continue; // Settlement signal is audited, never added to authoritative mass.
+    }
+    source.add(total);audit.positiveSourceCells++;
+    const row=Math.floor(index/g.ncols),col=index%g.ncols,x=g.x+col*g.cellsize,y=g.y+(g.nrows-row-1)*g.cellsize,w=g.cellsize;
+    const urbanShare=settlement>0?values.urban/settlement:0;
     if(settlement===0){audit.ruralFallbackCells.push({index,x,y,population:total,reason:'urban + rural == 0'});ruralFallbackMass.add(total);invalid=true;}
     if(settlement!==total)audit.shareMismatchCells++;
     if(invalid)anomalyMass.add(total);
@@ -58,7 +68,8 @@ function allocate(rasters,features,options={}){
     for(const [id,weight]of sorted){if(!totals.has(id))totals.set(id,{total:sum(),urban:sum()});const row=totals.get(id),mass=total*(weight/weightSum);row.total.add(mass);row.urban.add(mass*urbanShare);}
   }
   audit.rawSourceTotal=raw.value;audit.cleanedSourceTotal=source.value;audit.assignedSourceTotal=assigned.value;audit.fallbackPopulation=fallbackMass.value;audit.unresolvedPopulation=unresolvedMass.value;audit.anomalyPopulation=anomalyMass.value;audit.ruralFallbackPopulation=ruralFallbackMass.value;
-  audit.unresolvedPct=source.value?100*unresolvedMass.value/source.value:0;audit.anomalyPct=source.value?100*anomalyMass.value/source.value:0;
+  audit.settlementWithoutTotalPopulation=settlementWithoutTotalMass.value;
+  audit.unresolvedPct=source.value?100*unresolvedMass.value/source.value:0;audit.anomalyPct=source.value?100*anomalyMass.value/source.value:anomalyMass.value>0?100:0;
   return {rows:[...totals].sort((a,b)=>compare(a[0],b[0])).map(([id,r])=>({id,total:r.total.value,urban:r.urban.value})),audit};
 }
 function apportion(rows,target){
@@ -100,7 +111,7 @@ function createBaseline(rasters,features,hierarchy,options={}){
   for(const value of [...['total','urban','rural'].map(key=>rasters[key].sha256),options.geographyHash,options.hierarchyHash])if(typeof value!=='string'||!/^[a-f0-9]{64}$/.test(value))throw Error('Baseline provenance requires source, geography and hierarchy SHA256 hashes');
   const allocation=allocate(rasters,features,options),normalized=normalize(allocation,options),population=buildCohorts(normalized.rows);validatePopulationScenario(population,hierarchy);
   const generated={total:normalized.target,urban:normalized.urban,rural:normalized.rural,cohorts:population.cohorts.length,territoriesWithPopulation:normalized.rows.length,urbanCohorts:population.cohorts.filter(c=>c.settlement==='urban').length,ruralCohorts:population.cohorts.filter(c=>c.settlement==='rural').length};
-  const a=allocation.audit,meta={schema:'mandate-population-baseline-v1',scenario:'1700',source:SOURCE,sourceFiles:Object.fromEntries(['total','urban','rural'].map(key=>[key,{sha256:rasters[key].sha256}])),geography:{id:hierarchy.id,sha256:options.geographyHash,hierarchySha256:options.hierarchyHash},method:{spatialAllocation:'exact atomic polygon intersections; cylindrical equal-area overlap approximation',integerApportionment:'global territory Hamilton, then territory settlement Hamilton; ASCII ID ties',coastlineNormalization:'all cell population normalized over intersecting game land',fallbackAssignment:'cell-center to nearest polygon boundary within one local equirectangular cell diagonal; longitude wrap; ASCII ID ties',gameplayNormalizationVersion:1,normalizedTarget:'round(cleaned total assigned to game land); allowed unresolved mass excluded',thresholds:{maxUnresolvedPct:normalized.settings.maxUnresolvedPct,maxAnomalyPct:normalized.settings.maxAnomalyPct,strict:normalized.settings.strict}},generated,audit:{rawSourceTotal:a.rawSourceTotal,cleanedSourceTotal:a.cleanedSourceTotal,assignedSourceTotal:a.assignedSourceTotal,normalizedTarget:normalized.target,difference:generated.total-normalized.target,rawToGeneratedDifference:generated.total-a.rawSourceTotal,sourceCells:a.sourceCells,positiveSourceCells:a.positiveSourceCells,fallbackCells:a.fallbackCells.length,fallbackPopulation:a.fallbackPopulation,unresolvedCells:a.unresolvedCells.length,unresolvedPopulation:a.unresolvedPopulation,unresolvedPct:a.unresolvedPct,ruralFallbackCells:a.ruralFallbackCells.length,ruralFallbackPopulation:a.ruralFallbackPopulation,anomalyPopulation:a.anomalyPopulation,anomalyPct:a.anomalyPct,invalidSourceValues:a.invalidSourceValues.length,shareMismatchCells:a.shareMismatchCells},reference:{orderOfMagnitude:'about 600 million around 1700; reference only, no rescaling',paperUrl:'https://essd.copernicus.org/articles/9/927/2017/'}};
+  const a=allocation.audit,meta={schema:'mandate-population-baseline-v1',scenario:'1700',source:SOURCE,sourceFiles:Object.fromEntries(['total','urban','rural'].map(key=>[key,{sha256:rasters[key].sha256}])),geography:{id:hierarchy.id,sha256:options.geographyHash,hierarchySha256:options.hierarchyHash},method:{spatialAllocation:'exact atomic polygon intersections; cylindrical equal-area overlap approximation',integerApportionment:'global territory Hamilton, then territory settlement Hamilton; ASCII ID ties',coastlineNormalization:'all cell population normalized over intersecting game land',fallbackAssignment:'cell-center to nearest polygon boundary within one local equirectangular cell diagonal; longitude wrap; ASCII ID ties',gameplayNormalizationVersion:1,normalizedTarget:'round(cleaned total assigned to game land); allowed unresolved mass excluded',thresholds:{maxUnresolvedPct:normalized.settings.maxUnresolvedPct,maxAnomalyPct:normalized.settings.maxAnomalyPct,strict:normalized.settings.strict}},generated,audit:{nodataCompatibility:a.nodataCompatibility,rawSourceTotal:a.rawSourceTotal,cleanedSourceTotal:a.cleanedSourceTotal,assignedSourceTotal:a.assignedSourceTotal,normalizedTarget:normalized.target,difference:generated.total-normalized.target,rawToGeneratedDifference:generated.total-a.rawSourceTotal,sourceCells:a.sourceCells,positiveSourceCells:a.positiveSourceCells,fallbackCells:a.fallbackCells.length,fallbackPopulation:a.fallbackPopulation,unresolvedCells:a.unresolvedCells.length,unresolvedPopulation:a.unresolvedPopulation,unresolvedPct:a.unresolvedPct,ruralFallbackCells:a.ruralFallbackCells.length,ruralFallbackPopulation:a.ruralFallbackPopulation,anomalyPopulation:a.anomalyPopulation,anomalyPct:a.anomalyPct,settlementWithoutTotalCells:a.settlementWithoutTotalCells.length,settlementWithoutTotalPopulation:a.settlementWithoutTotalPopulation,invalidSourceValues:a.invalidSourceValues.length,shareMismatchCells:a.shareMismatchCells},reference:{orderOfMagnitude:'about 600 million around 1700; reference only, no rescaling',paperUrl:'https://essd.copernicus.org/articles/9/927/2017/'}};
   return {population,meta,territories:normalized.rows,audit:a};
 }
 module.exports={DEFAULTS,SOURCE,box,spatialIndex,allocate,apportion,normalize,buildCohorts,createBaseline,compare};

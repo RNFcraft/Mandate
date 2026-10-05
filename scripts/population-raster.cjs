@@ -40,6 +40,7 @@ async function readAscii(file){
 }
 function sameGrid(rasters){
   const a=rasters[0];for(const b of rasters.slice(1))for(const key of ['ncols','nrows','x','y','cellsize'])if(a[key]!==b[key])throw Error(`Raster: mismatched grids (${key})`);
+  for(const b of rasters.slice(1))if(a.nodata!==b.nodata&&!(Number.isNaN(a.nodata)&&Number.isNaN(b.nodata)))throw Error('Raster: mismatched NODATA semantics/value across total/urban/rural grids');
 }
 function clean(raster,index){
   const n=raster.values[index];

@@ -51,7 +51,7 @@ async function publishPopulation(result,folder){
 }
 async function writeAudit(audit,folder){
   folder=workspaceFolder(folder);await fs.mkdir(folder,{recursive:true});
-  const lists={fallbackCells:'fallback-cells',unresolvedCells:'unresolved-cells',ruralFallbackCells:'rural-fallback-cells',invalidSourceValues:'invalid-source-values'};
+  const lists={fallbackCells:'fallback-cells',unresolvedCells:'unresolved-cells',ruralFallbackCells:'rural-fallback-cells',settlementWithoutTotalCells:'settlement-without-total-cells',invalidSourceValues:'invalid-source-values'};
   for(const [key,name]of Object.entries(lists)){
     const file=await fs.open(path.join(folder,name+'.jsonl'),'w');try{for(const row of audit[key])await file.write(JSON.stringify(row)+'\n');}finally{await file.close();}
   }
