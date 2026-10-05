@@ -10,6 +10,12 @@ const HIERARCHY=path.join(ROOT,'client/data/adm2/hierarchy.json');
 const USAGE='node scripts/import-population-1700.cjs --total data/source/population/hyde32/<total-1700-file.asc> --urban data/source/population/hyde32/<urban-1700-file.asc> --rural data/source/population/hyde32/<rural-1700-file.asc> [--strict] [--max-unresolved-pct 0.05] [--max-anomaly-pct 0.05]';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const json=value=>JSON.stringify(value,null,2)+'\n';
+function validateHydeGrid(grid){
+  // Absolute tolerance in degrees accepts HYDE's rounded 0.0833333 header.
+  // Validation does not snap cellsize: allocation uses the parsed value.
+  const cellsizeTolerance=1e-6;
+  if(grid.ncols!==4320||grid.nrows!==2160||Math.abs(grid.cellsize-1/12)>cellsizeTolerance||Math.abs(grid.x+180)>1e-5||Math.abs(grid.y+90)>1e-5)throw Error('Expected global HYDE 3.2 5 arc-minute grid (4320 x 2160, origin -180/-90), people per cell; check inputs');
+}
 function argsOf(argv){
   const options={};for(let i=0;i<argv.length;i++){
     const key=argv[i];if(key==='--strict'){options.strict=true;continue;}if(key==='--help'){options.help=true;continue;}
@@ -76,8 +82,7 @@ async function main(argv){
   if(output===auditFolder||auditFolder.startsWith(output+path.sep)||output.startsWith(auditFolder+path.sep))throw Error('Scenario output and audit folders must be separate');
   const started=process.hrtime.bigint(),rasters={};console.log('SOURCE: reading explicit people-per-cell ASCII inputs');
   for(const key of ['total','urban','rural'])rasters[key]=await readAscii(paths[key]);
-  const grid=rasters.total;
-  if(grid.ncols!==4320||grid.nrows!==2160||Math.abs(grid.cellsize-1/12)>1e-8||Math.abs(grid.x+180)>1e-5||Math.abs(grid.y+90)>1e-5)throw Error('Expected global HYDE 3.2 5 arc-minute grid (4320 x 2160, origin -180/-90), people per cell; check inputs');
+  validateHydeGrid(rasters.total);
   const scenario=JSON.parse(await fs.readFile(path.join(ROOT,'scenarios/1700/scenario.json'),'utf8'));
   if(scenario.id!=='1700'||scenario.year!==1700||scenario.geography!=='mandate-atomic-v1')throw Error('Scenario 1700 metadata does not match baseline target');
   console.log('SPATIAL: loading exact canonical atomic polygons');const geography=await loadGeography();
@@ -95,5 +100,5 @@ async function main(argv){
   await writeAudit(result.audit,auditFolder);const derived=await writeDerived(result,auditFolder,geography.features,JSON.parse(await fs.readFile(path.join(ROOT,'scenarios/1700/ownership.json'),'utf8')));
   await publishPopulation(result,output);const report={...result.meta,performance:{wallSeconds:Number(process.hrtime.bigint()-started)/1e9,peakRssMiB:process.resourceUsage().maxRSS/1024,populationJsonBytes:Buffer.byteLength(json(result.population))},...derived};await fs.writeFile(path.join(auditFolder,'summary.json'),json(report));console.log(json(report));
 }
-module.exports={argsOf,loadGeography,publishPopulation,writeAudit,USAGE};
+module.exports={argsOf,validateHydeGrid,loadGeography,publishPopulation,writeAudit,USAGE};
 if(require.main===module)main(process.argv.slice(2)).catch(error=>{console.error(error.message);process.exitCode=1;});

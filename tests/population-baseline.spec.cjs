@@ -3,7 +3,7 @@ const fs=require('node:fs/promises'),path=require('node:path'),crypto=require('n
 const {execFileSync}=require('node:child_process');
 const {parseAscii,readAscii,sameGrid,clean}=require('../scripts/population-raster.cjs');
 const {box,spatialIndex,allocate,apportion,normalize,buildCohorts,createBaseline}=require('../scripts/population-baseline.cjs');
-const {argsOf,publishPopulation,writeAudit}=require('../scripts/import-population-1700.cjs');
+const {argsOf,validateHydeGrid,publishPopulation,writeAudit}=require('../scripts/import-population-1700.cjs');
 const {Simulation}=require('../shared/simulation.cjs');
 const {makeSave}=require('../shared/save.cjs');
 const {validatePopulationScenario,initializePopulation,summarizePopulation}=require('../shared/population.cjs');
@@ -18,6 +18,14 @@ const options={sanity:false,maxAnomalyPct:100,geographyHash:digest('synthetic ti
 const features=[rect('gb:A:1',0,0,1)];
 const resultOf=async(total,urban,rural,polygons=features,extra={})=>createBaseline(await inputs(total,urban,rural),polygons,hierarchy,{...options,...extra});
 const root=path.resolve('data/generated');
+for(const cellsize of [0.0833333,1/12])test(`HYDE 5 arc-minute validation accepts ${cellsize} without snapping parsed resolution`,async()=>{
+  const parsed=await parseAscii(ascii([1],{w:cellsize}));
+  const grid={...parsed,ncols:4320,nrows:2160,x:-180,y:-90};
+  expect(()=>validateHydeGrid(grid)).not.toThrow();expect(grid.cellsize).toBe(cellsize);
+});
+for(const cellsize of [0.083,0.1])test(`HYDE 5 arc-minute validation rejects wrong resolution ${cellsize}`,()=>{
+  expect(()=>validateHydeGrid({ncols:4320,nrows:2160,x:-180,y:-90,cellsize})).toThrow('5 arc-minute grid');
+});
 async function temp(){const folder=path.join(root,'baseline-fixture-'+crypto.randomUUID());await fs.mkdir(folder,{recursive:true});return folder;}
 async function cleanup(folder){if(path.dirname(folder)!==root||!/^baseline-fixture-[a-f0-9-]+$/.test(path.basename(folder)))throw Error('Unsafe fixture cleanup');await fs.rm(folder,{recursive:true,force:true});}
 test('ASCII dimensions, row order, center origin and NODATA parse exactly',async()=>{

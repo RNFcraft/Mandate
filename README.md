@@ -316,7 +316,10 @@ or land-use layers. ASCII has no year/unit metadata: selecting the right files i
 an explicit input responsibility. Plain .asc and gzip-compressed .asc.gz are
 supported; ZIP, GeoTIFF and NetCDF must first be extracted/converted externally.
 Global CLI inputs must use matching 4320 x 2160 grids, 5 arc minutes, longitude/
-latitude origin -180/-90. Missing inputs fail with all expected paths and create
+latitude origin -180/-90. Resolution validation allows an absolute tolerance of
+1e-6 degrees around nominal 1/12 degree, accepting HYDE's rounded 0.0833333.
+Cell coordinates still use the actual parsed cellsize without snapping.
+Missing inputs fail with all expected paths and create
 no population assets. Invalid rows/headers/mismatched grids also fail.
 
 PowerShell example (replace file placeholders with your extracted filenames):
