@@ -1,10 +1,8 @@
 const fs=require('node:fs/promises');
 const path=require('node:path');
 const {randomUUID}=require('node:crypto');
-const {TAG}=require('../shared/scenario.cjs');
-const {validateSave}=require('../shared/save.cjs');
+const {validateSave,validSaveId:validId}=require('../shared/save.cjs');
 const ROOT=path.resolve(__dirname,'../saves');
-const validId=id=>TAG.test(id)&&!/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(id);
 let hierarchyPromise,queue=Promise.resolve();
 const hierarchy=()=>hierarchyPromise||=fs.readFile(path.resolve(__dirname,'../client/data/adm2/hierarchy.json'),'utf8').then(JSON.parse);
 function reply(res,status,value){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}).end(JSON.stringify(value));}
@@ -14,9 +12,10 @@ async function read(id){const folder=folderOf(id);await noLink(ROOT);await noLin
 async function handle(req,res,pathname){
   if(pathname==='/api/saves'&&req.method==='GET'){
     await noLink(ROOT);let entries;try{entries=await fs.readdir(ROOT,{withFileTypes:true});}catch(e){if(e.code!=='ENOENT')throw e;entries=[];}
-    const result=[];
+    const result=[],h=await hierarchy();
     for(const entry of entries.sort((a,b)=>a.name.localeCompare(b.name,'en')))if(entry.isDirectory()&&validId(entry.name)){
-      let save;try{save=await read(entry.name);}catch(e){if(e.code==='ENOENT')continue;throw e;}
+      // A broken entry must not hide other saves. Listing never repairs files.
+      let save;try{save=await read(entry.name);validateSave(save,h);}catch{continue;}
       result.push({id:entry.name,scenarioId:save.scenarioId,geography:save.geography,date:save.state?.clock?.date,tick:save.state?.clock?.tick});
     }
     reply(res,200,result);return;
