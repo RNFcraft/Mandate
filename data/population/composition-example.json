@@ -1,0 +1,17 @@
+{
+  "version":1,
+  "rules":[
+    {
+      "id":"synthetic-japan-rural-example",
+      "match":{"sourceCountry":"JPN","settlement":"rural"},
+      "cultureShares":{"japanese":10000},
+      "religionShares":{"buddhist":6000,"folk":4000},
+      "stratumShares":{"peasant":9300,"artisan":300,"merchant":100,"elite":100,"commoner":200}
+    },
+    {
+      "id":"synthetic-japan-rural-artisan-literacy",
+      "match":{"sourceCountry":"JPN","settlement":"rural","stratumId":"artisan"},
+      "literacyBps":2500
+    }
+  ]
+}

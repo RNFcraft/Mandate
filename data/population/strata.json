@@ -1,0 +1,8 @@
+[
+  {"id":"unclassified","name":"Unclassified"},
+  {"id":"peasant","name":"Peasant"},
+  {"id":"commoner","name":"Commoner"},
+  {"id":"artisan","name":"Artisan"},
+  {"id":"merchant","name":"Merchant"},
+  {"id":"elite","name":"Elite"}
+]

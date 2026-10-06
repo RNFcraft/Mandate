@@ -1,0 +1,14 @@
+{
+  "schema": "mandate-population-composition-baseline-v1",
+  "scenario": "1700",
+  "year": 1700,
+  "populationSha256": "008c8d376d0dd6cf5106479bc4ae1d3ed50010865c35c0b07de037cf6434b517",
+  "baselineMetaSha256": "fd7194fd71fe8c2e1bbe07221145aad95918a4d950d2d5cfdc68fc4ac9a5881f",
+  "hierarchySha256": "49b8c3f498427877b5e84db79597cfd3ce2b123e4c78cae72a35c2cb68df9ce0",
+  "geographySha256": "9b3cc5de449778a3ed7edd4f6105b7ab3016b1af25227a4ff5c8c8cf0d1bbcc8",
+  "totals": {
+    "total": 591714189,
+    "rural": 545304591,
+    "urban": 46409598
+  }
+}

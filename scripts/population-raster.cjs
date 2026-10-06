@@ -22,7 +22,7 @@ async function parseLines(lines){
     if(!grid&&HEADER.has(key)){
       if(tokens.length!==2||Object.hasOwn(header,key))throw Error('Raster: invalid/duplicate header');header[key]=value(tokens[1]);continue;
     }
-    if(!grid){grid=gridOf(header);values=new Float64Array(grid.ncols*grid.nrows);}
+    if(!grid){grid=gridOf(header);values=new Float64Array(new SharedArrayBuffer(grid.ncols*grid.nrows*8));}
     if(tokens.length!==grid.ncols||row>=grid.nrows)throw Error('Raster: row width or row count mismatch');
     for(let col=0;col<tokens.length;col++)values[row*grid.ncols+col]=value(tokens[col]);row++;
   }

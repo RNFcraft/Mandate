@@ -401,3 +401,8 @@ Performance report includes wall time, process peak RSS, cells, cohort counts,
 totals and population.json size. Full HYDE performance is unmeasured until actual
 source files are supplied. Tests use tiny synthetic rasters only, isolated test
 folders, and never publish synthetic values into real scenario 1700.
+
+Population Composition v1 is an offline authored layer over the frozen HYDE mass.
+Its registries, rule precedence, joint Hamilton splitting, preview/publication
+commands and baseline-preservation workflow are documented in
+[docs/population-composition.md](docs/population-composition.md).

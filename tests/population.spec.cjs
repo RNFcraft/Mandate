@@ -90,7 +90,8 @@ test('optional scenario asset is validated; editor save preserves exact bytes; p
   const base=await(await request.get('/api/scenarios/1700')).json(),h=JSON.parse(await fs.readFile('client/data/adm2/hierarchy.json','utf8'));base.scenario.id=id;
   try{
     expect((await request.put(`/api/scenarios/${id}`,{data:base})).status()).toBe(200);
-    const absent=await(await request.get(`/api/scenarios/${id}?population=1`)).json();expect(absent.population.cohorts).toEqual([]);
+    await expect(fs.access(path.join(folder,'population.json'))).rejects.toMatchObject({code:'ENOENT'});
+    const absent=await(await request.get(`/api/scenarios/${id}?population=1`)).json();expect(absent.population).toEqual({version:1,cultures:[],religions:[],strata:[],cohorts:[]});
     const p=clone(population);for(const c of p.cohorts)c.territoryId=h.territories[c.id==='pop-3'?1:0].id;
     const bytes=JSON.stringify(p,null,3)+'\n';await fs.writeFile(path.join(folder,'population.json'),bytes);
     const response=await request.get(`/api/scenarios/${id}?population=1`);expect(response.status()).toBe(200);const data=await response.json();expect(data.population).toEqual(p);
@@ -111,10 +112,15 @@ test('synthetic populated browser monthly update changes counts without politica
   expect(await page.evaluate(()=>mandateSimulation.populationSummary().total)).toBe(112353);await page.evaluate(()=>mandateSimulation.step(31));await page.waitForTimeout(400);
   expect(await page.evaluate(()=>mandateSimulation.populationSummary().total)).toBe(112431);expect(await page.evaluate(()=>mandateMap.model.revision)).toBe(revision);expect(requests).toBe(before);expect(errors).toEqual([]);
 });
-test('normal empty 1700 monthly ticks do not rebuild political map; DEV and scenario assets remain intact',async({page})=>{
-  const errors=[],files=['scenario','countries','ownership'].map(n=>`scenarios/1700/${n}.json`),hashes=()=>Promise.all(files.map(async f=>crypto.createHash('sha256').update(await fs.readFile(f)).digest('hex'))),before=await hashes();let political=0;
+test('populated 1700 baseline monthly ticks do not rebuild political map; DEV and scenario assets remain intact',async({page})=>{
+  const errors=[],files=['scenario','countries','ownership','population','population.meta'].map(n=>`scenarios/1700/${n}.json`),hashes=()=>Promise.all(files.map(async f=>crypto.createHash('sha256').update(await fs.readFile(f)).digest('hex'))),before=await hashes();let political=0;
   page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});page.on('request',r=>{if(r.url().includes('/api/political'))political++;});
-  await page.goto('/?scenario=1700');await page.waitForFunction(()=>window.mandateSimulation&&!mandateMap.politicalPending);const initial=await page.evaluate(()=>({revision:mandateMap.model.revision,generation:mandateMap.politicalGeneration,total:mandateSimulation.populationSummary().total}));expect(initial.total).toBe(0);const requests=political;
+  const authored=JSON.parse(await fs.readFile('scenarios/1700/population.json','utf8'));
+  const expected=authored.cohorts.reduce((totals,c)=>{totals.total+=c.count;totals[c.settlement]+=c.count;return totals;},{total:0,urban:0,rural:0});
+  expect(Number.isSafeInteger(expected.total)).toBe(true);expect(expected.total).toBeGreaterThan(0);expect(expected.urban+expected.rural).toBe(expected.total);
+  await page.goto('/?scenario=1700');await page.waitForFunction(()=>window.mandateSimulation&&!mandateMap.politicalPending);
+  expect(await page.evaluate(()=>{const {total,urban,rural}=mandateSimulation.populationSummary();return {total,urban,rural};})).toEqual(expected);
+  const initial=await page.evaluate(()=>({revision:mandateMap.model.revision,generation:mandateMap.politicalGeneration,total:mandateSimulation.populationSummary().total}));const requests=political;
   await page.evaluate(()=>mandateSimulation.step(365));await page.waitForTimeout(400);expect(await page.evaluate(()=>({revision:mandateMap.model.revision,generation:mandateMap.politicalGeneration,total:mandateSimulation.populationSummary().total}))).toEqual(initial);expect(political).toBe(requests);
   await page.goto('/?editor=1&scenario=1700');await page.waitForFunction(()=>window.mandateEditor);expect(await page.evaluate(()=>window.mandateSimulation)).toBeUndefined();expect(await hashes()).toEqual(before);expect(errors).toEqual([]);
 });
