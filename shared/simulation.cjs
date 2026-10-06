@@ -1,6 +1,7 @@
 // Portable deterministic kernel. No DOM, rendering, filesystem or wall clock.
 const {validateScenario,migrateLegacy}=require('./scenario.cjs');
 const population=require('./population.cjs');
+const politicalGeography=require('./political-geography.cjs');
 const SPEEDS=Object.freeze([1,5,20,100]);
 const STATE_VERSION=1;
 const uint=n=>Number.isInteger(n)&&n>=0&&n<=0xffffffff;
@@ -41,13 +42,15 @@ function validateGameState(state,hierarchy){
   fields(state.systems.tickProbe,['ticks','lastRandom']);
   if(state.systems.tickProbe.ticks!==state.clock.tick||!uint(state.systems.tickProbe.lastRandom))throw new Error('Invalid tick probe');
   if(Object.hasOwn(state.systems,'population'))population.validatePopulationState(state.systems.population,hierarchy);
+  if(Object.hasOwn(state.systems,'polityRelations'))politicalGeography.validateRelations(state.systems.polityRelations,state.countries.map(c=>({id:c.id,name:c.name,shortName:c.shortName,type:c.polityType||c.governmentType,color:c.color})));
   return state;
 }
 function initializeGameState(scenario,hierarchy,seed=1){
   if(!uint(seed))throw new Error('Seed must be an unsigned 32-bit integer');
-  const data=migrateLegacy(scenario,hierarchy);
+  const data=migrateLegacy(politicalGeography.initializePoliticalScenario(scenario,hierarchy),hierarchy);
   const state={version:STATE_VERSION,geography:hierarchy.id,game:{scenario:structuredClone(data.scenario)},clock:{tick:0,date:{year:data.scenario.year,month:1,day:1},paused:true,speed:1},rng:{seed,state:seed||0x6d2b79f5},countries:structuredClone(data.countries),ownership:structuredClone(data.ownership),controllers:structuredClone(data.controllers||{}),systems:{tickProbe:{ticks:0,lastRandom:0}}};
   state.systems.population=population.initializePopulation(scenario.population,hierarchy);
+  if(scenario.politicalGeography?.status==='published')state.systems.polityRelations={version:1,relations:politicalGeography.validateRelations(scenario.polityRelations,scenario.polities)};
   validateGameState(state,hierarchy);return state;
 }
 function readOnlyMap(get){
@@ -62,6 +65,7 @@ class Simulation {
   constructor(scenario,hierarchy,{seed=1}={}){
     this.#hierarchy=hierarchy;this.#install(initializeGameState(scenario,hierarchy,seed));
     this.ownership=readOnlyMap(()=>this.#owners);this.countries=readOnlyMap(()=>this.#countries);
+    this.polities=this.countries; // Compatibility storage/name for the same registry, never a second authority.
   }
   #install(state){
     this.#state=state;this.#owners=new Map(Object.entries(state.ownership));
@@ -79,6 +83,7 @@ class Simulation {
   snapshot(){return structuredClone(this.#state);}
   serialize(){return JSON.stringify(this.#state);}
   populationSummary(territoryId){return population.summarizePopulation(this.#state.systems.population,territoryId);}
+  territoryPoliticalState(territoryId){return politicalGeography.territoryPoliticalState(this.#state,territoryId);}
   load(state){
     validateGameState(state,this.#hierarchy);const next=structuredClone(state);this.#install(next);
     this.#emit('stateChanged',{kind:'loaded',ownershipIds:null});this.#emit('gameLoaded',{clock:this.clock});

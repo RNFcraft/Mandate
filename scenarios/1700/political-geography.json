@@ -1,0 +1,9 @@
+{
+  "version":1,
+  "year":1700,
+  "geography":"mandate-atomic-v1",
+  "status":"draft",
+  "owners":{},
+  "controllers":{},
+  "provenance":{"note":"Unassigned historical draft. Existing countries/ownership RU/US assets are DEV TEST DATA, not historical 1700 evidence. No historical boundary source supplied."}
+}

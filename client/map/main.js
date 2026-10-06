@@ -16,7 +16,7 @@ try {
     if (!response.ok) throw new Error(`Map data: ${response.status}`);
     const data=await response.json();return url.endsWith('.topo.json')?unpackTopology(data):data;
   }));
-  const initial=await loadScenario(scenarioId,{population:params.get('editor')!=='1'});
+  const initial=await loadScenario(scenarioId,{population:params.get('editor')!=='1',politicalPreview:params.get('politicalPreview')==='1'});
   const simulation=params.get('editor')==='1'?null:new kernel.Simulation(initial,geography);
   const model = new MapModel(geography,initial,{simulation});
   const geometry = name => feature(topology, topology.objects[name]).features.map(prepare);
@@ -40,6 +40,18 @@ try {
   // Public integration surface for future simulation and rendering layers.
   window.mandateMap = map;
   if(simulation){window.mandateSimulation=simulation;window.mandateGameControls=gameControls(simulation,geography);}
+  if(simulation){
+    window.inspectPoliticalTerritory=id=>({...simulation.territoryPoliticalState(id),population:simulation.populationSummary(id).total});
+    if(params.get('politicalDebug')==='1'||params.get('politicalPreview')==='1'){
+      const output=document.createElement('output');output.id='political-inspect';
+      output.textContent=initial.politicalPreview?'Political PREVIEW (not published)':initial.politicalGeography?.status==='published'?'Published political geography':'Historical geography is draft; current ownership is DEV TEST DATA';
+      document.body.append(output);
+      map.canvas.addEventListener('regionselect',event=>{
+        const id=event.detail.regionId;if(!simulation.ownership.has(id))return;
+        output.textContent=JSON.stringify(window.inspectPoliticalTerritory(id));
+      });
+    }
+  }
   if (params.get('editor') === '1') {
     const { ScenarioEditor } = await import('../editor/editor.js');
     window.mandateEditor = new ScenarioEditor(map);

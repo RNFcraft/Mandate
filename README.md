@@ -406,3 +406,7 @@ Population Composition v1 is an offline authored layer over the frozen HYDE mass
 Its registries, rule precedence, joint Hamilton splitting, preview/publication
 commands and baseline-preservation workflow are documented in
 [docs/population-composition.md](docs/population-composition.md).
+
+Political Geography 1700 v1 foundation, historical source requirements,
+preview/publication commands and runtime authority are documented in
+[docs/political-geography.md](docs/political-geography.md).

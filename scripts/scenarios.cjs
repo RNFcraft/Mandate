@@ -3,6 +3,8 @@ const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 const { TAG, validateScenario, migrateLegacy } = require('../shared/scenario.cjs');
 const {emptyPopulation,validatePopulationScenario}=require('../shared/population.cjs');
+const {initializePoliticalScenario}=require('../shared/political-geography.cjs');
+const {parseStrictJson}=require('./strict-json.cjs');
 const root = path.resolve(__dirname, '../scenarios');
 const geographyFile = path.resolve(__dirname, '../client/data/geography.json');
 const hierarchyFile = path.resolve(__dirname, '../client/data/adm2/hierarchy.json');
@@ -15,7 +17,13 @@ async function read(id) {
   const [scenario, countries, ownership] = await Promise.all(['scenario', 'countries', 'ownership'].map(name => json(path.join(folder, `${name}.json`))));
   let controllers;
   try { controllers = await json(path.join(folder, 'controllers.json')); } catch (error) { if (error.code !== 'ENOENT') throw error; }
-  return { scenario, countries, ownership, ...(controllers ? { controllers } : {}) };
+  let politicalAssets={},politicalGeography;
+  try{politicalGeography=parseStrictJson(await fs.readFile(path.join(folder,'political-geography.json'),'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;}
+  if(politicalGeography!==undefined){
+    const [polities,polityRelations]=await Promise.all(['polities.json','polity-relations.json'].map(async file=>parseStrictJson(await fs.readFile(path.join(folder,file),'utf8'))));
+    politicalAssets={politicalGeography,polities,polityRelations};
+  }
+  return { scenario, countries, ownership, ...(controllers ? { controllers } : {}),...politicalAssets };
 }
 function reply(res, code, data) { res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }).end(JSON.stringify(data)); }
 async function handle(req, res, pathname) {
@@ -29,7 +37,14 @@ async function handle(req, res, pathname) {
   if (!match) { reply(res, 404, { error: 'Неизвестный маршрут' }); return; }
   const id = match[1];
   if (req.method === 'GET') {
-    const h=await hierarchy(),data=migrateLegacy(await read(id),h);
+    const h=await hierarchy(),input=await read(id),query=new URL(req.url,'http://localhost').searchParams;
+    if(query.get('politicalPreview')==='1'){
+      if(id!=='1700'){reply(res,400,{error:'Political preview targets scenario 1700 only'});return;}
+      const folder=path.resolve(__dirname,'../data/generated/political-geography/1700');
+      const [asset,polities,polityRelations]=await Promise.all(['political-geography.json','polities.json','polity-relations.json'].map(async name=>parseStrictJson(await fs.readFile(path.join(folder,name)))));
+      Object.assign(input,{politicalGeography:{...asset,status:'published'},polities,polityRelations,politicalPreview:true});
+    }
+    const data=migrateLegacy(initializePoliticalScenario(input,h),h);
     if(new URL(req.url,'http://localhost').searchParams.get('population')!=='1'){reply(res,200,data);return;}
     let population;
     try{population=await json(path.join(root,id,'population.json'));}
@@ -73,7 +88,7 @@ async function handle(req, res, pathname) {
       }
     }catch(error){if(error.code!=='ENOENT')throw error;}
     // Population is an independent authored asset, never supplied by the editor.
-    for(const asset of ['population.json','population.meta.json'])try{await fs.copyFile(path.join(folder,asset),path.join(stage,asset));}catch(error){if(error.code!=='ENOENT')throw error;}
+    for(const asset of ['population.json','population.meta.json','population-composition.json','polities.json','polity-relations.json','political-geography.json','political-geography-overrides.json'])try{await fs.copyFile(path.join(folder,asset),path.join(stage,asset));}catch(error){if(error.code!=='ENOENT')throw error;}
     for (const [name, value] of Object.entries(data)) if (['scenario', 'countries', 'ownership', 'controllers'].includes(name)) await fs.writeFile(path.join(stage, `${name}.json`), JSON.stringify(value, null, 2));
     try { await fs.rename(folder, backup); backedUp = true; } catch (error) { if (error.code !== 'ENOENT') throw error; }
     try { await fs.rename(stage, folder); published = true; } catch (error) { if (backedUp) await fs.rename(backup, folder); throw error; }
