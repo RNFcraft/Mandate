@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Mandate — UI v9 Full Interactive Mockup</title>
+<title>Mandate — Political Party & Election Prototype v11</title>
 <link rel="stylesheet" href="styles.css">
 
 </head>
 <body>
 
 <input id="t-map" name="main" type="radio" checked>
+<input id="t-party" name="main" type="radio">
 <input id="t-parliament" name="main" type="radio">
 <input id="t-economy" name="main" type="radio">
 <input id="t-government" name="main" type="radio">
@@ -27,9 +28,10 @@
       <div class="emblem" title="Государственный герб">A</div>
 
       <div class="country-mini">
-        <span><span class="mini-ico">♟</span><b>18.9 млн</b></span>
-        <span><span class="mini-ico">▥</span><b>76.4</b></span>
-        <span><span class="mini-ico">★</span>Влияние: <b>68</b></span>
+        <button class="player-party-chip" id="playerPartyBadge" type="button" title="Открыть штаб партии">
+          <i id="playerPartyDot"></i><span>ВЫ УПРАВЛЯЕТЕ</span><b id="controlledPartyName">Либеральная партия</b>
+        </button>
+        <span class="party-mini-role">Лидер: <b id="controlledPartyLeader">Элиас Варен</b> · <b id="controlledPartySeats">71 / 250</b></span>
       </div>
     </div>
 
@@ -85,6 +87,7 @@
 
   <nav class="tabs">
     <label class="tab" for="t-map">КАРТА <small>обзор</small></label>
+    <label class="tab party-tab" for="t-party">МОЯ ПАРТИЯ <small id="partyTabStatus">правящая коалиция</small></label>
     <label class="tab" for="t-parliament">ПАРЛАМЕНТ <small>250 мест</small></label>
     <label class="tab" for="t-economy">ЭКОНОМИКА</label>
     <label class="tab" for="t-government">ПРАВИТЕЛЬСТВО</label>
@@ -196,6 +199,287 @@
 
           <div class="map-overlay zoom-readout">Масштаб: <b id="zoomText">100%</b></div>
           <div class="map-overlay map-hint">Перетаскивай карту мышью. Масштабируй колесом.</div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- PLAYER PARTY -->
+    <section class="screen party">
+      <div class="module-page party-module">
+        <div class="panel module-subnav" data-module="party">
+          <button class="active" data-view="party-hq">Штаб</button>
+          <button data-view="party-platform">Программа</button>
+          <button data-view="party-campaign">Кампания</button>
+          <button data-view="party-parliament-election">Парламентские выборы</button>
+          <button data-view="party-president-election">Президентские выборы</button>
+          <span class="tag party-control-tag">◈ игрок управляет партией, а не государством напрямую</span>
+        </div>
+
+        <div class="module-content">
+          <div class="module-view active" id="party-hq">
+            <div class="party-page">
+              <div class="panel party-hero">
+                <div class="party-hero-mark" id="partyHeroMark">ЛП</div>
+                <div class="party-hero-copy">
+                  <div class="controlled-kicker">ВАША ПОЛИТИЧЕСКАЯ СИЛА</div>
+                  <h1 id="partyHeroName">Либеральная партия</h1>
+                  <p id="partyHeroSlogan">«Свобода, закон, развитие»</p>
+                  <div class="party-hero-tags">
+                    <span class="pill good" id="partyGovernmentStatus">правящая коалиция</span>
+                    <span class="pill">лидер: <b id="partyHeroLeader">Элиас Варен</b></span>
+                    <span class="pill">идеология: либеральный центр</span>
+                  </div>
+                </div>
+                <div class="party-hero-actions">
+                  <button class="btn" id="editPartyBtn">Настроить партию</button>
+                  <button class="btn" id="partyCongressBtn">Созвать съезд</button>
+                  <button class="btn primary" id="goCampaignBtn">Перейти в кампанию</button>
+                </div>
+              </div>
+
+              <div class="kpi-grid party-kpis">
+                <div class="panel kpi-card"><div class="k">Поддержка</div><div class="v" id="partySupportKpi">28.4%</div><div class="s" id="partySupportTrend">+0.0 п.п. за кампанию</div></div>
+                <div class="panel kpi-card"><div class="k">Места в парламенте</div><div class="v" id="partySeatsKpi">71 / 250</div><div class="s">ваша фракция выделена синим</div></div>
+                <div class="panel kpi-card"><div class="k">Касса партии</div><div class="v" id="partyFundsKpi">₳ 18.6 млн</div><div class="s">взносы + пожертвования</div></div>
+                <div class="panel kpi-card"><div class="k">Члены партии</div><div class="v" id="partyMembersKpi">243 тыс.</div><div class="s" id="partyVolunteersKpi">18.6 тыс. активистов</div></div>
+                <div class="panel kpi-card"><div class="k">Организация</div><div class="v" id="partyOrgKpi">64 / 100</div><div class="s">отделения и местные штабы</div></div>
+                <div class="panel kpi-card"><div class="k">Президентский рейтинг</div><div class="v" id="partyPresidentPollKpi">31%</div><div class="s" id="partyPresidentCandidateKpi">кандидат: Элиас Варен</div></div>
+              </div>
+
+              <div class="party-dashboard-grid">
+                <div class="panel party-leader-card">
+                  <div class="panel-title">ЛИДЕР ПАРТИИ <small>ваш основной политический персонаж</small></div>
+                  <div class="party-leader-body">
+                    <div class="person-portrait party-portrait">Э.В.</div>
+                    <div>
+                      <h2 id="partyLeaderName">Элиас Варен</h2>
+                      <p>46 лет · депутат от Ауреля · либеральное крыло · председатель партии с 1846 года</p>
+                      <div class="rowline"><span>Личная популярность</span><b id="leaderPopularity">63%</b></div>
+                      <div class="rowline"><span>Контроль над аппаратом</span><b class="good">72%</b></div>
+                      <div class="rowline"><span>Репутация</span><b>реформатор</b></div>
+                      <div class="rowline"><span>Высшая достижимая должность</span><b class="warn" id="leaderOfficeGoal">Президент Республики</b></div>
+                    </div>
+                  </div>
+                  <div class="party-office-banner" id="playerOfficeBanner">
+                    <span>Текущий статус</span><b>Лидер парламентской партии · не президент</b>
+                  </div>
+                </div>
+
+                <div class="panel">
+                  <div class="panel-title">ПАРТИЙНЫЙ АППАРАТ <small>действия меняют состояние прототипа</small></div>
+                  <div class="card-body action-stack">
+                    <button class="party-action btn" data-party-action="fundraise">◉ Провести сбор пожертвований</button>
+                    <button class="party-action btn" data-party-action="recruit">♟ Набор членов и активистов</button>
+                    <button class="party-action btn" data-party-action="local">⌂ Открыть местный штаб</button>
+                    <button class="party-action btn" data-party-action="press">▤ Провести пресс-конференцию</button>
+                    <button class="party-action btn primary" data-party-action="rally">★ Большой митинг</button>
+                  </div>
+                  <div class="mini-note" id="partyActionHint">Партия живёт собственной жизнью: деньги, активисты, аппарат, программа и репутация влияют на выборы.</div>
+                </div>
+
+                <div class="panel">
+                  <div class="panel-title">БЛИЖАЙШИЕ ПОЛИТИЧЕСКИЕ ЦЕЛИ</div>
+                  <div class="card-body">
+                    <div class="objective-row"><span class="objective-icon">1</span><div><b>Удержать правящую коалицию</b><small>Нужно не менее 126 мест вместе с партнёрами.</small></div><span class="pill warn" id="coalitionObjective">139 / 250</span></div>
+                    <div class="objective-row"><span class="objective-icon">2</span><div><b>Парламентские выборы</b><small id="parliamentElectionGoalDate">1 мая 1848</small></div><span class="pill" id="parliamentElectionCountdown">48 дней</span></div>
+                    <div class="objective-row"><span class="objective-icon">3</span><div><b>Выдвинуть кандидата в президенты</b><small id="presidentElectionGoalDate">15 июня 1848</small></div><span class="pill good" id="presidentNominationStatus">Элиас Варен</span></div>
+                  </div>
+                </div>
+
+                <div class="panel">
+                  <div class="panel-title">ПОСЛЕДНИЕ СОБЫТИЯ ПАРТИИ</div>
+                  <div class="card-body" id="partyEventLog">
+                    <div class="party-log-item"><b>12 марта</b><span>Съезд подтвердил курс на промышленную модернизацию.</span></div>
+                    <div class="party-log-item"><b>9 марта</b><span>Аграрии требуют гарантий сельской инфраструктуры для продолжения коалиции.</span></div>
+                    <div class="party-log-item"><b>3 марта</b><span>Элиас Варен объявил о готовности участвовать в президентской кампании.</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-view" id="party-platform">
+            <div class="party-page">
+              <div class="panel header-strip"><div><h2 class="section-title">Программа партии</h2><p class="section-desc">Позиции меняют поддержку разных слоёв и постепенно сдвигают общий рейтинг. Это не мгновенная магическая кнопка.</p></div><div class="header-actions"><span class="tag" id="platformEffectTag">эффект на рейтинг: +0.0 п.п.</span></div></div>
+              <div class="platform-grid">
+                <div class="panel platform-controls">
+                  <div class="panel-title">ПОЛИТИЧЕСКИЕ ПОЗИЦИИ</div>
+                  <div class="card-body">
+                    <div class="platform-slider"><div><b>Налоги и бюджет</b><span id="taxPlatformLabel">умеренные налоги</span></div><input type="range" min="0" max="100" value="52" data-platform="tax"></div>
+                    <div class="platform-scale"><span>низкие налоги</span><span>высокие расходы</span></div>
+                    <div class="platform-slider"><div><b>Труд и фабрики</b><span id="laborPlatformLabel">умеренная защита труда</span></div><input type="range" min="0" max="100" value="58" data-platform="labor"></div>
+                    <div class="platform-scale"><span>свобода договора</span><span>жёсткое регулирование</span></div>
+                    <div class="platform-slider"><div><b>Торговля</b><span id="tradePlatformLabel">умеренно свободная</span></div><input type="range" min="0" max="100" value="36" data-platform="trade"></div>
+                    <div class="platform-scale"><span>свободная торговля</span><span>протекционизм</span></div>
+                    <div class="platform-slider"><div><b>Централизация</b><span id="centralPlatformLabel">баланс центра и регионов</span></div><input type="range" min="0" max="100" value="48" data-platform="central"></div>
+                    <div class="platform-scale"><span>региональная автономия</span><span>сильный центр</span></div>
+                    <div class="platform-slider"><div><b>Избирательные права</b><span id="franchisePlatformLabel">постепенное расширение</span></div><input type="range" min="0" max="100" value="62" data-platform="franchise"></div>
+                    <div class="platform-scale"><span>узкий ценз</span><span>всеобщее право</span></div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="panel-title">ПОДДЕРЖКА СОЦИАЛЬНЫХ ГРУПП <small>условная оценка</small></div>
+                  <div class="card-body voter-groups" id="voterGroups">
+                    <div><span>Городские рабочие</span><div class="voter-bar"><i id="workersSupportBar"></i></div><b id="workersSupport">34%</b></div>
+                    <div><span>Предприниматели</span><div class="voter-bar"><i id="businessSupportBar"></i></div><b id="businessSupport">47%</b></div>
+                    <div><span>Крестьяне</span><div class="voter-bar"><i id="peasantsSupportBar"></i></div><b id="peasantsSupport">24%</b></div>
+                    <div><span>Служащие и образованные</span><div class="voter-bar"><i id="clerksSupportBar"></i></div><b id="clerksSupport">51%</b></div>
+                    <div><span>Аристократия</span><div class="voter-bar"><i id="eliteSupportBar"></i></div><b id="eliteSupport">18%</b></div>
+                  </div>
+                  <div class="mini-note">Слишком резкие повороты программы снижают партийную дисциплину и могут вызвать раскол. В этом прототипе эффект упрощён.</div>
+                </div>
+                <div class="panel">
+                  <div class="panel-title">МАНИФЕСТ</div>
+                  <div class="card-body">
+                    <textarea id="partyManifesto" class="manifesto-editor">Мы выступаем за ответственное правительство, независимый суд, развитие промышленности и транспорта, расширение образования и постепенное расширение политического представительства.</textarea>
+                    <button class="btn primary" id="publishManifestoBtn" style="margin-top:8px">Опубликовать обновлённый манифест</button>
+                    <div class="mini-note" id="manifestoReaction" style="margin-top:8px">Последняя редакция принята съездом 2 месяца назад.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-view" id="party-campaign">
+            <div class="party-page">
+              <div class="panel header-strip"><div><h2 class="section-title">Избирательная кампания</h2><p class="section-desc">Выбирай регионы и методы агитации. Кампания расходует партийную кассу, время и организационный ресурс.</p></div><div class="header-actions"><span class="tag">режим: парламент + президент</span></div></div>
+              <div class="campaign-layout">
+                <div class="panel campaign-command">
+                  <div class="panel-title">ШТАБ КАМПАНИИ</div>
+                  <div class="card-body">
+                    <div class="field"><label>Приоритетный регион</label><select id="campaignRegion"><option>Аурель и центр</option><option>Промышленный север</option><option>Сельский юг</option><option>Пограничные провинции</option><option>Вся страна</option></select></div>
+                    <div class="field"><label>Стратегия</label><select id="campaignStrategy"><option value="broad">широкая коалиция избирателей</option><option value="workers">городские рабочие</option><option value="business">предприниматели и средний класс</option><option value="rural">сельские избиратели</option><option value="reform">реформаторы и образованные</option></select></div>
+                    <div class="campaign-actions">
+                      <button class="party-action btn" data-party-action="canvass">Дверь-в-дверь <small>₳ 0.4м</small></button>
+                      <button class="party-action btn" data-party-action="press">Газеты и пресса <small>₳ 0.7м</small></button>
+                      <button class="party-action btn" data-party-action="ads">Массовая реклама <small>₳ 1.2м</small></button>
+                      <button class="party-action btn primary" data-party-action="rally">Национальный митинг <small>₳ 0.9м</small></button>
+                      <button class="party-action btn" data-party-action="fundraise">Сбор средств <small>+касса</small></button>
+                      <button class="party-action btn" data-party-action="recruit">Вербовка активистов <small>₳ 0.25м</small></button>
+                    </div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="panel-title">СОСТОЯНИЕ КАМПАНИИ</div>
+                  <div class="card-body">
+                    <div class="campaign-meter"><span>Импульс</span><div class="progress"><i id="campaignMomentumBar"></i></div><b id="campaignMomentumText">4 / 100</b></div>
+                    <div class="campaign-meter"><span>Узнаваемость</span><div class="progress"><i id="campaignRecognitionBar"></i></div><b id="campaignRecognitionText">78%</b></div>
+                    <div class="campaign-meter"><span>Полевой аппарат</span><div class="progress"><i id="campaignOrgBar"></i></div><b id="campaignOrgText">64%</b></div>
+                    <div class="campaign-meter"><span>Поддержка</span><div class="progress"><i id="campaignSupportBar"></i></div><b id="campaignSupportText">28.4%</b></div>
+                  </div>
+                  <div class="campaign-news" id="campaignNews">Штаб ждёт решения. Сейчас партия конкурентоспособна, но исход выборов не гарантирован.</div>
+                </div>
+                <div class="panel">
+                  <div class="panel-title">РЕГИОНАЛЬНЫЙ ПРОГНОЗ</div>
+                  <div class="card-body district-list">
+                    <div><span>Аурель и центр</span><b class="good">34%</b><small>сильная позиция</small></div>
+                    <div><span>Промышленный север</span><b>29%</b><small>борьба с социалистами</small></div>
+                    <div><span>Сельский юг</span><b class="warn">21%</b><small>лидируют аграрии</small></div>
+                    <div><span>Пограничные провинции</span><b>27%</b><small>много неопределившихся</small></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-view" id="party-parliament-election">
+            <div class="party-page">
+              <div class="panel election-header">
+                <div><div class="subhead">ПАРЛАМЕНТСКИЕ ВЫБОРЫ</div><h2>Палата граждан · 250 мест</h2><p>Очередные выборы: <b id="parliamentElectionDate">1 мая 1848</b> · кампания идёт в реальном игровом времени.</p></div>
+                <div class="election-clock"><span>До голосования</span><b id="parliamentElectionDays">48 дней</b></div>
+              </div>
+              <div class="election-layout">
+                <div class="panel">
+                  <div class="panel-title">ТЕКУЩИЙ ПРОГНОЗ МЕСТ <small>не результат</small></div>
+                  <div class="election-party-list" id="parliamentProjectionList"></div>
+                  <div class="mini-note">Прогноз реагирует на рейтинг, организацию, кампанию и небольшой элемент неопределённости.</div>
+                </div>
+                <div class="panel">
+                  <div class="panel-title">ДЕНЬ ВЫБОРОВ</div>
+                  <div class="card-body">
+                    <div class="ballot-box">▥</div>
+                    <h3 class="center-title" id="parliamentElectionStageTitle">Кампания продолжается</h3>
+                    <p class="center-copy" id="parliamentElectionStageText">Можно дождаться даты в календаре или провести демонстрационный день выборов прямо сейчас.</p>
+                    <button class="btn primary full-btn" id="runParliamentElection">Провести парламентские выборы</button>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="panel-title">ФОРМИРОВАНИЕ БОЛЬШИНСТВА</div>
+                  <div class="card-body">
+                    <div class="rowline"><span>Ваши места</span><b id="coalitionOwnSeats">71</b></div>
+                    <label class="coalition-choice"><input type="checkbox" value="Аграрии" data-coalition-seats="31"> <span>Аграрии</span><b id="coalitionAgrarianSeats">31</b></label>
+                    <label class="coalition-choice"><input type="checkbox" value="Независимые" data-coalition-seats="16"> <span>Независимые</span><b id="coalitionIndependentSeats">16</b></label>
+                    <label class="coalition-choice"><input type="checkbox" value="Социалисты" data-coalition-seats="54"> <span>Социалисты</span><b id="coalitionSocialistSeats">54</b></label>
+                    <div class="coalition-total">Коалиция: <b id="coalitionTotal">71 / 250</b></div>
+                    <button class="btn" id="formCoalitionBtn">Предложить коалиционное соглашение</button>
+                    <div class="mini-note" id="coalitionResultText" style="margin-top:8px">Для большинства нужно 126 мест.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="panel election-results-panel">
+                <div class="panel-title">ПОСЛЕДНИЙ РЕЗУЛЬТАТ <small id="parliamentResultStamp">ещё не проводились</small></div>
+                <div class="election-result-grid" id="parliamentElectionResults"><div class="empty-election">Результаты появятся после дня голосования.</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-view" id="party-president-election">
+            <div class="party-page">
+              <div class="panel election-header presidential">
+                <div><div class="subhead">ПРЕЗИДЕНТСКИЕ ВЫБОРЫ</div><h2>Президент Республики Аврелия</h2><p>Первый тур: <b id="presidentElectionDate">15 июня 1848</b> · при необходимости второй тур через 14 дней.</p></div>
+                <div class="election-clock"><span>До первого тура</span><b id="presidentElectionDays">93 дня</b></div>
+              </div>
+              <div class="president-layout">
+                <div class="panel">
+                  <div class="panel-title">КАНДИДАТ ПАРТИИ <small>решение партийного съезда</small></div>
+                  <div class="candidate-choice-grid" id="presidentCandidateGrid">
+                    <button class="pres-candidate selected" data-candidate="Элиас Варен" data-popularity="63"><span class="candidate-avatar">ЭВ</span><b>Элиас Варен</b><small>лидер партии · реформатор</small><em>ваш лидер</em></button>
+                    <button class="pres-candidate" data-candidate="Мара Рейн" data-popularity="58"><span class="candidate-avatar">МР</span><b>Мара Рейн</b><small>министр финансов · умеренное крыло</small><em>сильна у бизнеса</em></button>
+                    <button class="pres-candidate" data-candidate="Арон Севель" data-popularity="54"><span class="candidate-avatar">АС</span><b>Арон Севель</b><small>министр торговли · промышленник</small><em>сильный аппарат</em></button>
+                  </div>
+                  <button class="btn primary full-btn" id="nominatePresidentBtn">Утвердить кандидата съездом</button>
+                </div>
+                <div class="panel">
+                  <div class="panel-title">ОПРОС ПЕРЕД ВЫБОРАМИ</div>
+                  <div class="pres-polls" id="presidentPolls">
+                    <div><span id="presPlayerPollName">Элиас Варен · ЛП</span><div><i id="presPlayerPollBar"></i></div><b id="presPlayerPoll">31%</b></div>
+                    <div><span>Адела Нор · Консерваторы</span><div><i style="width:32%"></i></div><b>32%</b></div>
+                    <div><span>Иво Марен · Социалисты</span><div><i style="width:24%"></i></div><b>24%</b></div>
+                    <div><span>Грета Фаль · Аграрии</span><div><i style="width:9%"></i></div><b>9%</b></div>
+                    <div><span>прочие</span><div><i style="width:4%"></i></div><b>4%</b></div>
+                  </div>
+                  <div class="pres-campaign-actions">
+                    <button class="btn" data-pres-action="tour">Тур по стране · ₳0.8м</button>
+                    <button class="btn" data-pres-action="debate">Телеграфные дебаты · ₳0.5м</button>
+                    <button class="btn" data-pres-action="endorse">Искать поддержку союзников</button>
+                  </div>
+                </div>
+                <div class="panel president-office-card">
+                  <div class="panel-title">ПОСТ ПРЕЗИДЕНТА</div>
+                  <div class="office-seal">A</div>
+                  <div class="subhead">Действующий президент</div>
+                  <h2 id="currentPresidentName">Маркус Эстель</h2>
+                  <p id="currentPresidentParty">Консервативная партия · срок до 1848</p>
+                  <div class="mini-note" id="presidencyPlayerMessage">Ваш лидер пока не занимает президентский пост. Победа на выборах изменит статус партии и доступ к полномочиям главы государства.</div>
+                </div>
+              </div>
+              <div class="panel presidential-ballot">
+                <div class="panel-title">ИЗБИРАТЕЛЬНАЯ ПРОЦЕДУРА</div>
+                <div class="pres-election-stage">
+                  <div class="stage-step active" id="presStageNomination"><b>1</b><span>Номинация</span></div>
+                  <div class="stage-line"></div>
+                  <div class="stage-step" id="presStageRound1"><b>2</b><span>Первый тур</span></div>
+                  <div class="stage-line"></div>
+                  <div class="stage-step" id="presStageRunoff"><b>3</b><span>Второй тур</span></div>
+                  <div class="stage-line"></div>
+                  <div class="stage-step" id="presStageOffice"><b>4</b><span>Инаугурация</span></div>
+                </div>
+                <div class="pres-result-box" id="presidentElectionResult">Кандидат партии готовится к кампании.</div>
+                <div class="pres-ballot-actions"><button class="btn primary" id="runPresidentRound1">Провести первый тур</button><button class="btn" id="runPresidentRunoff" disabled>Провести второй тур</button></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -1317,6 +1601,7 @@
 
   <nav class="mobile-nav" aria-label="Мобильная навигация">
     <label for="t-map"><span>◈</span><b>Карта</b></label>
+    <label for="t-party"><span>◆</span><b>Партия</b></label>
     <label for="t-parliament"><span>◔</span><b>Парламент</b></label>
     <label for="t-economy"><span>▦</span><b>Экономика</b></label>
     <label for="t-government"><span>♜</span><b>Правительство</b></label>
@@ -1597,6 +1882,43 @@
     <div class="builder-head"><div><div class="subhead" style="color:#e9e1c9">АНАЛИТИЧЕСКИЙ ОТЧЁТ</div><h2 id="reportModalTitle">Экономический доклад</h2></div><button class="builder-close" data-close-modal="reportModal">×</button></div>
     <div class="modal-body" id="reportModalBody"></div>
     <div class="builder-footer"><div class="builder-footer-left">Все цифры в прототипе демонстрационные, но состояние меняется с ходом времени и действиями игрока.</div><div class="builder-footer-actions"><button class="btn" id="exportPrototypeJson">Экспорт состояния JSON</button><button class="btn primary" data-close-modal="reportModal">Закрыть</button></div></div>
+  </div>
+</div>
+
+
+<div class="generic-modal prototype-modal" id="partyEditModal" aria-hidden="true">
+  <div class="panel modal-window party-modal-window">
+    <div class="builder-head"><div><div class="subhead" style="color:#e9e1c9">ВНУТРИПАРТИЙНОЕ РЕШЕНИЕ</div><h2>Настройки политической партии</h2></div><button class="builder-close" data-close-modal="partyEditModal">×</button></div>
+    <div class="modal-body modal-grid">
+      <div class="builder-section">
+        <h3>Идентичность</h3>
+        <div class="field"><label>Название</label><input id="partyEditName" type="text" value="Либеральная партия"></div>
+        <div class="field"><label>Аббревиатура</label><input id="partyEditShort" type="text" value="ЛП" maxlength="8"></div>
+        <div class="field"><label>Лозунг</label><input id="partyEditSlogan" type="text" value="Свобода, закон, развитие"></div>
+        <div class="field"><label>Партийный цвет</label><input id="partyEditColor" type="color" value="#527c9d"></div>
+      </div>
+      <div class="builder-section">
+        <h3>Последствия</h3>
+        <div class="modal-summary">Переименование и визуальная идентичность партии — внутреннее решение организации. Резкий ребрендинг может позже влиять на узнаваемость и лояльность членов; в прототипе это отражается небольшим штрафом к узнаваемости.</div>
+        <div class="party-brand-preview"><i id="partyBrandPreviewDot"></i><div><b id="partyBrandPreviewName">Либеральная партия</b><small id="partyBrandPreviewSlogan">Свобода, закон, развитие</small></div></div>
+      </div>
+    </div>
+    <div class="builder-footer"><div class="builder-footer-left">Это изменение касается партии, а не официального названия государства.</div><div class="builder-footer-actions"><button class="btn" data-close-modal="partyEditModal">Отмена</button><button class="btn primary" id="applyPartyEdit">Утвердить на исполкоме</button></div></div>
+  </div>
+</div>
+
+<div class="generic-modal prototype-modal" id="partyCongressModal" aria-hidden="true">
+  <div class="panel modal-window party-modal-window">
+    <div class="builder-head"><div><div class="subhead" style="color:#e9e1c9">ПАРТИЙНЫЙ СЪЕЗД</div><h2>Выборы председателя партии</h2></div><button class="builder-close" data-close-modal="partyCongressModal">×</button></div>
+    <div class="modal-body">
+      <div class="congress-candidates">
+        <label class="congress-candidate selected"><input type="radio" name="partyLeaderChoice" value="Элиас Варен" checked><span class="candidate-avatar">ЭВ</span><div><b>Элиас Варен</b><small>реформатор · действующий лидер · поддержка делегатов 61%</small></div></label>
+        <label class="congress-candidate"><input type="radio" name="partyLeaderChoice" value="Мара Рейн"><span class="candidate-avatar">МР</span><div><b>Мара Рейн</b><small>умеренное крыло · финансовая компетентность · 24%</small></div></label>
+        <label class="congress-candidate"><input type="radio" name="partyLeaderChoice" value="Арон Севель"><span class="candidate-avatar">АС</span><div><b>Арон Севель</b><small>промышленное крыло · сильные доноры · 15%</small></div></label>
+      </div>
+      <div class="mini-note" style="margin-top:9px">Игрок управляет партией как политической силой. Смена лидера меняет лицо партии; если президентом станет ваш действующий лидер, интерфейс явно покажет, что вы заняли высшую должность через партийную политику.</div>
+    </div>
+    <div class="builder-footer"><div class="builder-footer-left">Съезд может вызвать внутреннюю борьбу и временно снизить организацию.</div><div class="builder-footer-actions"><button class="btn" data-close-modal="partyCongressModal">Отмена</button><button class="btn primary" id="runPartyCongress">Провести голосование делегатов</button></div></div>
   </div>
 </div>
 

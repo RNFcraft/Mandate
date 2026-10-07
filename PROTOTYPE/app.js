@@ -970,3 +970,240 @@ document.querySelectorAll('.module-subnav[data-module="laws"] button[data-law-fi
     layer.appendChild(circle);
   });
 })();
+
+
+/* =========================================================
+   V11 PLAYER PARTY, PARLIAMENTARY ELECTIONS & PRESIDENCY
+   ========================================================= */
+(() => {
+  const rootState = window.MandatePrototypeState = window.MandatePrototypeState || {};
+  const saved = (()=>{try{return JSON.parse(localStorage.getItem('mandatePrototypeV11Party')||'null')}catch{return null}})();
+  const defaults = {
+    name:'Либеральная партия', short:'ЛП', slogan:'Свобода, закон, развитие', color:'#527c9d',
+    leader:'Элиас Варен', leaderPopularity:63, status:'правящая коалиция',
+    seats:71, funds:18.6, members:243000, volunteers:18600, organization:64, recognition:78,
+    baselineSupport:28.4, campaignBoost:0, momentum:4,
+    platform:{tax:52,labor:58,trade:36,central:48,franchise:62},
+    manifesto:'Мы выступаем за ответственное правительство, независимый суд, развитие промышленности и транспорта, расширение образования и постепенное расширение политического представительства.',
+    coalition:['Аграрии','Независимые'], coalitionSeats:139,
+    parliamentDate:'1848-05-01', parliamentElectionDone:false, parliamentResults:null,
+    president:{candidate:'Элиас Варен', candidatePopularity:63, pollBoost:0, nominated:true, stage:'nomination', firstRound:null, runoff:null, officeHolder:'Маркус Эстель', officeParty:'Консервативная партия'},
+    events:[
+      {date:'12 марта',text:'Съезд подтвердил курс на промышленную модернизацию.'},
+      {date:'9 марта',text:'Аграрии требуют гарантий сельской инфраструктуры для продолжения коалиции.'},
+      {date:'3 марта',text:'Элиас Варен объявил о готовности участвовать в президентской кампании.'}
+    ]
+  };
+  const merge=(base,over)=>{const out={...base,...(over||{})};out.platform={...base.platform,...(over?.platform||{})};out.president={...base.president,...(over?.president||{})};out.events=Array.isArray(over?.events)?over.events:base.events;return out};
+  const P = rootState.party = merge(defaults, saved || rootState.party);
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const rub=n=>'₳ '+Number(n).toFixed(1)+' млн';
+  const num=n=>Math.round(n).toLocaleString('ru-RU');
+  const save=()=>{try{localStorage.setItem('mandatePrototypeV11Party',JSON.stringify(P))}catch{}};
+
+  const platformEffect=()=>{
+    const x=P.platform;
+    return ((x.franchise-62)*0.018)+((58-Math.abs(x.labor-58))*0.004)-Math.abs(x.tax-52)*0.006-Math.abs(x.trade-36)*0.004-Math.abs(x.central-48)*0.003;
+  };
+  const support=()=>clamp(P.baselineSupport+P.campaignBoost+platformEffect(),8,52);
+  const presidentPoll=()=>clamp(24 + (P.president.candidatePopularity-50)*0.22 + P.campaignBoost*.45 + P.president.pollBoost + P.momentum*.045,8,54);
+  const currentDate=()=>rootState.date instanceof Date?rootState.date:new Date(Date.UTC(1848,2,14));
+  const dayDiff=(iso)=>Math.ceil((new Date(iso+'T00:00:00Z')-currentDate())/86400000);
+  const dateRu=d=>new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(d+'T00:00:00Z'));
+  const log=(text)=>{
+    const d=currentDate(); const label=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'short',timeZone:'UTC'}).format(d);
+    P.events.unshift({date:label,text}); P.events=P.events.slice(0,12); save(); render();
+    window.prototypeNotify?.('Партия',text);
+  };
+  const switchParty=()=>{const r=document.getElementById('t-party');if(r){r.checked=true;r.dispatchEvent(new Event('change',{bubbles:true}))}};
+  document.getElementById('playerPartyBadge')?.addEventListener('click',switchParty);
+  document.getElementById('goCampaignBtn')?.addEventListener('click',()=>{switchParty();document.querySelector('[data-module="party"] [data-view="party-campaign"]')?.click()});
+
+  function voterSupport(){
+    const x=P.platform, boost=P.campaignBoost;
+    return {
+      workers:clamp(26+x.labor*.22+x.franchise*.08-x.tax*.03+boost*.35,5,78),
+      business:clamp(68-x.tax*.36-x.labor*.18-(x.trade*.08)+boost*.18,5,82),
+      peasants:clamp(34-x.central*.11+x.trade*.06+x.franchise*.03+boost*.15,5,70),
+      clerks:clamp(36+x.franchise*.20+(100-Math.abs(x.tax-50))*.05+boost*.25,5,82),
+      elite:clamp(48-x.franchise*.38-x.labor*.10+(100-x.tax)*.05+boost*.12,2,70)
+    };
+  }
+
+  const parties=()=>[
+    {key:'soc',name:'Социалисты',seats:window.__parliamentSeats?.soc??54,color:'#ae6059',base:21.6},
+    {key:'lib',name:P.name,seats:P.seats,color:P.color,base:support(),player:true},
+    {key:'agr',name:'Аграрии',seats:window.__parliamentSeats?.agr??31,color:'#7b875e',base:12.4},
+    {key:'ind',name:'Независимые',seats:window.__parliamentSeats?.ind??16,color:'#9b8350',base:6.4},
+    {key:'con',name:'Консерваторы',seats:window.__parliamentSeats?.con??78,color:'#59606d',base:31.2}
+  ];
+
+  function normalizeShares(arr){
+    const sum=arr.reduce((s,x)=>s+x.share,0)||1;
+    arr.forEach(x=>x.share=x.share/sum*100);
+    return arr;
+  }
+  function allocateSeats(arr,total=250){
+    const quotas=arr.map(x=>({...x,exact:x.share/100*total}));
+    quotas.forEach(x=>x.seats=Math.floor(x.exact));
+    let remain=total-quotas.reduce((s,x)=>s+x.seats,0);
+    quotas.sort((a,b)=>(b.exact-b.seats)-(a.exact-a.seats));
+    for(let i=0;i<remain;i++)quotas[i%quotas.length].seats++;
+    return quotas;
+  }
+
+  window.renderParliamentSeatsV11=function(list=parties()){
+    window.__parliamentSeats=Object.fromEntries(list.map(p=>[p.key,p.seats]));
+    const layer=document.getElementById('seatLayer'); if(!layer)return; layer.innerHTML='';
+    const total=list.reduce((s,p)=>s+p.seats,0), NS='http://www.w3.org/2000/svg';
+    const rows=Math.max(5,Math.min(11,Math.round(Math.sqrt(total)/2))), innerR=92, outerR=315;
+    const radii=Array.from({length:rows},(_,i)=>innerR+(outerR-innerR)*(i/(rows-1)));
+    const weight=radii.reduce((a,b)=>a+b,0); const counts=radii.map(r=>Math.max(5,Math.floor(total*r/weight)));
+    let used=counts.reduce((a,b)=>a+b,0),cur=rows-1;while(used<total){counts[cur]++;used++;cur--;if(cur<0)cur=rows-1}cur=0;while(used>total){if(counts[cur]>5){counts[cur]--;used--}cur=(cur+1)%rows}
+    const cx=380,cy=438,margin=.10,pos=[];
+    counts.forEach((count,row)=>{const r=radii[row];for(let i=0;i<count;i++){const t=count===1?.5:i/(count-1),a=Math.PI-margin-t*(Math.PI-margin*2);pos.push({x:cx+r*Math.cos(a),y:cy-r*Math.sin(a),a,r})}});
+    pos.sort((a,b)=>Math.abs(a.a-b.a)>.01?b.a-a.a:a.r-b.r);
+    const slot=[];list.forEach(p=>{for(let i=0;i<p.seats;i++)slot.push(p)});
+    pos.forEach((p,i)=>{const party=slot[i],c=document.createElementNS(NS,'circle');c.setAttribute('class','seat'+(party.player?' player-seat':''));c.setAttribute('cx',p.x.toFixed(2));c.setAttribute('cy',p.y.toFixed(2));c.setAttribute('r',party.player?'5.8':'5.4');c.setAttribute('fill',party.color);if(party.player)c.setAttribute('stroke','#f3ead0');const t=document.createElementNS(NS,'title');t.textContent=(party.player?'ВАША ПАРТИЯ · ':'')+party.name+' — место '+(i+1);c.appendChild(t);layer.appendChild(c)});
+    const factionEls=[...document.querySelectorAll('.parliament-main .faction')];
+    list.forEach((p,i)=>{const el=factionEls[i];if(!el)return;el.classList.toggle('player-party',!!p.player);const b=el.querySelector('.faction-top b'),n=el.querySelector('.faction-top span'),bar=el.querySelector('.factionbar i');if(b)b.childNodes[0].nodeValue=p.name;if(n)n.textContent=p.seats;if(bar){bar.style.width=(p.seats/total*100)+'%';bar.style.background=p.color}});
+    document.getElementById('seatCountLabel').textContent=total+' мест';document.getElementById('thresholdText').textContent=(Math.floor(total/2)+1)+' / '+total;
+  };
+
+  function projection(){
+    const org=(P.organization-50)*.035, mom=P.momentum*.025;
+    let arr=parties().map(p=>({key:p.key,name:p.name,color:p.color,player:p.player,share:p.player?support()+org+mom:p.base}));
+    const drift={soc:0.8,agr:-0.2,ind:-0.5,con:-0.7};arr.forEach(p=>{if(!p.player)p.share+=(drift[p.key]||0)});
+    normalizeShares(arr); return allocateSeats(arr);
+  }
+
+  function renderProjection(){
+    const box=document.getElementById('parliamentProjectionList');if(!box)return;
+    const pr=projection().sort((a,b)=>b.seats-a.seats);
+    box.innerHTML=pr.map(p=>'<div class="election-party-row '+(p.player?'player':'')+'"><span><i class="party-swatch" style="background:'+p.color+'"></i><b>'+escapeV9(p.name)+'</b></span><div class="seat-track"><i style="width:'+(p.seats/1.4)+'%;background:'+p.color+'"></i></div><b>'+p.share.toFixed(1)+'%</b><strong>'+p.seats+'</strong></div>').join('');
+  }
+
+  function render(){
+    document.documentElement.style.setProperty('--party',P.color);
+    const ids={
+      controlledPartyName:P.name,controlledPartyLeader:P.leader,controlledPartySeats:P.seats+' / 250',
+      partyHeroName:P.name,partyHeroMark:P.short,partyHeroSlogan:'«'+P.slogan+'»',partyHeroLeader:P.leader,
+      partyGovernmentStatus:P.status,partyTabStatus:P.status,partyLeaderName:P.leader,
+      partySupportKpi:support().toFixed(1)+'%',partySupportTrend:(P.campaignBoost>=0?'+':'')+P.campaignBoost.toFixed(1)+' п.п. за кампанию',
+      partySeatsKpi:P.seats+' / 250',partyFundsKpi:rub(P.funds),partyMembersKpi:(P.members/1000).toFixed(0)+' тыс.',
+      partyVolunteersKpi:(P.volunteers/1000).toFixed(1)+' тыс. активистов',partyOrgKpi:Math.round(P.organization)+' / 100',
+      partyPresidentPollKpi:presidentPoll().toFixed(1)+'%',partyPresidentCandidateKpi:'кандидат: '+P.president.candidate,
+      leaderPopularity:Math.round(P.leaderPopularity)+'%',presidentNominationStatus:P.president.candidate,
+      coalitionObjective:(P.coalitionSeats||P.seats)+' / 250',coalitionOwnSeats:P.seats,
+      presPlayerPollName:P.president.candidate+' · '+P.short,presPlayerPoll:presidentPoll().toFixed(1)+'%',
+      currentPresidentName:P.president.officeHolder,currentPresidentParty:P.president.officeParty
+    };
+    Object.entries(ids).forEach(([id,val])=>{const e=document.getElementById(id);if(e)e.textContent=val});
+    const dot=document.getElementById('playerPartyDot');if(dot)dot.style.background=P.color;
+    const pp=document.getElementById('presPlayerPollBar');if(pp)pp.style.width=presidentPoll()+'%';
+    const mom=document.getElementById('campaignMomentumBar');if(mom)mom.style.width=clamp(P.momentum,0,100)+'%';
+    const rec=document.getElementById('campaignRecognitionBar');if(rec)rec.style.width=clamp(P.recognition,0,100)+'%';
+    const org=document.getElementById('campaignOrgBar');if(org)org.style.width=clamp(P.organization,0,100)+'%';
+    const sup=document.getElementById('campaignSupportBar');if(sup)sup.style.width=clamp(support()*2,0,100)+'%';
+    [['campaignMomentumText',Math.round(P.momentum)+' / 100'],['campaignRecognitionText',Math.round(P.recognition)+'%'],['campaignOrgText',Math.round(P.organization)+'%'],['campaignSupportText',support().toFixed(1)+'%']].forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.textContent=v});
+    const groups=voterSupport();[['workers',groups.workers],['business',groups.business],['peasants',groups.peasants],['clerks',groups.clerks],['elite',groups.elite]].forEach(([k,v])=>{const t=document.getElementById(k+'Support'),b=document.getElementById(k+'SupportBar');if(t)t.textContent=Math.round(v)+'%';if(b)b.style.width=v+'%'});
+    const eventBox=document.getElementById('partyEventLog');if(eventBox)eventBox.innerHTML=P.events.map(e=>'<div class="party-log-item"><b>'+escapeV9(e.date)+'</b><span>'+escapeV9(e.text)+'</span></div>').join('');
+    const parDays=dayDiff(P.parliamentDate),presDays=dayDiff('1848-06-15');
+    ['parliamentElectionCountdown','parliamentElectionDays'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=parDays>0?parDays+' дней':'сегодня / дата прошла'});
+    const pe=document.getElementById('presidentElectionDays');if(pe)pe.textContent=presDays>0?presDays+' дней':'сегодня / дата прошла';
+    const off=document.getElementById('playerOfficeBanner'),msg=document.getElementById('presidencyPlayerMessage');
+    const playerIsPresident=P.president.officeHolder===P.leader;
+    if(off)off.innerHTML=playerIsPresident?'<span>Текущий статус</span><b class="good">★ ВЫШ ЛИДЕР — ПРЕЗИДЕНТ РЕСПУБЛИКИ</b>':'<span>Текущий статус</span><b>Лидер парламентской партии · не президент</b>';
+    if(msg)msg.textContent=playerIsPresident?'Ваш действующий лидер выиграл президентские выборы. Партия теперь контролирует президентский пост через избранного кандидата.':'Ваш лидер пока не занимает президентский пост. Победа на выборах изменит статус партии и доступ к полномочиям главы государства.';
+    renderProjection();window.renderParliamentSeatsV11(parties());save();
+  }
+
+  document.querySelectorAll('[data-platform]').forEach(sl=>{
+    const key=sl.dataset.platform;if(P.platform[key]!=null)sl.value=P.platform[key];
+    sl.addEventListener('input',()=>{P.platform[key]=Number(sl.value);const labels={tax:['низкие налоги','умеренные налоги','высокие расходы'],labor:['свобода договора','умеренная защита труда','жёсткое регулирование'],trade:['свободная торговля','смешанная политика','протекционизм'],central:['региональная автономия','баланс центра и регионов','сильный центр'],franchise:['узкий ценз','постепенное расширение','всеобщее право']};const v=Number(sl.value),lab=labels[key][v<34?0:v<67?1:2],id={tax:'taxPlatformLabel',labor:'laborPlatformLabel',trade:'tradePlatformLabel',central:'centralPlatformLabel',franchise:'franchisePlatformLabel'}[key];const el=document.getElementById(id);if(el)el.textContent=lab;const eff=document.getElementById('platformEffectTag');if(eff)eff.textContent='эффект на рейтинг: '+(platformEffect()>=0?'+':'')+platformEffect().toFixed(1)+' п.п.';render()});
+  });
+  const manifest=document.getElementById('partyManifesto');if(manifest)manifest.value=P.manifesto;
+  document.getElementById('publishManifestoBtn')?.addEventListener('click',()=>{P.manifesto=manifest.value.trim();P.momentum=clamp(P.momentum+1.5,0,100);P.campaignBoost+=0.15;document.getElementById('manifestoReaction').textContent='Манифест опубликован. Газеты обсуждают обновлённую программу; импульс кампании вырос.';log('Партия опубликовала обновлённый предвыборный манифест.')});
+
+  const costs={canvass:.4,press:.7,ads:1.2,rally:.9,recruit:.25,local:.6};
+  function action(type){
+    if(type==='fundraise'){P.funds+=2.4+Math.random()*1.8;P.momentum+=.4;log('Финансовый комитет провёл успешный сбор пожертвований.');return}
+    const cost=costs[type]??0;if(P.funds<cost){showGlobalToast('В партийной кассе недостаточно денег.');return}P.funds-=cost;
+    const region=document.getElementById('campaignRegion')?.value||'стране';
+    if(type==='canvass'){P.campaignBoost+=.18;P.organization+=1.2;P.volunteers+=650;P.momentum+=.8;log('Активисты провели поквартирную агитацию: '+region+'.')}
+    if(type==='press'){P.campaignBoost+=.14;P.recognition+=1.5;P.momentum+=.5;log('Газеты опубликовали материалы партийного штаба.')}
+    if(type==='ads'){P.campaignBoost+=.32;P.recognition+=2.7;P.momentum+=1.1;log('Запущена крупная рекламная кампания: '+region+'.')}
+    if(type==='rally'){P.campaignBoost+=.27;P.momentum+=2.0;P.volunteers+=280;log('Партия провела большой митинг: '+region+'.')}
+    if(type==='recruit'){P.members+=4200+Math.round(Math.random()*2600);P.volunteers+=700;P.organization+=.8;log('Местные отделения приняли новых членов и волонтёров.')}
+    if(type==='local'){P.organization+=2.2;P.members+=900;P.campaignBoost+=.08;log('Открыт новый местный партийный штаб.')}
+    P.organization=clamp(P.organization,20,100);P.recognition=clamp(P.recognition,20,100);P.momentum=clamp(P.momentum,0,100);render();
+  }
+  document.querySelectorAll('.party-action').forEach(b=>b.addEventListener('click',()=>action(b.dataset.partyAction)));
+
+  document.getElementById('editPartyBtn')?.addEventListener('click',()=>{partyEditName.value=P.name;partyEditShort.value=P.short;partyEditSlogan.value=P.slogan;partyEditColor.value=P.color;partyBrandPreviewName.textContent=P.name;partyBrandPreviewSlogan.textContent=P.slogan;partyBrandPreviewDot.style.background=P.color;openModal('partyEditModal')});
+  ['partyEditName','partyEditShort','partyEditSlogan','partyEditColor'].forEach(id=>document.getElementById(id)?.addEventListener('input',()=>{partyBrandPreviewName.textContent=partyEditName.value;partyBrandPreviewSlogan.textContent=partyEditSlogan.value;partyBrandPreviewDot.style.background=partyEditColor.value}));
+  document.getElementById('applyPartyEdit')?.addEventListener('click',()=>{const changed=P.name!==partyEditName.value.trim();P.name=partyEditName.value.trim()||P.name;P.short=partyEditShort.value.trim()||P.short;P.slogan=partyEditSlogan.value.trim()||P.slogan;P.color=partyEditColor.value||P.color;if(changed)P.recognition=clamp(P.recognition-2,0,100);closeModal('partyEditModal');log('Исполком утвердил обновлённую идентичность партии: «'+P.name+'».')});
+
+  document.getElementById('partyCongressBtn')?.addEventListener('click',()=>openModal('partyCongressModal'));
+  document.getElementById('runPartyCongress')?.addEventListener('click',()=>{const choice=document.querySelector('input[name="partyLeaderChoice"]:checked')?.value||P.leader;const pop={['Элиас Варен']:63,['Мара Рейн']:58,['Арон Севель']:54}[choice]||55;P.leader=choice;P.leaderPopularity=pop;P.organization=clamp(P.organization-2,20,100);if(P.president.stage==='nomination'){P.president.candidate=choice;P.president.candidatePopularity=pop}closeModal('partyCongressModal');log('Партийный съезд избрал председателем: '+choice+'.')});
+
+  document.querySelectorAll('.pres-candidate').forEach(c=>c.addEventListener('click',()=>{document.querySelectorAll('.pres-candidate').forEach(x=>x.classList.remove('selected'));c.classList.add('selected')}));
+  document.getElementById('nominatePresidentBtn')?.addEventListener('click',()=>{const c=document.querySelector('.pres-candidate.selected');if(!c)return;P.president.candidate=c.dataset.candidate;P.president.candidatePopularity=Number(c.dataset.popularity);P.president.nominated=true;P.president.stage='nomination';log('Съезд официально выдвинул кандидата в президенты: '+P.president.candidate+'.')});
+  document.querySelectorAll('[data-pres-action]').forEach(b=>b.addEventListener('click',()=>{const t=b.dataset.presAction;if(t==='endorse'){P.president.pollBoost+=1.2;P.momentum+=.8;log('Штаб добился публичной поддержки нескольких региональных политиков.')}else{const cost=t==='tour'?.8:.5;if(P.funds<cost){showGlobalToast('Недостаточно средств на президентскую кампанию.');return}P.funds-=cost;P.president.pollBoost+=t==='tour'?1.1:.8;P.momentum+=t==='tour'?1.4:.7;log(t==='tour'?'Кандидат завершил большой тур по стране.':'Кандидат успешно выступил на публичных дебатах.')}render()}));
+
+  function parliamentElection(auto=false){
+    if(P.parliamentElectionDone&&!auto){showGlobalToast('Выборы уже проведены в этой демонстрационной кампании.');return}
+    let arr=projection().map(p=>({...p,share:p.share+(Math.random()-.5)*2.6+(p.player?P.momentum*.018:0)}));normalizeShares(arr);arr=allocateSeats(arr);
+    const map=Object.fromEntries(arr.map(x=>[x.key,x.seats]));P.seats=map.lib;P.parliamentElectionDone=true;P.parliamentResults=arr;window.__parliamentSeats=map;P.coalition=[];P.coalitionSeats=P.seats;
+    P.status=P.seats>=126?'парламентское большинство':'переговоры о коалиции';
+    const title=document.getElementById('parliamentElectionStageTitle'),txt=document.getElementById('parliamentElectionStageText');if(title)title.textContent='Голосование завершено';if(txt)txt.textContent='Результаты пересчитали состав Палаты граждан. Теперь нужно сформировать большинство.';
+    const stamp=document.getElementById('parliamentResultStamp');if(stamp)stamp.textContent=dateRu(new Date(currentDate()).toISOString().slice(0,10));
+    const box=document.getElementById('parliamentElectionResults');if(box)box.innerHTML=arr.sort((a,b)=>b.seats-a.seats).map(p=>'<div class="result-party-card '+(p.player?'player':'')+'"><b>'+escapeV9(p.name)+'</b><strong>'+p.seats+'</strong><small>'+p.share.toFixed(1)+'% голосов</small></div>').join('');
+    syncCoalitionSeatLabels(map);window.renderParliamentSeatsV11(parties().map(p=>({...p,seats:map[p.key]})));log('Парламентские выборы завершены. '+P.name+' получила '+P.seats+' мест из 250.');render();
+  }
+  window.runParliamentElectionV11=parliamentElection;
+  document.getElementById('runParliamentElection')?.addEventListener('click',()=>parliamentElection(false));
+
+  function syncCoalitionSeatLabels(map=window.__parliamentSeats||{}){const ids={agr:['coalitionAgrarianSeats','Аграрии'],ind:['coalitionIndependentSeats','Независимые'],soc:['coalitionSocialistSeats','Социалисты']};Object.entries(ids).forEach(([k,[id]])=>{const e=document.getElementById(id);if(e)e.textContent=map[k]??({agr:31,ind:16,soc:54}[k])});document.querySelectorAll('.coalition-choice').forEach(l=>{const name=l.querySelector('input').value,key=name==='Аграрии'?'agr':name==='Независимые'?'ind':'soc';l.dataset.currentSeats=map[key]??Number(l.querySelector('b')?.textContent)||0})}
+  function coalitionTotal(){let total=P.seats;document.querySelectorAll('.coalition-choice input:checked').forEach(i=>{total+=Number(i.closest('.coalition-choice').dataset.currentSeats||0)});const e=document.getElementById('coalitionTotal');if(e)e.textContent=total+' / 250';return total}
+  document.querySelectorAll('.coalition-choice input').forEach(i=>i.addEventListener('change',coalitionTotal));
+  document.getElementById('formCoalitionBtn')?.addEventListener('click',()=>{const names=[...document.querySelectorAll('.coalition-choice input:checked')].map(i=>i.value),total=coalitionTotal();const out=document.getElementById('coalitionResultText');if(total<126){if(out)out.innerHTML='<b class="bad">Большинства нет.</b> Нужно ещё '+(126-total)+' мест.';return}const friction=names.includes('Социалисты')&&names.includes('Аграрии');const ok=!friction||Math.random()>.45;if(ok){P.coalition=names;P.coalitionSeats=total;P.status=names.length?'коалиционное правительство':'парламентское большинство';if(out)out.innerHTML='<b class="good">Соглашение достигнуто.</b> Коалиция контролирует '+total+' мест.';log('Заключено коалиционное соглашение: '+[P.name,...names].join(' + ')+'.')}else{if(out)out.innerHTML='<b class="bad">Переговоры провалились.</b> Партнёры не согласовали программу.';log('Коалиционные переговоры сорвались из-за несовместимых требований.')}render()});
+
+  function firstRound(auto=false){
+    if(P.president.firstRound&&!auto){showGlobalToast('Первый тур уже проведён.');return}
+    let arr=[
+      {name:P.president.candidate,party:P.name,player:true,share:presidentPoll()},
+      {name:'Адела Нор',party:'Консерваторы',share:32+(Math.random()-.5)*2},
+      {name:'Иво Марен',party:'Социалисты',share:24+(Math.random()-.5)*2},
+      {name:'Грета Фаль',party:'Аграрии',share:9+(Math.random()-.5)*1.4},
+      {name:'прочие',party:'прочие',share:4}
+    ];normalizeShares(arr);arr.sort((a,b)=>b.share-a.share);P.president.firstRound=arr;P.president.stage='round1';
+    const player=arr.find(x=>x.player),top2=arr.slice(0,2),result=document.getElementById('presidentElectionResult');document.getElementById('presStageRound1')?.classList.add('done','active');
+    if(top2.some(x=>x.player)){P.president.stage='runoff';document.getElementById('presStageRunoff')?.classList.add('active');document.getElementById('runPresidentRunoff').disabled=false;result.innerHTML='<b>'+escapeV9(P.president.candidate)+'</b> выходит во второй тур с '+player.share.toFixed(1)+'%. Соперник: '+escapeV9(top2.find(x=>!x.player).name)+' ('+top2.find(x=>!x.player).share.toFixed(1)+'%).';log(P.president.candidate+' вышел во второй тур президентских выборов.')}else{P.president.stage='eliminated';result.innerHTML='<b class="bad">Кандидат выбыл.</b> '+escapeV9(P.president.candidate)+' получил '+player.share.toFixed(1)+'% и не вошёл в двойку лидеров.';log(P.president.candidate+' выбыл после первого тура президентских выборов.')}render();
+  }
+  window.runPresidentFirstRoundV11=firstRound;
+  document.getElementById('runPresidentRound1')?.addEventListener('click',()=>firstRound(false));
+
+  function runoff(auto=false){
+    if(P.president.stage!=='runoff'){if(!auto)showGlobalToast('Второй тур пока недоступен.');return}
+    const top2=P.president.firstRound.slice(0,2),op=top2.find(x=>!x.player),me=top2.find(x=>x.player);
+    let score=50+(me.share-op.share)*.42+P.momentum*.11+P.organization*.018-1.4;score=clamp(score,36,66);const actual=clamp(score+(Math.random()-.5)*5,30,70),win=actual>=50;
+    P.president.runoff={player:actual,opponent:100-actual,opponentName:op.name,win};P.president.stage=win?'office':'lost';
+    const result=document.getElementById('presidentElectionResult');document.getElementById('presStageRunoff')?.classList.add('done');
+    if(win){P.president.officeHolder=P.president.candidate;P.president.officeParty=P.name;document.getElementById('presStageOffice')?.classList.add('active','done');result.innerHTML='<b class="good">ПОБЕДА: '+escapeV9(P.president.candidate)+' — '+actual.toFixed(1)+'%.</b> После инаугурации кандидат партии занимает пост президента.';if(P.president.candidate===P.leader)log('Ваш лидер '+P.leader+' избран президентом Республики. Вы добрались до президентского поста через партийную политику.');else log(P.president.candidate+' избран президентом от '+P.name+'.')}else{result.innerHTML='<b class="bad">Поражение во втором туре.</b> '+escapeV9(P.president.candidate)+' — '+actual.toFixed(1)+'%, '+escapeV9(op.name)+' — '+(100-actual).toFixed(1)+'%.';log('Президентская кампания завершилась поражением во втором туре.')}document.getElementById('runPresidentRunoff').disabled=true;render();
+  }
+  window.runPresidentRunoffV11=runoff;
+  document.getElementById('runPresidentRunoff')?.addEventListener('click',()=>runoff(false));
+
+  function automaticElectionMonitor(){
+    const d=currentDate(),pDate=new Date(P.parliamentDate+'T00:00:00Z'),r1=new Date('1848-06-15T00:00:00Z'),r2=new Date('1848-06-29T00:00:00Z');
+    if(d>=pDate&&!P.parliamentElectionDone)parliamentElection(true);
+    if(d>=r1&&!P.president.firstRound)firstRound(true);
+    if(d>=r2&&P.president.stage==='runoff'&&!P.president.runoff)runoff(true);
+    const parDays=dayDiff(P.parliamentDate),presDays=dayDiff('1848-06-15');['parliamentElectionCountdown','parliamentElectionDays'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=parDays>0?parDays+' дней':'дата наступила'});const e=document.getElementById('presidentElectionDays');if(e)e.textContent=presDays>0?presDays+' дней':'дата наступила';
+  }
+  setInterval(automaticElectionMonitor,700);
+
+  syncCoalitionSeatLabels();
+  render();
+})();
