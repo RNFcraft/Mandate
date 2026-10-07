@@ -1,1930 +1,521 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Mandate — Political Party & Election Prototype v11</title>
-<link rel="stylesheet" href="styles.css">
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mandate — functional prototype</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-<input id="t-map" name="main" type="radio" checked>
-<input id="t-party" name="main" type="radio">
-<input id="t-parliament" name="main" type="radio">
-<input id="t-economy" name="main" type="radio">
-<input id="t-government" name="main" type="radio">
-<input id="t-laws" name="main" type="radio">
-<input id="t-science" name="main" type="radio">
-
-<div class="app">
+<div class="app-shell">
   <header class="topbar">
-    <div class="country">
-      <div class="flag" aria-label="Флаг Аврелии"></div>
-      <div class="country-copy">
-        <div class="country-name">Республика Аврелия</div>
-        <div class="country-sub">федеративная парламентская республика</div>
-      </div>
-      <div class="emblem" title="Государственный герб">A</div>
-
-      <div class="country-mini">
-        <button class="player-party-chip" id="playerPartyBadge" type="button" title="Открыть штаб партии">
-          <i id="playerPartyDot"></i><span>ВЫ УПРАВЛЯЕТЕ</span><b id="controlledPartyName">Либеральная партия</b>
-        </button>
-        <span class="party-mini-role">Лидер: <b id="controlledPartyLeader">Элиас Варен</b> · <b id="controlledPartySeats">71 / 250</b></span>
+    <div class="brand">
+      <div class="flag" id="topFlag" title="Флаг государства"></div>
+      <div>
+        <div class="eyebrow">MANDATE · ФУНКЦИОНАЛЬНЫЙ ПРОТОТИП</div>
+        <div class="country-name" id="countryNameTop">Республика Аврелия</div>
       </div>
     </div>
 
-    <div class="metrics">
-      <div class="metric">
-        <div class="metric-icon">◉</div>
-        <div class="k">Казна</div>
-        <div class="v" id="treasuryValue">₳ 1.24 млрд</div>
-        <div class="s good">↑ +12.8 млн / мес.</div>
+    <div class="player-chip" id="playerChip">
+      <span class="party-dot" id="topPartyDot"></span>
+      <div>
+        <small>ВЫ УПРАВЛЯЕТЕ</small>
+        <b id="topPartyName">Либеральная партия</b>
       </div>
-      <div class="metric">
-        <div class="metric-icon">▥</div>
-        <div class="k">Баланс</div>
-        <div class="v" id="budgetBalanceValue">+₳ 12.8 млн</div>
-        <div class="s good">↑ +0.7% ВВП</div>
-      </div>
-      <div class="metric">
-        <div class="metric-icon">▦</div>
-        <div class="k">Промышленность</div>
-        <div class="v" id="industryIndexValue">112</div>
-        <div class="s good">↑ +4.7%</div>
-      </div>
-      <div class="metric">
-        <div class="metric-icon">◒</div>
-        <div class="k">Инфляция</div>
-        <div class="v" id="inflationValue">3.8%</div>
-        <div class="s bad">↑ +0.4 п.п.</div>
-      </div>
-      <div class="metric">
-        <div class="metric-icon">♟</div>
-        <div class="k">Легитимность</div>
-        <div class="v">61%</div>
-        <div class="s good">↑ +2 п.п.</div>
-      </div>
+    </div>
+
+    <div class="top-stats">
+      <div><small>Казна</small><b id="topTreasury">₳ 1.24 млрд</b></div>
+      <div><small>Поддержка партии</small><b id="topSupport">28.4%</b></div>
+      <div><small>Парламент</small><b id="topSeats">71 / 250</b></div>
+      <div><small>Ваш статус</small><b id="topOffice">Лидер партии</b></div>
     </div>
 
     <div class="timebox">
-      <div class="date">
-        <div class="calendar-ico">▦</div>
-        <b id="gameDateLabel">14 марта 1848</b>
-        <span id="gameEraLabel">Пятница · ранняя индустриализация</span>
+      <div>
+        <small id="weekdayLabel">Пятница</small>
+        <b id="dateLabel">14 марта 1848</b>
       </div>
       <div class="time-controls">
-        <button class="mail" id="notificationsButton" title="Уведомления" type="button">✉<span class="badge" id="notificationBadge">3</span></button>
-        <div class="speed" aria-label="Скорость времени">
-          <span data-speed="0" title="Пауза">Ⅱ</span><span class="active" data-speed="1" title="Обычная скорость">▶</span><span data-speed="4" title="Быстро">▶▶</span><span data-speed="12" title="Очень быстро">▶▶▶</span>
-        </div>
-        <div class="speed-caption">x1</div>
-        <button class="time-step" id="stepDayBtn" type="button" title="Промотать один день">+1д</button>
+        <button data-speed="0">Ⅱ</button>
+        <button class="active" data-speed="1">▶</button>
+        <button data-speed="7">▶▶</button>
+        <button data-speed="30">▶▶▶</button>
+        <button id="stepDay">+1д</button>
+        <button id="stepMonth">+30д</button>
       </div>
     </div>
   </header>
 
-  <nav class="tabs">
-    <label class="tab" for="t-map">КАРТА <small>обзор</small></label>
-    <label class="tab party-tab" for="t-party">МОЯ ПАРТИЯ <small id="partyTabStatus">правящая коалиция</small></label>
-    <label class="tab" for="t-parliament">ПАРЛАМЕНТ <small>250 мест</small></label>
-    <label class="tab" for="t-economy">ЭКОНОМИКА</label>
-    <label class="tab" for="t-government">ПРАВИТЕЛЬСТВО</label>
-    <label class="tab" for="t-laws">ЗАКОНЫ</label>
-    <label class="tab" for="t-science">НАУКА <small>исследования</small></label>
-  </nav>
+  <aside class="sidebar">
+    <button class="nav active" data-view="overview"><span>⌂</span>Обзор</button>
+    <button class="nav" data-view="party"><span>◆</span>Моя партия</button>
+    <button class="nav" data-view="elections"><span>◉</span>Выборы</button>
+    <button class="nav" data-view="parliament"><span>▦</span>Парламент</button>
+    <button class="nav" data-view="economy"><span>₳</span>Экономика</button>
+    <button class="nav" data-view="state"><span>⚑</span>Государство</button>
+    <button class="nav" data-view="science"><span>✦</span>Наука</button>
+    <button class="nav" data-view="map"><span>◈</span>Карта</button>
+    <div class="sidebar-spacer"></div>
+    <button class="nav" id="openLog"><span>≡</span>Журнал</button>
+    <button class="nav danger" id="resetDemo"><span>↺</span>Сбросить демо</button>
+  </aside>
 
-  <main class="main">
+  <main class="content">
+    <section class="view active" id="view-overview">
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">ТЕКУЩАЯ ПОЛИТИЧЕСКАЯ СИТУАЦИЯ</div>
+          <h1>Вы — политическая партия внутри государства</h1>
+          <p>Вы не управляете страной напрямую. Сначала нужно выиграть выборы, собрать большинство, провести законы и занять должности.</p>
+        </div>
+        <div class="status-card">
+          <small>Текущая роль</small>
+          <b id="overviewRole">Лидер Либеральной партии</b>
+          <span id="overviewGovStatus">Участник правящей коалиции</span>
+        </div>
+      </div>
 
-    <!-- MAP -->
-    <section class="screen map">
-      <div class="map-wrap">
-        <div class="panel map-toolbar">
-          <div class="layer-tabs">
-            <button class="active" data-layer="politics">Политика</button>
-            <button data-layer="states">Регионы</button>
-            <button data-layer="resources">Ресурсы</button>
-            <button data-layer="roads">Инфраструктура</button>
-            <button data-layer="trade">Торговля</button>
-          </div>
-          <div>
-            <span class="tag">Map v2 · gameplay provinces</span>
-            <span class="tag">векторная геометрия</span>
-            <span class="tag">границы = ownership</span>
+      <div class="metric-grid six">
+        <div class="card metric"><small>Поддержка</small><strong id="ovSupport">28.4%</strong><span id="ovSupportDelta">кампания: +0.0 п.п.</span></div>
+        <div class="card metric"><small>Места</small><strong id="ovSeats">71</strong><span>из 250</span></div>
+        <div class="card metric"><small>Партийная касса</small><strong id="ovFunds">₳ 18.6м</strong><span>на кампании и аппарат</span></div>
+        <div class="card metric"><small>Организация</small><strong id="ovOrg">64</strong><span>из 100</span></div>
+        <div class="card metric"><small>Президентский рейтинг</small><strong id="ovPresPoll">31%</strong><span id="ovCandidate">Элиас Варен</span></div>
+        <div class="card metric"><small>Государственная казна</small><strong id="ovTreasury">₳ 1.24 млрд</strong><span id="ovBalance">+₳ 12.8м / мес.</span></div>
+      </div>
+
+      <div class="overview-grid">
+        <div class="card">
+          <div class="card-head"><h2>Ближайшие события</h2><span class="tag">реагируют на время</span></div>
+          <div id="nextEvents" class="timeline"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Что можно сделать прямо сейчас</h2></div>
+          <div class="quick-actions">
+            <button data-jump="party">Управлять партией</button>
+            <button data-jump="elections">Вести кампанию</button>
+            <button data-jump="parliament">Внести поправку</button>
+            <button data-jump="state">Провести государственную реформу</button>
+            <button data-jump="science">Выдать грант учёному</button>
+            <button data-jump="economy">Купить предприятие государством</button>
           </div>
         </div>
-
-        <div class="panel map-stage" id="mapStage" tabindex="0">
-          <div class="map-water"></div>
-
-          <svg id="mapSvg" viewBox="0 0 1100 640" aria-label="Интерактивная карта Map v2">
-            <g id="mapWorld">
-              <g id="regions">
-                <path class="region province owner-norven" data-region="Северный Норвен" d="M58 98 L210 76 L260 142 L222 222 L84 214 L42 154 Z"/>
-                <path class="region province owner-norven" data-region="Норвенское побережье" d="M210 76 L365 86 L392 172 L300 236 L222 222 L260 142 Z"/>
-                <path class="region province owner-aurelia" data-region="Тернская провинция" d="M365 86 L522 92 L548 177 L462 232 L392 172 Z"/>
-                <path class="region province owner-aurelia" data-region="Северная Аурелия" d="M522 92 L680 118 L712 204 L612 246 L548 177 Z"/>
-                <path class="region province owner-estel" data-region="Эстельский край" d="M680 118 L858 130 L934 210 L818 252 L712 204 Z"/>
-
-                <path class="region province owner-norven" data-region="Западный рубеж" d="M84 214 L222 222 L286 310 L212 382 L78 356 L44 278 Z"/>
-                <path class="region province owner-aurelia" data-region="Лиорская провинция" d="M222 222 L300 236 L398 310 L330 392 L212 382 L286 310 Z"/>
-                <path class="region province owner-aurelia selected" data-region="Аурельская провинция" d="M300 236 L462 232 L524 322 L454 408 L330 392 L398 310 Z"/>
-                <path class="region province owner-aurelia" data-region="Ровенская провинция" d="M462 232 L612 246 L690 330 L612 410 L524 322 Z"/>
-                <path class="region province owner-estel" data-region="Восточный Эстель" d="M612 246 L818 252 L892 338 L770 402 L690 330 Z"/>
-
-                <path class="region province owner-aurelia" data-region="Юго-западная Аурелия" d="M78 356 L212 382 L330 392 L302 506 L156 530 L66 454 Z"/>
-                <path class="region province owner-aurelia" data-region="Вальтская провинция" d="M330 392 L454 408 L548 486 L478 576 L302 506 Z"/>
-                <path class="region province owner-aurelia" data-region="Южная Аурелия" d="M454 408 L612 410 L696 488 L632 582 L478 576 L548 486 Z"/>
-                <path class="region province owner-estel" data-region="Эстельская марка" d="M612 410 L770 402 L944 368 L1028 452 L946 558 L786 570 L632 582 L696 488 Z"/>
-              </g>
-
-              <g id="resourceLayer" class="hidden-layer">
-                <ellipse class="resource-zone coal-zone" cx="520" cy="210" rx="132" ry="64"/>
-                <text class="resource-label" x="482" y="205">угольный бассейн</text>
-                <path class="resource-zone ore-zone" d="M274 372 C360 322 460 342 554 420 C488 444 396 470 308 456 Z"/>
-                <text class="resource-label" x="346" y="405">железорудный пояс</text>
-                <ellipse class="resource-zone forest-zone" cx="256" cy="462" rx="116" ry="74"/>
-                <text class="resource-label" x="222" y="466">лесной массив</text>
-              </g>
-
-              <g id="stateBordersLayer" class="hidden-layer">
-                <path class="state-border" d="M300 236 L398 310 L330 392"/>
-                <path class="state-border" d="M462 232 L524 322 L454 408"/>
-                <path class="state-border" d="M330 392 L454 408 L548 486"/>
-              </g>
-
-              <g id="countryBordersLayer">
-                <path class="country-border" d="M365 86 L392 172 L300 236 L222 222 L286 310 L212 382 L330 392 L302 506"/>
-                <path class="country-border" d="M680 118 L712 204 L612 246 L690 330 L612 410 L696 488 L632 582"/>
-              </g>
-
-              <g id="roadsLayer" class="hidden-layer">
-                <path class="road" d="M140 330 C258 314 356 312 430 318 S622 342 760 324"/>
-                <path class="road" d="M432 132 C438 224 430 316 448 498"/>
-                <path class="road" d="M260 448 C388 420 538 452 674 492"/>
-              </g>
-
-              <g id="tradeLayer" class="hidden-layer">
-                <path class="trade" d="M78 438 C256 394 430 428 602 384 C744 348 854 380 1010 326"/>
-              </g>
-
-              <g id="citiesLayer">
-                <circle class="city" cx="424" cy="314" r="7"/><text class="map-label" x="436" y="310">Аурель</text>
-                <circle class="city" cx="642" cy="342" r="6"/><text class="map-label" x="654" y="338">Ровен</text>
-                <circle class="city" cx="280" cy="358" r="6"/><text class="map-label" x="292" y="354">Лиор</text>
-                <circle class="city" cx="450" cy="158" r="5"/><text class="map-label" x="460" y="154">Терн</text>
-                <circle class="city" cx="472" cy="510" r="5"/><text class="map-label" x="482" y="506">Вальт</text>
-              </g>
-            </g>
-          </svg>
-
-          <div class="map-overlay map-controls">
-            <button id="zoomIn" title="Приблизить">+</button>
-            <button id="zoomOut" title="Отдалить">−</button>
-            <button class="reset" id="resetMap">СБРОС</button>
-          </div>
-
-          <div class="map-overlay region-card" id="regionCard">
-            <h3>ВЫБРАННАЯ ПРОВИНЦИЯ</h3>
-            <div class="name" id="regionName">Аурельская провинция</div>
-            <div class="meta" id="rMeta">Регион: Центральная Аурелия · владелец: Республика Аврелия</div>
-            <div class="rowline"><span>Население</span><b id="rPop">2.84 млн</b></div>
-            <div class="rowline"><span>Локальный рынок</span><b id="rMarket">Аурель</b></div>
-            <div class="rowline"><span>Средняя зарплата</span><b id="rWage">₳ 4.18 / день</b></div>
-            <div class="rowline"><span>Инфраструктура</span><b class="good" id="rInd">78 / 100</b></div>
-            <div class="rowline"><span>Известные ресурсы</span><b id="rDef">уголь, железо</b></div>
-            <div style="margin-top:8px"><button class="btn primary" id="openProvinceBtn">Открыть провинцию</button></div>
-          </div>
-
-          <div class="map-overlay zoom-readout">Масштаб: <b id="zoomText">100%</b></div>
-          <div class="map-overlay map-hint">Перетаскивай карту мышью. Масштабируй колесом.</div>
+        <div class="card">
+          <div class="card-head"><h2>Последние события</h2></div>
+          <div id="overviewLog" class="log-list"></div>
         </div>
       </div>
     </section>
 
+    <section class="view" id="view-party">
+      <div class="page-head compact">
+        <div>
+          <div class="eyebrow">ВАША ПОЛИТИЧЕСКАЯ СИЛА</div>
+          <h1 id="partyTitle">Либеральная партия</h1>
+          <p id="partySlogan">«Свобода, закон, развитие»</p>
+        </div>
+        <button class="primary" id="editParty">Редактировать партию</button>
+      </div>
 
-    <!-- PLAYER PARTY -->
-    <section class="screen party">
-      <div class="module-page party-module">
-        <div class="panel module-subnav" data-module="party">
-          <button class="active" data-view="party-hq">Штаб</button>
-          <button data-view="party-platform">Программа</button>
-          <button data-view="party-campaign">Кампания</button>
-          <button data-view="party-parliament-election">Парламентские выборы</button>
-          <button data-view="party-president-election">Президентские выборы</button>
-          <span class="tag party-control-tag">◈ игрок управляет партией, а не государством напрямую</span>
+      <div class="metric-grid five">
+        <div class="card metric"><small>Поддержка</small><strong id="partySupport">28.4%</strong><span>по стране</span></div>
+        <div class="card metric"><small>Касса</small><strong id="partyFunds">₳ 18.6м</strong><span>партийные средства</span></div>
+        <div class="card metric"><small>Организация</small><strong id="partyOrg">64</strong><span>местные отделения</span></div>
+        <div class="card metric"><small>Узнаваемость</small><strong id="partyRecognition">78%</strong><span>избирателей знают партию</span></div>
+        <div class="card metric"><small>Активисты</small><strong id="partyVolunteers">18.6 тыс.</strong><span>готовы агитировать</span></div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><h2>Лидер и аппарат</h2><button id="partyCongress">Созвать съезд</button></div>
+          <div class="leader-box">
+            <div class="avatar" id="leaderAvatar">ЭВ</div>
+            <div>
+              <h3 id="leaderName">Элиас Варен</h3>
+              <p>Действующий председатель партии. Если он станет кандидатом и выиграет президентские выборы, вы получите президентский пост через политическую систему.</p>
+              <div class="kv"><span>Личная популярность</span><b id="leaderPopularity">63%</b></div>
+              <div class="kv"><span>Текущая должность</span><b id="leaderOffice">Лидер партии</b></div>
+              <div class="kv"><span>Статус партии</span><b id="partyStatus">Правящая коалиция</b></div>
+            </div>
+          </div>
         </div>
 
-        <div class="module-content">
-          <div class="module-view active" id="party-hq">
-            <div class="party-page">
-              <div class="panel party-hero">
-                <div class="party-hero-mark" id="partyHeroMark">ЛП</div>
-                <div class="party-hero-copy">
-                  <div class="controlled-kicker">ВАША ПОЛИТИЧЕСКАЯ СИЛА</div>
-                  <h1 id="partyHeroName">Либеральная партия</h1>
-                  <p id="partyHeroSlogan">«Свобода, закон, развитие»</p>
-                  <div class="party-hero-tags">
-                    <span class="pill good" id="partyGovernmentStatus">правящая коалиция</span>
-                    <span class="pill">лидер: <b id="partyHeroLeader">Элиас Варен</b></span>
-                    <span class="pill">идеология: либеральный центр</span>
-                  </div>
-                </div>
-                <div class="party-hero-actions">
-                  <button class="btn" id="editPartyBtn">Настроить партию</button>
-                  <button class="btn" id="partyCongressBtn">Созвать съезд</button>
-                  <button class="btn primary" id="goCampaignBtn">Перейти в кампанию</button>
-                </div>
-              </div>
+        <div class="card">
+          <div class="card-head"><h2>Действия аппарата</h2><span class="tag">имеют цену и эффект</span></div>
+          <div class="action-grid">
+            <button class="party-action" data-action="fundraise">Сбор пожертвований<small>+ деньги</small></button>
+            <button class="party-action" data-action="recruit">Набор членов<small>− ₳0.25м</small></button>
+            <button class="party-action" data-action="office">Открыть штаб<small>− ₳0.60м</small></button>
+            <button class="party-action" data-action="press">Пресса<small>− ₳0.70м</small></button>
+            <button class="party-action" data-action="rally">Большой митинг<small>− ₳0.90м</small></button>
+            <button class="party-action" data-action="canvass">Дверь-в-дверь<small>− ₳0.40м</small></button>
+          </div>
+        </div>
+      </div>
 
-              <div class="kpi-grid party-kpis">
-                <div class="panel kpi-card"><div class="k">Поддержка</div><div class="v" id="partySupportKpi">28.4%</div><div class="s" id="partySupportTrend">+0.0 п.п. за кампанию</div></div>
-                <div class="panel kpi-card"><div class="k">Места в парламенте</div><div class="v" id="partySeatsKpi">71 / 250</div><div class="s">ваша фракция выделена синим</div></div>
-                <div class="panel kpi-card"><div class="k">Касса партии</div><div class="v" id="partyFundsKpi">₳ 18.6 млн</div><div class="s">взносы + пожертвования</div></div>
-                <div class="panel kpi-card"><div class="k">Члены партии</div><div class="v" id="partyMembersKpi">243 тыс.</div><div class="s" id="partyVolunteersKpi">18.6 тыс. активистов</div></div>
-                <div class="panel kpi-card"><div class="k">Организация</div><div class="v" id="partyOrgKpi">64 / 100</div><div class="s">отделения и местные штабы</div></div>
-                <div class="panel kpi-card"><div class="k">Президентский рейтинг</div><div class="v" id="partyPresidentPollKpi">31%</div><div class="s" id="partyPresidentCandidateKpi">кандидат: Элиас Варен</div></div>
-              </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><h2>Программа партии</h2><span id="platformEffect" class="tag">эффект 0.0 п.п.</span></div>
+          <div class="sliders">
+            <label><span><b>Налоги</b><em id="lab-tax">умеренные</em></span><input data-platform="tax" type="range" min="0" max="100" value="52"></label>
+            <label><span><b>Трудовое право</b><em id="lab-labor">умеренная защита</em></span><input data-platform="labor" type="range" min="0" max="100" value="58"></label>
+            <label><span><b>Торговля</b><em id="lab-trade">скорее свободная</em></span><input data-platform="trade" type="range" min="0" max="100" value="36"></label>
+            <label><span><b>Централизация</b><em id="lab-central">баланс</em></span><input data-platform="central" type="range" min="0" max="100" value="48"></label>
+            <label><span><b>Избирательные права</b><em id="lab-franchise">постепенное расширение</em></span><input data-platform="franchise" type="range" min="0" max="100" value="62"></label>
+          </div>
+        </div>
 
-              <div class="party-dashboard-grid">
-                <div class="panel party-leader-card">
-                  <div class="panel-title">ЛИДЕР ПАРТИИ <small>ваш основной политический персонаж</small></div>
-                  <div class="party-leader-body">
-                    <div class="person-portrait party-portrait">Э.В.</div>
-                    <div>
-                      <h2 id="partyLeaderName">Элиас Варен</h2>
-                      <p>46 лет · депутат от Ауреля · либеральное крыло · председатель партии с 1846 года</p>
-                      <div class="rowline"><span>Личная популярность</span><b id="leaderPopularity">63%</b></div>
-                      <div class="rowline"><span>Контроль над аппаратом</span><b class="good">72%</b></div>
-                      <div class="rowline"><span>Репутация</span><b>реформатор</b></div>
-                      <div class="rowline"><span>Высшая достижимая должность</span><b class="warn" id="leaderOfficeGoal">Президент Республики</b></div>
-                    </div>
-                  </div>
-                  <div class="party-office-banner" id="playerOfficeBanner">
-                    <span>Текущий статус</span><b>Лидер парламентской партии · не президент</b>
-                  </div>
-                </div>
+        <div class="card">
+          <div class="card-head"><h2>Поддержка групп</h2></div>
+          <div id="groupSupport" class="bars"></div>
+        </div>
+      </div>
+    </section>
 
-                <div class="panel">
-                  <div class="panel-title">ПАРТИЙНЫЙ АППАРАТ <small>действия меняют состояние прототипа</small></div>
-                  <div class="card-body action-stack">
-                    <button class="party-action btn" data-party-action="fundraise">◉ Провести сбор пожертвований</button>
-                    <button class="party-action btn" data-party-action="recruit">♟ Набор членов и активистов</button>
-                    <button class="party-action btn" data-party-action="local">⌂ Открыть местный штаб</button>
-                    <button class="party-action btn" data-party-action="press">▤ Провести пресс-конференцию</button>
-                    <button class="party-action btn primary" data-party-action="rally">★ Большой митинг</button>
-                  </div>
-                  <div class="mini-note" id="partyActionHint">Партия живёт собственной жизнью: деньги, активисты, аппарат, программа и репутация влияют на выборы.</div>
-                </div>
+    <section class="view" id="view-elections">
+      <div class="page-head compact">
+        <div>
+          <div class="eyebrow">ВЫБОРЫ</div>
+          <h1>Путь партии к власти</h1>
+          <p>Парламентские выборы определяют фракцию и коалицию. Президентские проходят отдельно и могут потребовать второй тур.</p>
+        </div>
+      </div>
 
-                <div class="panel">
-                  <div class="panel-title">БЛИЖАЙШИЕ ПОЛИТИЧЕСКИЕ ЦЕЛИ</div>
-                  <div class="card-body">
-                    <div class="objective-row"><span class="objective-icon">1</span><div><b>Удержать правящую коалицию</b><small>Нужно не менее 126 мест вместе с партнёрами.</small></div><span class="pill warn" id="coalitionObjective">139 / 250</span></div>
-                    <div class="objective-row"><span class="objective-icon">2</span><div><b>Парламентские выборы</b><small id="parliamentElectionGoalDate">1 мая 1848</small></div><span class="pill" id="parliamentElectionCountdown">48 дней</span></div>
-                    <div class="objective-row"><span class="objective-icon">3</span><div><b>Выдвинуть кандидата в президенты</b><small id="presidentElectionGoalDate">15 июня 1848</small></div><span class="pill good" id="presidentNominationStatus">Элиас Варен</span></div>
-                  </div>
-                </div>
+      <div class="election-tabs">
+        <button class="active" data-election-tab="parliament">Парламент</button>
+        <button data-election-tab="president">Президент</button>
+      </div>
 
-                <div class="panel">
-                  <div class="panel-title">ПОСЛЕДНИЕ СОБЫТИЯ ПАРТИИ</div>
-                  <div class="card-body" id="partyEventLog">
-                    <div class="party-log-item"><b>12 марта</b><span>Съезд подтвердил курс на промышленную модернизацию.</span></div>
-                    <div class="party-log-item"><b>9 марта</b><span>Аграрии требуют гарантий сельской инфраструктуры для продолжения коалиции.</span></div>
-                    <div class="party-log-item"><b>3 марта</b><span>Элиас Варен объявил о готовности участвовать в президентской кампании.</span></div>
-                  </div>
-                </div>
-              </div>
+      <div class="election-panel active" id="election-parliament">
+        <div class="three-col">
+          <div class="card">
+            <div class="card-head"><h2>Прогноз</h2><span id="parlDays" class="tag"></span></div>
+            <div id="parlProjection" class="party-list"></div>
+          </div>
+          <div class="card center">
+            <div class="ballot-icon">▥</div>
+            <h2>Парламентские выборы</h2>
+            <p>Дата: <b>1 мая 1848</b>. Можно дождаться её ходом времени или запустить демонстрацию вручную.</p>
+            <button class="primary wide" id="runParlElection">Провести выборы сейчас</button>
+            <div id="parlElectionMessage" class="result-box">Выборы ещё не проведены.</div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>Коалиция</h2><span>126 мест для большинства</span></div>
+            <div id="coalitionBuilder"></div>
+            <button class="wide" id="formCoalition">Предложить коалицию</button>
+            <div id="coalitionMessage" class="hint">Выберите партнёров после выборов или прямо сейчас.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Последний результат</h2></div>
+          <div id="parlResults" class="result-grid"><div class="empty">Нет результатов.</div></div>
+        </div>
+      </div>
+
+      <div class="election-panel" id="election-president">
+        <div class="pres-grid">
+          <div class="card">
+            <div class="card-head"><h2>Кандидат вашей партии</h2><span id="presDays" class="tag"></span></div>
+            <div id="candidateChoices" class="candidate-list"></div>
+            <button class="primary wide" id="nominateCandidate">Утвердить кандидата</button>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>Опрос</h2><span>до первого тура</span></div>
+            <div id="presPolls" class="bars"></div>
+            <div class="action-grid small-actions">
+              <button data-pres-action="tour">Тур по стране<small>− ₳0.8м</small></button>
+              <button data-pres-action="debate">Публичные дебаты<small>− ₳0.5м</small></button>
+              <button data-pres-action="endorsement">Искать поддержку<small>политический эффект</small></button>
             </div>
           </div>
 
-          <div class="module-view" id="party-platform">
-            <div class="party-page">
-              <div class="panel header-strip"><div><h2 class="section-title">Программа партии</h2><p class="section-desc">Позиции меняют поддержку разных слоёв и постепенно сдвигают общий рейтинг. Это не мгновенная магическая кнопка.</p></div><div class="header-actions"><span class="tag" id="platformEffectTag">эффект на рейтинг: +0.0 п.п.</span></div></div>
-              <div class="platform-grid">
-                <div class="panel platform-controls">
-                  <div class="panel-title">ПОЛИТИЧЕСКИЕ ПОЗИЦИИ</div>
-                  <div class="card-body">
-                    <div class="platform-slider"><div><b>Налоги и бюджет</b><span id="taxPlatformLabel">умеренные налоги</span></div><input type="range" min="0" max="100" value="52" data-platform="tax"></div>
-                    <div class="platform-scale"><span>низкие налоги</span><span>высокие расходы</span></div>
-                    <div class="platform-slider"><div><b>Труд и фабрики</b><span id="laborPlatformLabel">умеренная защита труда</span></div><input type="range" min="0" max="100" value="58" data-platform="labor"></div>
-                    <div class="platform-scale"><span>свобода договора</span><span>жёсткое регулирование</span></div>
-                    <div class="platform-slider"><div><b>Торговля</b><span id="tradePlatformLabel">умеренно свободная</span></div><input type="range" min="0" max="100" value="36" data-platform="trade"></div>
-                    <div class="platform-scale"><span>свободная торговля</span><span>протекционизм</span></div>
-                    <div class="platform-slider"><div><b>Централизация</b><span id="centralPlatformLabel">баланс центра и регионов</span></div><input type="range" min="0" max="100" value="48" data-platform="central"></div>
-                    <div class="platform-scale"><span>региональная автономия</span><span>сильный центр</span></div>
-                    <div class="platform-slider"><div><b>Избирательные права</b><span id="franchisePlatformLabel">постепенное расширение</span></div><input type="range" min="0" max="100" value="62" data-platform="franchise"></div>
-                    <div class="platform-scale"><span>узкий ценз</span><span>всеобщее право</span></div>
-                  </div>
-                </div>
-                <div class="panel">
-                  <div class="panel-title">ПОДДЕРЖКА СОЦИАЛЬНЫХ ГРУПП <small>условная оценка</small></div>
-                  <div class="card-body voter-groups" id="voterGroups">
-                    <div><span>Городские рабочие</span><div class="voter-bar"><i id="workersSupportBar"></i></div><b id="workersSupport">34%</b></div>
-                    <div><span>Предприниматели</span><div class="voter-bar"><i id="businessSupportBar"></i></div><b id="businessSupport">47%</b></div>
-                    <div><span>Крестьяне</span><div class="voter-bar"><i id="peasantsSupportBar"></i></div><b id="peasantsSupport">24%</b></div>
-                    <div><span>Служащие и образованные</span><div class="voter-bar"><i id="clerksSupportBar"></i></div><b id="clerksSupport">51%</b></div>
-                    <div><span>Аристократия</span><div class="voter-bar"><i id="eliteSupportBar"></i></div><b id="eliteSupport">18%</b></div>
-                  </div>
-                  <div class="mini-note">Слишком резкие повороты программы снижают партийную дисциплину и могут вызвать раскол. В этом прототипе эффект упрощён.</div>
-                </div>
-                <div class="panel">
-                  <div class="panel-title">МАНИФЕСТ</div>
-                  <div class="card-body">
-                    <textarea id="partyManifesto" class="manifesto-editor">Мы выступаем за ответственное правительство, независимый суд, развитие промышленности и транспорта, расширение образования и постепенное расширение политического представительства.</textarea>
-                    <button class="btn primary" id="publishManifestoBtn" style="margin-top:8px">Опубликовать обновлённый манифест</button>
-                    <div class="mini-note" id="manifestoReaction" style="margin-top:8px">Последняя редакция принята съездом 2 месяца назад.</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="card">
+            <div class="card-head"><h2>Президентский пост</h2></div>
+            <div class="seal">A</div>
+            <div class="center"><small>Действующий президент</small><h2 id="currentPresident">Маркус Эстель</h2><p id="currentPresidentParty">Консервативная партия</p></div>
+            <div id="presOfficeMessage" class="hint">Ваш кандидат пока не занимает пост.</div>
           </div>
+        </div>
 
-          <div class="module-view" id="party-campaign">
-            <div class="party-page">
-              <div class="panel header-strip"><div><h2 class="section-title">Избирательная кампания</h2><p class="section-desc">Выбирай регионы и методы агитации. Кампания расходует партийную кассу, время и организационный ресурс.</p></div><div class="header-actions"><span class="tag">режим: парламент + президент</span></div></div>
-              <div class="campaign-layout">
-                <div class="panel campaign-command">
-                  <div class="panel-title">ШТАБ КАМПАНИИ</div>
-                  <div class="card-body">
-                    <div class="field"><label>Приоритетный регион</label><select id="campaignRegion"><option>Аурель и центр</option><option>Промышленный север</option><option>Сельский юг</option><option>Пограничные провинции</option><option>Вся страна</option></select></div>
-                    <div class="field"><label>Стратегия</label><select id="campaignStrategy"><option value="broad">широкая коалиция избирателей</option><option value="workers">городские рабочие</option><option value="business">предприниматели и средний класс</option><option value="rural">сельские избиратели</option><option value="reform">реформаторы и образованные</option></select></div>
-                    <div class="campaign-actions">
-                      <button class="party-action btn" data-party-action="canvass">Дверь-в-дверь <small>₳ 0.4м</small></button>
-                      <button class="party-action btn" data-party-action="press">Газеты и пресса <small>₳ 0.7м</small></button>
-                      <button class="party-action btn" data-party-action="ads">Массовая реклама <small>₳ 1.2м</small></button>
-                      <button class="party-action btn primary" data-party-action="rally">Национальный митинг <small>₳ 0.9м</small></button>
-                      <button class="party-action btn" data-party-action="fundraise">Сбор средств <small>+касса</small></button>
-                      <button class="party-action btn" data-party-action="recruit">Вербовка активистов <small>₳ 0.25м</small></button>
-                    </div>
-                  </div>
-                </div>
-                <div class="panel">
-                  <div class="panel-title">СОСТОЯНИЕ КАМПАНИИ</div>
-                  <div class="card-body">
-                    <div class="campaign-meter"><span>Импульс</span><div class="progress"><i id="campaignMomentumBar"></i></div><b id="campaignMomentumText">4 / 100</b></div>
-                    <div class="campaign-meter"><span>Узнаваемость</span><div class="progress"><i id="campaignRecognitionBar"></i></div><b id="campaignRecognitionText">78%</b></div>
-                    <div class="campaign-meter"><span>Полевой аппарат</span><div class="progress"><i id="campaignOrgBar"></i></div><b id="campaignOrgText">64%</b></div>
-                    <div class="campaign-meter"><span>Поддержка</span><div class="progress"><i id="campaignSupportBar"></i></div><b id="campaignSupportText">28.4%</b></div>
-                  </div>
-                  <div class="campaign-news" id="campaignNews">Штаб ждёт решения. Сейчас партия конкурентоспособна, но исход выборов не гарантирован.</div>
-                </div>
-                <div class="panel">
-                  <div class="panel-title">РЕГИОНАЛЬНЫЙ ПРОГНОЗ</div>
-                  <div class="card-body district-list">
-                    <div><span>Аурель и центр</span><b class="good">34%</b><small>сильная позиция</small></div>
-                    <div><span>Промышленный север</span><b>29%</b><small>борьба с социалистами</small></div>
-                    <div><span>Сельский юг</span><b class="warn">21%</b><small>лидируют аграрии</small></div>
-                    <div><span>Пограничные провинции</span><b>27%</b><small>много неопределившихся</small></div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div class="card">
+          <div class="card-head"><h2>Избирательная процедура</h2><span>1-й тур → 2-й тур → инаугурация</span></div>
+          <div class="stages">
+            <div class="stage active" id="stageNom"><b>1</b><span>Номинация</span></div>
+            <i></i>
+            <div class="stage" id="stageR1"><b>2</b><span>Первый тур</span></div>
+            <i></i>
+            <div class="stage" id="stageR2"><b>3</b><span>Второй тур</span></div>
+            <i></i>
+            <div class="stage" id="stageOffice"><b>4</b><span>Инаугурация</span></div>
           </div>
-
-          <div class="module-view" id="party-parliament-election">
-            <div class="party-page">
-              <div class="panel election-header">
-                <div><div class="subhead">ПАРЛАМЕНТСКИЕ ВЫБОРЫ</div><h2>Палата граждан · 250 мест</h2><p>Очередные выборы: <b id="parliamentElectionDate">1 мая 1848</b> · кампания идёт в реальном игровом времени.</p></div>
-                <div class="election-clock"><span>До голосования</span><b id="parliamentElectionDays">48 дней</b></div>
-              </div>
-              <div class="election-layout">
-                <div class="panel">
-                  <div class="panel-title">ТЕКУЩИЙ ПРОГНОЗ МЕСТ <small>не результат</small></div>
-                  <div class="election-party-list" id="parliamentProjectionList"></div>
-                  <div class="mini-note">Прогноз реагирует на рейтинг, организацию, кампанию и небольшой элемент неопределённости.</div>
-                </div>
-                <div class="panel">
-                  <div class="panel-title">ДЕНЬ ВЫБОРОВ</div>
-                  <div class="card-body">
-                    <div class="ballot-box">▥</div>
-                    <h3 class="center-title" id="parliamentElectionStageTitle">Кампания продолжается</h3>
-                    <p class="center-copy" id="parliamentElectionStageText">Можно дождаться даты в календаре или провести демонстрационный день выборов прямо сейчас.</p>
-                    <button class="btn primary full-btn" id="runParliamentElection">Провести парламентские выборы</button>
-                  </div>
-                </div>
-                <div class="panel">
-                  <div class="panel-title">ФОРМИРОВАНИЕ БОЛЬШИНСТВА</div>
-                  <div class="card-body">
-                    <div class="rowline"><span>Ваши места</span><b id="coalitionOwnSeats">71</b></div>
-                    <label class="coalition-choice"><input type="checkbox" value="Аграрии" data-coalition-seats="31"> <span>Аграрии</span><b id="coalitionAgrarianSeats">31</b></label>
-                    <label class="coalition-choice"><input type="checkbox" value="Независимые" data-coalition-seats="16"> <span>Независимые</span><b id="coalitionIndependentSeats">16</b></label>
-                    <label class="coalition-choice"><input type="checkbox" value="Социалисты" data-coalition-seats="54"> <span>Социалисты</span><b id="coalitionSocialistSeats">54</b></label>
-                    <div class="coalition-total">Коалиция: <b id="coalitionTotal">71 / 250</b></div>
-                    <button class="btn" id="formCoalitionBtn">Предложить коалиционное соглашение</button>
-                    <div class="mini-note" id="coalitionResultText" style="margin-top:8px">Для большинства нужно 126 мест.</div>
-                  </div>
-                </div>
-              </div>
-              <div class="panel election-results-panel">
-                <div class="panel-title">ПОСЛЕДНИЙ РЕЗУЛЬТАТ <small id="parliamentResultStamp">ещё не проводились</small></div>
-                <div class="election-result-grid" id="parliamentElectionResults"><div class="empty-election">Результаты появятся после дня голосования.</div></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="module-view" id="party-president-election">
-            <div class="party-page">
-              <div class="panel election-header presidential">
-                <div><div class="subhead">ПРЕЗИДЕНТСКИЕ ВЫБОРЫ</div><h2>Президент Республики Аврелия</h2><p>Первый тур: <b id="presidentElectionDate">15 июня 1848</b> · при необходимости второй тур через 14 дней.</p></div>
-                <div class="election-clock"><span>До первого тура</span><b id="presidentElectionDays">93 дня</b></div>
-              </div>
-              <div class="president-layout">
-                <div class="panel">
-                  <div class="panel-title">КАНДИДАТ ПАРТИИ <small>решение партийного съезда</small></div>
-                  <div class="candidate-choice-grid" id="presidentCandidateGrid">
-                    <button class="pres-candidate selected" data-candidate="Элиас Варен" data-popularity="63"><span class="candidate-avatar">ЭВ</span><b>Элиас Варен</b><small>лидер партии · реформатор</small><em>ваш лидер</em></button>
-                    <button class="pres-candidate" data-candidate="Мара Рейн" data-popularity="58"><span class="candidate-avatar">МР</span><b>Мара Рейн</b><small>министр финансов · умеренное крыло</small><em>сильна у бизнеса</em></button>
-                    <button class="pres-candidate" data-candidate="Арон Севель" data-popularity="54"><span class="candidate-avatar">АС</span><b>Арон Севель</b><small>министр торговли · промышленник</small><em>сильный аппарат</em></button>
-                  </div>
-                  <button class="btn primary full-btn" id="nominatePresidentBtn">Утвердить кандидата съездом</button>
-                </div>
-                <div class="panel">
-                  <div class="panel-title">ОПРОС ПЕРЕД ВЫБОРАМИ</div>
-                  <div class="pres-polls" id="presidentPolls">
-                    <div><span id="presPlayerPollName">Элиас Варен · ЛП</span><div><i id="presPlayerPollBar"></i></div><b id="presPlayerPoll">31%</b></div>
-                    <div><span>Адела Нор · Консерваторы</span><div><i style="width:32%"></i></div><b>32%</b></div>
-                    <div><span>Иво Марен · Социалисты</span><div><i style="width:24%"></i></div><b>24%</b></div>
-                    <div><span>Грета Фаль · Аграрии</span><div><i style="width:9%"></i></div><b>9%</b></div>
-                    <div><span>прочие</span><div><i style="width:4%"></i></div><b>4%</b></div>
-                  </div>
-                  <div class="pres-campaign-actions">
-                    <button class="btn" data-pres-action="tour">Тур по стране · ₳0.8м</button>
-                    <button class="btn" data-pres-action="debate">Телеграфные дебаты · ₳0.5м</button>
-                    <button class="btn" data-pres-action="endorse">Искать поддержку союзников</button>
-                  </div>
-                </div>
-                <div class="panel president-office-card">
-                  <div class="panel-title">ПОСТ ПРЕЗИДЕНТА</div>
-                  <div class="office-seal">A</div>
-                  <div class="subhead">Действующий президент</div>
-                  <h2 id="currentPresidentName">Маркус Эстель</h2>
-                  <p id="currentPresidentParty">Консервативная партия · срок до 1848</p>
-                  <div class="mini-note" id="presidencyPlayerMessage">Ваш лидер пока не занимает президентский пост. Победа на выборах изменит статус партии и доступ к полномочиям главы государства.</div>
-                </div>
-              </div>
-              <div class="panel presidential-ballot">
-                <div class="panel-title">ИЗБИРАТЕЛЬНАЯ ПРОЦЕДУРА</div>
-                <div class="pres-election-stage">
-                  <div class="stage-step active" id="presStageNomination"><b>1</b><span>Номинация</span></div>
-                  <div class="stage-line"></div>
-                  <div class="stage-step" id="presStageRound1"><b>2</b><span>Первый тур</span></div>
-                  <div class="stage-line"></div>
-                  <div class="stage-step" id="presStageRunoff"><b>3</b><span>Второй тур</span></div>
-                  <div class="stage-line"></div>
-                  <div class="stage-step" id="presStageOffice"><b>4</b><span>Инаугурация</span></div>
-                </div>
-                <div class="pres-result-box" id="presidentElectionResult">Кандидат партии готовится к кампании.</div>
-                <div class="pres-ballot-actions"><button class="btn primary" id="runPresidentRound1">Провести первый тур</button><button class="btn" id="runPresidentRunoff" disabled>Провести второй тур</button></div>
-              </div>
-            </div>
+          <div id="presResult" class="result-box large">Кандидат ещё не прошёл первый тур.</div>
+          <div class="row-actions center">
+            <button class="primary" id="runPresRound1">Провести первый тур</button>
+            <button id="runPresRound2" disabled>Провести второй тур</button>
+            <button id="inaugurateBtn" disabled>Инаугурация</button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- PARLIAMENT -->
-    <section class="screen parliament">
-      <div class="parliament-wrap">
-        <div class="panel billhead">
-          <div>
-            <div class="subhead">Очередное заседание · Палата граждан</div>
-            <h1>Законопроект № 184 — О фабричном труде</h1>
-            <p>Второе чтение · голосование через 2 игровых дня</p>
+    <section class="view" id="view-parliament">
+      <div class="page-head compact">
+        <div>
+          <div class="eyebrow">ПАЛАТА ГРАЖДАН · 250 МЕСТ</div>
+          <h1>Парламент и законы</h1>
+          <p>Вы управляете собственной фракцией: договариваетесь, вносите поправки и голосуете.</p>
+        </div>
+      </div>
+
+      <div class="two-col parliament-layout">
+        <div class="card">
+          <div class="card-head"><h2>Состав парламента</h2><span id="majorityLabel">126 для большинства</span></div>
+          <div id="parliamentBars" class="parliament-bars"></div>
+          <div class="coalition-summary" id="coalitionSummary"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Текущий законопроект</h2><span id="billStage">2-е чтение</span></div>
+          <h3 id="billTitle">О фабричном труде</h3>
+          <div id="billArticles" class="law-text"></div>
+          <div class="row-actions">
+            <button id="openAmendment">Внести поправку</button>
+            <button id="negotiateBill">Переговоры</button>
+            <button class="primary" id="voteBill">Голосование</button>
           </div>
-          <div class="threshold">
-            <div class="subhead">Для принятия</div>
-            <b id="thresholdText">126 / 250</b>
-            <span class="tag">обычное большинство</span>
+          <div id="billMessage" class="hint"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Прогноз голосования</h2></div>
+        <div id="billVotePreview" class="vote-preview"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-economy">
+      <div class="page-head compact">
+        <div>
+          <div class="eyebrow">ЭКОНОМИКА</div>
+          <h1>Рынки, предприятия и собственность</h1>
+          <p>Небольшая живая демонстрация: цены меняются со временем, предприятия можно покупать государством и приватизировать.</p>
+        </div>
+      </div>
+
+      <div class="metric-grid five">
+        <div class="card metric"><small>ВВП</small><strong id="econGDP">₳ 8.42 млрд</strong><span id="econGrowth">+3.1% г/г</span></div>
+        <div class="card metric"><small>Инфляция</small><strong id="econInflation">3.8%</strong><span>меняется помесячно</span></div>
+        <div class="card metric"><small>Промышленность</small><strong id="econIndustry">112</strong><span>индекс выпуска</span></div>
+        <div class="card metric"><small>Безработица</small><strong id="econUnemployment">7.1%</strong><span>демонстрационная</span></div>
+        <div class="card metric"><small>Валюта</small><strong id="econCurrency">₳ талер</strong><span id="econCurrencyTrust">доверие 74%</span></div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><h2>Локальный рынок Ауреля</h2><span>цены в официальной валюте</span></div>
+          <div id="marketTable" class="market-table"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Предприятия</h2><span>владелец может меняться</span></div>
+          <div id="enterpriseList" class="enterprise-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-state">
+      <div class="page-head compact">
+        <div>
+          <div class="eyebrow">ГОСУДАРСТВО</div>
+          <h1>Идентичность, валюта и государственные решения</h1>
+          <p>Название, флаг и валюта изменяются через политические процедуры, а не через обычные настройки.</p>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><h2>Государственная идентичность</h2></div>
+          <div class="identity-preview">
+            <div class="flag big" id="stateFlag"></div>
+            <div>
+              <h2 id="stateName">Республика Аврелия</h2>
+              <p id="stateForm">Смешанная республика</p>
+              <div class="kv"><span>Короткое имя</span><b id="stateShort">Аврелия</b></div>
+              <div class="kv"><span>Девиз</span><b id="stateMotto">«Закон и достоинство»</b></div>
+            </div>
+          </div>
+          <button class="primary wide" id="openIdentity">Предложить реформу идентичности</button>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Официальная валюта</h2></div>
+          <div class="currency-preview">
+            <div class="currency-symbol" id="currencySymbol">₳</div>
+            <div>
+              <h2 id="currencyName">Аурельский талер</h2>
+              <div class="kv"><span>Тип</span><b id="currencyType">смешанная</b></div>
+              <div class="kv"><span>Серебро</span><b id="currencySilver">18.0 г</b></div>
+              <div class="kv"><span>Доверие</span><b id="currencyTrust">74%</b></div>
+            </div>
+          </div>
+          <button class="primary wide" id="openCurrency">Денежная реформа</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-science">
+      <div class="page-head compact">
+        <div>
+          <div class="eyebrow">НАУКА</div>
+          <h1>Учёные, гранты и открытия</h1>
+          <p>Государство не нажимает кнопку «исследовать». Исследователи работают сами, а власть может выдавать гранты и создавать условия.</p>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><h2>Исследование электричества</h2><span id="electricityStatus" class="tag">экспериментальная стадия</span></div>
+          <div class="research-progress"><i id="electricityBar"></i></div>
+          <div class="kv"><span>Накопленный прогресс</span><b id="electricityProgressText">62%</b></div>
+          <div class="knowledge-chain">
+            <span class="done">Статическое электричество</span><b>→</b>
+            <span class="done">Проводимость</span><b>→</b>
+            <span id="electroNode">Электрохимия</span><b>→</b>
+            <span>Генераторы</span>
           </div>
         </div>
+        <div class="card">
+          <div class="card-head"><h2>Запросы учёных</h2><span>решение правительства</span></div>
+          <div id="grantRequests" class="grant-list"></div>
+        </div>
+      </div>
+    </section>
 
-        <div class="parliament-main">
-          <div class="panel factions">
-            <div class="panel-title">ФРАКЦИИ <small id="seatCountLabel">250 мест</small></div>
+    <section class="view" id="view-map">
+      <div class="page-head compact">
+        <div>
+          <div class="eyebrow">MAP V2 · ДЕМОНСТРАЦИЯ</div>
+          <h1>Крупные игровые провинции</h1>
+          <p>Современные административные границы не показываются. Политическая граница выводится по владельцу провинции.</p>
+        </div>
+      </div>
 
-            <div class="faction">
-              <div class="faction-top"><b>Социалисты</b><span>54</span></div>
-              <div class="factionbar"><i style="width:21.6%;background:#ae6059"></i></div>
-            </div>
-            <div class="faction">
-              <div class="faction-top"><b>Либералы</b><span>71</span></div>
-              <div class="factionbar"><i style="width:28.4%;background:#527c9d"></i></div>
-            </div>
-            <div class="faction">
-              <div class="faction-top"><b>Аграрии</b><span>31</span></div>
-              <div class="factionbar"><i style="width:12.4%;background:#7b875e"></i></div>
-            </div>
-            <div class="faction">
-              <div class="faction-top"><b>Независимые</b><span>16</span></div>
-              <div class="factionbar"><i style="width:6.4%;background:#9b8350"></i></div>
-            </div>
-            <div class="faction">
-              <div class="faction-top"><b>Консерваторы</b><span>78</span></div>
-              <div class="factionbar"><i style="width:31.2%;background:#59606d"></i></div>
-            </div>
-
-            <div class="subhead" style="margin-top:16px">Прогноз голосования</div>
-            <div class="rowline"><span>За</span><b class="good">119–141</b></div>
-            <div class="rowline"><span>Против</span><b class="bad">89–112</b></div>
-            <div class="rowline"><span>Не определились</span><b>27</b></div>
-
-            <div style="margin-top:14px;font-size:9px;color:#66675f;line-height:1.4">
-              Кружок = одно место в парламенте. Количество кружков генерируется автоматически из числа мест фракций.
-            </div>
+      <div class="map-layout">
+        <div class="card map-card">
+          <div class="map-toolbar">
+            <button class="active" data-map-layer="political">Политика</button>
+            <button data-map-layer="resources">Ресурсы</button>
+            <button data-map-layer="roads">Инфраструктура</button>
+            <button id="mapReset">Сброс</button>
           </div>
-
-          <div class="panel chamber">
-            <svg id="parliamentSvg" viewBox="0 0 760 500" preserveAspectRatio="xMidYMid meet">
-              <g id="seatLayer"></g>
-              <rect class="dais" x="305" y="430" width="150" height="44" rx="2"/>
-              <text class="dais-label" x="380" y="457">ПРЕЗИДИУМ</text>
+          <div id="mapStage" class="map-stage">
+            <svg id="mapSvg" viewBox="0 0 1000 560">
+              <g id="mapWorld">
+                <path class="province norven" data-province="Северный Норвен" d="M70 80 L250 70 L300 170 L220 250 L70 220 L40 140 Z"></path>
+                <path class="province aurelia" data-province="Тернская провинция" d="M250 70 L450 80 L500 180 L380 245 L300 170 Z"></path>
+                <path class="province aurelia" data-province="Северная Аурелия" d="M450 80 L650 100 L700 210 L560 250 L500 180 Z"></path>
+                <path class="province estel" data-province="Эстельский край" d="M650 100 L860 120 L950 220 L780 260 L700 210 Z"></path>
+                <path class="province norven" data-province="Западный рубеж" d="M70 220 L220 250 L310 350 L210 430 L60 380 L40 290 Z"></path>
+                <path class="province aurelia selected" data-province="Аурельская провинция" d="M220 250 L380 245 L500 340 L420 440 L310 350 Z"></path>
+                <path class="province aurelia" data-province="Ровенская провинция" d="M380 245 L560 250 L700 350 L590 450 L500 340 Z"></path>
+                <path class="province estel" data-province="Восточный Эстель" d="M560 250 L780 260 L940 360 L760 450 L700 350 Z"></path>
+                <path class="province aurelia" data-province="Южная Аурелия" d="M210 430 L420 440 L590 450 L520 535 L300 520 Z"></path>
+                <path class="province estel" data-province="Эстельская марка" d="M590 450 L760 450 L940 360 L960 500 L760 535 L520 535 Z"></path>
+                <g id="resourceOverlay" class="hidden">
+                  <ellipse class="resource coal" cx="505" cy="175" rx="120" ry="52"></ellipse>
+                  <text x="465" y="180">уголь</text>
+                  <ellipse class="resource iron" cx="390" cy="390" rx="125" ry="45"></ellipse>
+                  <text x="350" y="395">железо</text>
+                </g>
+                <g id="roadOverlay" class="hidden">
+                  <path class="road" d="M160 345 C350 300 520 330 785 320"></path>
+                  <path class="road" d="M420 120 C430 260 430 360 450 505"></path>
+                </g>
+                <g id="cityOverlay">
+                  <circle cx="420" cy="335" r="7"></circle><text x="433" y="332">Аурель</text>
+                  <circle cx="610" cy="345" r="6"></circle><text x="623" y="342">Ровен</text>
+                </g>
+              </g>
             </svg>
-
-            <div class="tallies">
-              <div class="tally"><b class="good">127</b><span>За</span></div>
-              <div class="tally"><b class="bad">94</b><span>Против</span></div>
-              <div class="tally"><b>18</b><span>Воздержатся</span></div>
-              <div class="tally"><b>11</b><span>Не определились</span></div>
-            </div>
           </div>
-
-          <div class="panel billbox">
-            <div class="panel-title">ТЕКСТ ЗАКОНА <small>ред. 2</small></div>
-            <h3>О фабричном труде</h3>
-            <div class="article"><b>СТАТЬЯ I</b><p>Максимальная продолжительность рабочей недели: <strong>60 часов</strong>.</p></div>
-            <div class="article"><b>СТАТЬЯ II</b><p>Минимальный возраст фабричного труда: <strong>10 лет</strong>.</p></div>
-            <div class="article"><b>СТАТЬЯ III</b><p>Создать корпус фабричных инспекторов Министерства внутренних дел.</p></div>
-
-            <div class="note">
-              <div class="subhead">Оценка министерства</div>
-              <div class="rowline"><span>Расходы бизнеса</span><b class="bad">+2.8%</b></div>
-              <div class="rowline"><span>Доход рабочих</span><b class="good">+1.4%</b></div>
-              <div class="rowline"><span>Промышленный выпуск</span><b class="warn">−0.4…−1.2%</b></div>
-              <div class="rowline"><span>Уверенность</span><b class="warn">низкая</b></div>
-            </div>
-          </div>
+        </div>
+        <div class="card province-info">
+          <div class="card-head"><h2>Провинция</h2></div>
+          <h2 id="provinceName">Аурельская провинция</h2>
+          <div class="kv"><span>Владелец</span><b id="provinceOwner">Республика Аврелия</b></div>
+          <div class="kv"><span>Население</span><b id="provincePop">2.84 млн</b></div>
+          <div class="kv"><span>Инфраструктура</span><b id="provinceInfra">78 / 100</b></div>
+          <div class="kv"><span>Известные ресурсы</span><b id="provinceResources">уголь, железо</b></div>
+          <button class="wide" id="investInfra">Инвестировать в инфраструктуру · ₳3м</button>
+          <button class="wide" id="surveyProvince">Геологоразведка · ₳1м</button>
         </div>
       </div>
     </section>
-
-    <!-- ECONOMY -->
-    <section class="screen economy">
-      <div class="module-page">
-        <div class="panel module-subnav" data-module="economy">
-          <button class="active" data-view="econ-overview">Обзор</button>
-          <button data-view="econ-market">Рынки</button>
-          <button data-view="econ-resources">Ресурсы</button>
-          <button data-view="econ-enterprises">Предприятия</button>
-          <button data-view="econ-production">Производство</button>
-          <button data-view="econ-materials">Материалы</button>
-          <button data-view="econ-trade">Торговля</button>
-          <button data-view="econ-finance">Финансы</button>
-          <button data-view="econ-currency">Валюта</button>
-        </div>
-
-        <div class="module-content">
-          <div class="module-view active" id="econ-overview">
-            <div class="econ-overview">
-              <div class="panel header-strip">
-                <div>
-                  <h2 class="section-title">Национальная экономика</h2>
-                  <p class="section-desc">Предприятия, инвестиции и рабочие места развиваются автономно; государство влияет через законы, налоги, бюджет и инфраструктуру.</p>
-                </div>
-                <div class="header-actions">
-                  <span class="tag">Статистика: средняя точность</span>
-                  <button class="btn" id="economicReportBtn">Экономический доклад</button>
-                </div>
-              </div>
-
-              <div class="kpi-grid">
-                <div class="panel kpi-card"><div class="k">ВВП</div><div class="v">₳ 8.42 млрд</div><div class="s good">↑ +3.1% г/г</div></div>
-                <div class="panel kpi-card"><div class="k">ВВП на душу</div><div class="v">₳ 445</div><div class="s good">↑ +1.8%</div></div>
-                <div class="panel kpi-card"><div class="k">Пром. выпуск</div><div class="v">112.8</div><div class="s good">↑ +5.4%</div></div>
-                <div class="panel kpi-card"><div class="k">Безработица</div><div class="v">7.1%</div><div class="s good">↓ −0.4 п.п.</div></div>
-                <div class="panel kpi-card"><div class="k">Торговый баланс</div><div class="v">−₳ 130 млн</div><div class="s bad">импорт выше экспорта</div></div>
-                <div class="panel kpi-card"><div class="k">Ставка ЦБ</div><div class="v">4.5%</div><div class="s">без изменений</div></div>
-              </div>
-
-              <div class="econ-main-grid">
-                <div class="econ-left">
-                  <div class="panel">
-                    <div class="panel-title">СТРУКТУРА ЭКОНОМИКИ <small>доля выпуска</small></div>
-                    <div class="sector-list">
-                      <div class="sector-row"><b>Сельское хозяйство</b><div class="sector-bar"><i style="width:31%"></i></div><span>31%</span></div>
-                      <div class="sector-row"><b>Промышленность</b><div class="sector-bar"><i style="width:27%"></i></div><span>27%</span></div>
-                      <div class="sector-row"><b>Добыча</b><div class="sector-bar"><i style="width:12%"></i></div><span>12%</span></div>
-                      <div class="sector-row"><b>Строительство</b><div class="sector-bar"><i style="width:9%"></i></div><span>9%</span></div>
-                      <div class="sector-row"><b>Услуги и торговля</b><div class="sector-bar"><i style="width:21%"></i></div><span>21%</span></div>
-
-                      <div class="subhead" style="margin:12px 0 6px">Промышленный индекс · 24 месяца</div>
-                      <div class="econ-chart">
-                        <svg viewBox="0 0 500 110" preserveAspectRatio="none">
-                          <polyline points="0,88 32,84 64,80 96,83 128,71 160,67 192,70 224,56 256,59 288,47 320,39 352,43 384,31 416,28 448,22 500,18" fill="none" stroke="#596d65" stroke-width="3"/>
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="panel">
-                    <div class="panel-title">ЧАСТНЫЕ ИНВЕСТИЦИИ <small>строится автоматически</small></div>
-                    <div class="card-body">
-                      <div class="project">
-                        <div class="project-head"><b>Аурельский сталелитейный комбинат</b><span class="pill good">68%</span></div>
-                        <small>₳ 42.8 млн · 2 400 будущих рабочих мест · завершение через 11 мес.</small>
-                        <div class="progress" style="margin-top:5px"><i style="width:68%"></i></div>
-                      </div>
-                      <div class="project">
-                        <div class="project-head"><b>Железная дорога Ровен—Терн</b><span class="pill warn">41%</span></div>
-                        <small>Частно-государственный проект · нехватка стали задерживает стройку.</small>
-                        <div class="progress" style="margin-top:5px"><i style="width:41%"></i></div>
-                      </div>
-                      <div class="project">
-                        <div class="project-head"><b>Текстильные фабрики Лиора</b><span class="pill good">82%</span></div>
-                        <small>Консорциум из 4 компаний · ожидаемый найм: 1 120 работников.</small>
-                        <div class="progress" style="margin-top:5px"><i style="width:82%"></i></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="econ-right">
-                  <div class="panel">
-                    <div class="panel-title">НАПРЯЖЕНИЕ НА РЫНКЕ <small>товары с крупнейшим дисбалансом</small></div>
-                    <div class="card-body">
-                      <div class="market-alert">
-                        <div class="iconbox">●</div>
-                        <div><b>Уголь</b><small>Недостаток предложения тормозит металлургию и железные дороги.</small></div>
-                        <div><b class="bad">−18.2%</b><small class="bad">цена +21.8%</small></div>
-                      </div>
-                      <div class="market-alert">
-                        <div class="iconbox">♨</div>
-                        <div><b>Зерно</b><small>Плохой урожай на юге; растёт импорт и стоимость продовольствия.</small></div>
-                        <div><b class="bad">−7.6%</b><small class="bad">цена +9.1%</small></div>
-                      </div>
-                      <div class="market-alert">
-                        <div class="iconbox">▦</div>
-                        <div><b>Сталь</b><small>Внутреннее производство покрывает спрос, но стройки давят на цены.</small></div>
-                        <div><b class="good">+6.4%</b><small class="bad">цена +12.6%</small></div>
-                      </div>
-                      <div class="market-alert">
-                        <div class="iconbox">≈</div>
-                        <div><b>Ткань</b><small>Избыток продукции уходит на экспорт.</small></div>
-                        <div><b class="good">+35.8%</b><small class="good">цена −3.1%</small></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="panel">
-                    <div class="panel-title">АКТИВНАЯ ЭКОНОМИЧЕСКАЯ ПОЛИТИКА</div>
-                    <div class="card-body">
-                      <div class="policy-row">
-                        <div class="iconbox">%</div>
-                        <div><b>Тариф на импорт стали — 8%</b><small>Поддерживает местных производителей, повышает стоимость строительства.</small></div>
-                        <span class="pill warn">активно</span>
-                      </div>
-                      <div class="policy-row">
-                        <div class="iconbox">↯</div>
-                        <div><b>Субсидии железным дорогам</b><small>Государство покрывает до 15% капитальных затрат.</small></div>
-                        <span class="pill good">активно</span>
-                      </div>
-                      <div class="policy-row">
-                        <div class="iconbox">¤</div>
-                        <div><b>Золотой стандарт</b><small>Сдерживает денежную эмиссию и снижает гибкость центробанка.</small></div>
-                        <span class="pill">система</span>
-                      </div>
-                      <div class="mini-note" style="margin-top:7px">
-                        Государство не выбирает, где строить частные заводы. Предприниматели реагируют на прибыль, спрос, кредиты, инфраструктуру, налоги и доступность рабочей силы.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="module-view" id="econ-market">
-            <div class="market-layout">
-              <div class="panel goods-table">
-                <div class="panel-title">НАЦИОНАЛЬНЫЙ РЫНОК <small>месячные потоки</small></div>
-                <table class="data-table">
-                  <thead><tr><th>Товар</th><th>Производство</th><th>Потребление</th><th>Запасы</th><th>Баланс</th><th>Цена</th><th>6 мес.</th></tr></thead>
-                  <tbody>
-                    <tr class="selected"><td><b>Уголь</b></td><td>821 тыс. т</td><td>1.01 млн т</td><td>14 дней</td><td class="bad">−18.2%</td><td>₳ 5.82</td><td class="bad">+21.8%</td></tr>
-                    <tr><td><b>Зерно</b></td><td>1.82 млн т</td><td>1.97 млн т</td><td>33 дня</td><td class="bad">−7.6%</td><td>₳ 2.14</td><td class="bad">+9.1%</td></tr>
-                    <tr><td><b>Железная руда</b></td><td>144 тыс. т</td><td>132 тыс. т</td><td>46 дней</td><td class="good">+9.1%</td><td>₳ 4.08</td><td>+2.4%</td></tr>
-                    <tr><td><b>Сталь</b></td><td>118 тыс. т</td><td>111 тыс. т</td><td>22 дня</td><td class="good">+6.4%</td><td>₳ 18.40</td><td class="bad">+12.6%</td></tr>
-                    <tr><td><b>Древесина</b></td><td>441 тыс. м³</td><td>391 тыс. м³</td><td>51 день</td><td class="good">+12.8%</td><td>₳ 3.44</td><td>+0.8%</td></tr>
-                    <tr><td><b>Ткань</b></td><td>690 тыс.</td><td>508 тыс.</td><td>67 дней</td><td class="good">+35.8%</td><td>₳ 1.87</td><td class="good">−3.1%</td></tr>
-                    <tr><td><b>Инструменты</b></td><td>41 тыс.</td><td>44 тыс.</td><td>26 дней</td><td class="bad">−6.8%</td><td>₳ 14.72</td><td class="bad">+6.9%</td></tr>
-                    <tr><td><b>Машины</b></td><td>12.8 тыс.</td><td>17.1 тыс.</td><td>18 дней</td><td class="bad">−25.1%</td><td>₳ 94.10</td><td class="bad">+18.3%</td></tr>
-                    <tr><td><b>Стекло</b></td><td>32 тыс.</td><td>27 тыс.</td><td>38 дней</td><td class="good">+18.5%</td><td>₳ 7.64</td><td class="good">−1.7%</td></tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div class="panel market-detail">
-                <div class="subhead">Выбранный товар</div>
-                <h2 style="margin:3px 0 0;font:700 22px Georgia,serif">Уголь</h2>
-                <div class="market-price">₳ 5.82 <span style="font:12px ui-monospace;color:#66675f">/ тонна</span></div>
-                <div class="rowline"><span>Производство</span><b>821 тыс. т / мес.</b></div>
-                <div class="rowline"><span>Потребление</span><b>1.01 млн т / мес.</b></div>
-                <div class="rowline"><span>Импорт</span><b>134 тыс. т / мес.</b></div>
-                <div class="rowline"><span>Стратегический запас</span><b class="warn">14 дней</b></div>
-
-                <div class="subhead" style="margin:12px 0 6px">История цены</div>
-                <div class="market-history">
-                  <svg viewBox="0 0 300 120" preserveAspectRatio="none">
-                    <polyline points="0,97 30,91 60,94 90,83 120,78 150,66 180,60 210,42 240,35 270,24 300,18" fill="none" stroke="#8a5d4f" stroke-width="3"/>
-                  </svg>
-                </div>
-
-                <div class="subhead" style="margin:12px 0 6px">Крупнейшие потребители</div>
-                <div class="rowline"><span>Металлургия</span><b>38%</b></div>
-                <div class="rowline"><span>Железные дороги</span><b>26%</b></div>
-                <div class="rowline"><span>Городское отопление</span><b>18%</b></div>
-                <div class="rowline"><span>Прочие</span><b>18%</b></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="module-view" id="econ-industries">
-            <div class="industry-grid">
-              <div class="panel industry-card">
-                <div class="industry-card-head"><div class="iconbox">⚒</div><div><b>Металлургия</b><div class="section-desc">23 предприятия</div></div></div>
-                <div class="industry-stat"><span>Работники</span><b>48 200</b></div>
-                <div class="industry-stat"><span>Загрузка мощностей</span><b>86%</b></div>
-                <div class="industry-stat"><span>Прибыльность</span><b class="good">+11.4%</b></div>
-                <div class="industry-stat"><span>Главный риск</span><b class="bad">уголь</b></div>
-              </div>
-              <div class="panel industry-card">
-                <div class="industry-card-head"><div class="iconbox">≈</div><div><b>Текстиль</b><div class="section-desc">61 предприятие</div></div></div>
-                <div class="industry-stat"><span>Работники</span><b>74 100</b></div>
-                <div class="industry-stat"><span>Загрузка мощностей</span><b>79%</b></div>
-                <div class="industry-stat"><span>Прибыльность</span><b class="good">+8.2%</b></div>
-                <div class="industry-stat"><span>Экспорт</span><b class="good">31%</b></div>
-              </div>
-              <div class="panel industry-card">
-                <div class="industry-card-head"><div class="iconbox">⚙</div><div><b>Машиностроение</b><div class="section-desc">17 предприятий</div></div></div>
-                <div class="industry-stat"><span>Работники</span><b>28 600</b></div>
-                <div class="industry-stat"><span>Загрузка мощностей</span><b>94%</b></div>
-                <div class="industry-stat"><span>Прибыльность</span><b class="good">+16.7%</b></div>
-                <div class="industry-stat"><span>Главный риск</span><b class="bad">станки</b></div>
-              </div>
-              <div class="panel industry-card">
-                <div class="industry-card-head"><div class="iconbox">♨</div><div><b>Пищевая промышленность</b><div class="section-desc">88 предприятий</div></div></div>
-                <div class="industry-stat"><span>Работники</span><b>92 700</b></div>
-                <div class="industry-stat"><span>Загрузка мощностей</span><b>71%</b></div>
-                <div class="industry-stat"><span>Прибыльность</span><b>+4.1%</b></div>
-                <div class="industry-stat"><span>Главный риск</span><b class="warn">зерно</b></div>
-              </div>
-              <div class="panel industry-card">
-                <div class="industry-card-head"><div class="iconbox">♣</div><div><b>Лесная промышленность</b><div class="section-desc">44 предприятия</div></div></div>
-                <div class="industry-stat"><span>Работники</span><b>39 800</b></div>
-                <div class="industry-stat"><span>Загрузка мощностей</span><b>68%</b></div>
-                <div class="industry-stat"><span>Прибыльность</span><b>+5.6%</b></div>
-                <div class="industry-stat"><span>Экспорт</span><b class="good">24%</b></div>
-              </div>
-              <div class="panel industry-card">
-                <div class="industry-card-head"><div class="iconbox">▧</div><div><b>Строительство</b><div class="section-desc">126 компаний</div></div></div>
-                <div class="industry-stat"><span>Работники</span><b>101 200</b></div>
-                <div class="industry-stat"><span>Активные объекты</span><b>212</b></div>
-                <div class="industry-stat"><span>Прибыльность</span><b class="good">+13.3%</b></div>
-                <div class="industry-stat"><span>Главный риск</span><b class="bad">сталь</b></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="module-view" id="econ-trade">
-            <div class="trade-grid">
-              <div class="panel">
-                <div class="panel-title">ВНЕШНЯЯ ТОРГОВЛЯ <small>последние 12 месяцев</small></div>
-                <div class="card-body">
-                  <div class="rowline"><span>Экспорт</span><b class="good">₳ 1.09 млрд</b></div>
-                  <div class="rowline"><span>Импорт</span><b class="bad">₳ 1.22 млрд</b></div>
-                  <div class="rowline"><span>Баланс</span><b class="bad">−₳ 130 млн</b></div>
-                  <div class="rowline"><span>Таможенные доходы</span><b>₳ 61.4 млн</b></div>
-
-                  <div class="subhead" style="margin:14px 0 6px">Торговые партнёры</div>
-                  <div class="partner"><b>Республика Норвен</b><div class="partner-bar"><i style="width:82%"></i></div><span>21%</span></div>
-                  <div class="partner"><b>Королевство Эстель</b><div class="partner-bar"><i style="width:67%"></i></div><span>17%</span></div>
-                  <div class="partner"><b>Вальская Федерация</b><div class="partner-bar"><i style="width:55%"></i></div><span>14%</span></div>
-                  <div class="partner"><b>Империя Каден</b><div class="partner-bar"><i style="width:39%"></i></div><span>10%</span></div>
-                </div>
-              </div>
-
-              <div class="panel">
-                <div class="panel-title">ТОВАРНАЯ СТРУКТУРА</div>
-                <div class="card-body">
-                  <div class="subhead">Главный экспорт</div>
-                  <div class="rowline"><span>Ткань</span><b>₳ 244 млн</b></div>
-                  <div class="rowline"><span>Древесина</span><b>₳ 196 млн</b></div>
-                  <div class="rowline"><span>Сталь</span><b>₳ 141 млн</b></div>
-                  <div class="rowline"><span>Зерно</span><b>₳ 88 млн</b></div>
-
-                  <div class="subhead" style="margin-top:14px">Главный импорт</div>
-                  <div class="rowline"><span>Машины и станки</span><b class="bad">₳ 310 млн</b></div>
-                  <div class="rowline"><span>Уголь</span><b class="bad">₳ 182 млн</b></div>
-                  <div class="rowline"><span>Химические товары</span><b>₳ 133 млн</b></div>
-                  <div class="rowline"><span>Предметы роскоши</span><b>₳ 94 млн</b></div>
-                </div>
-              </div>
-
-              <div class="panel" style="grid-column:1/-1">
-                <div class="panel-title">ТОРГОВАЯ ПОЛИТИКА</div>
-                <div class="card-body" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-                  <div class="mini-note"><b>Средний импортный тариф: 7.4%</b><br>Промышленные товары защищены сильнее сельскохозяйственных.</div>
-                  <div class="mini-note"><b>3 торговых соглашения</b><br>Сниженные пошлины действуют с Норвеном, Эстелем и Лигой Свободных портов.</div>
-                  <div class="mini-note"><b>2 торговых спора</b><br>Норвен требует снижения пошлины на уголь; промышленники выступают против.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="module-view" id="econ-finance">
-            <div class="finance-grid">
-              <div class="panel">
-                <div class="panel-title">ГОСУДАРСТВЕННЫЕ ФИНАНСЫ</div>
-                <div class="card-body">
-                  <div class="rowline"><span>Доходы бюджета</span><b>₳ 462 млн / год</b></div>
-                  <div class="rowline"><span>Расходы бюджета</span><b>₳ 449 млн / год</b></div>
-                  <div class="rowline"><span>Профицит</span><b class="good">+₳ 13 млн</b></div>
-                  <div class="rowline"><span>Государственный долг</span><b>28.4% ВВП</b></div>
-                  <div class="rowline"><span>Обслуживание долга</span><b>₳ 18.7 млн / год</b></div>
-                </div>
-              </div>
-
-              <div class="panel">
-                <div class="panel-title">БАНКОВСКАЯ СИСТЕМА</div>
-                <div class="card-body">
-                  <div class="rowline"><span>Ставка Центробанка</span><b>4.5%</b></div>
-                  <div class="rowline"><span>Средняя ставка кредита</span><b>7.8%</b></div>
-                  <div class="rowline"><span>Кредитование промышленности</span><b class="good">+11.2%</b></div>
-                  <div class="rowline"><span>Плохие долги</span><b class="warn">5.4%</b></div>
-                  <div class="rowline"><span>Золотой резерв</span><b>₳ 214 млн</b></div>
-                </div>
-              </div>
-
-              <div class="panel">
-                <div class="panel-title">НАЛОГОВАЯ СИСТЕМА</div>
-                <div class="card-body">
-                  <div class="rowline"><span>Подоходный налог</span><b>4–12%</b></div>
-                  <div class="rowline"><span>Налог на прибыль</span><b>14%</b></div>
-                  <div class="rowline"><span>Акцизы</span><b>8%</b></div>
-                  <div class="rowline"><span>Импортные пошлины</span><b>7.4%</b></div>
-                  <div class="rowline"><span>Эффективность сбора</span><b class="warn">72%</b></div>
-                </div>
-              </div>
-
-              <div class="panel">
-                <div class="panel-title">КРЕДИТНЫЙ ЦИКЛ</div>
-                <div class="card-body">
-                  <div class="mini-note"><b>Фаза: расширение</b><br>Инвестиции растут быстрее ВВП. Цены промышленных активов повышаются, но признаков банковского кризиса пока нет.</div>
-                  <div class="subhead" style="margin:12px 0 6px">Финансовая устойчивость</div>
-                  <div class="progress"><i style="width:68%"></i></div>
-                  <div style="font-size:8px;color:#66675f;margin-top:4px">68 / 100 · умеренный риск</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-
-          <div class="module-view" id="econ-resources">
-            <div class="feature-page">
-              <div class="panel header-strip">
-                <div><h2 class="section-title">Природные ресурсы и геология</h2><p class="section-desc">Истинная геология фиксируется при старте кампании; государство видит только разведанную часть.</p></div>
-                <div class="header-actions"><span class="tag">resource seed: 1848-A7C9</span><button class="btn primary" id="fundExploration">Финансировать разведку</button></div>
-              </div>
-              <div class="kpi-grid">
-                <div class="panel kpi-card"><div class="k">Известные структуры</div><div class="v">37</div><div class="s">11 бассейнов · 19 поясов · 7 кластеров</div></div>
-                <div class="panel kpi-card"><div class="k">Разведанность</div><div class="v" id="surveyKpi">46%</div><div class="s good">↑ +3 п.п. за 5 лет</div></div>
-                <div class="panel kpi-card"><div class="k">Добыча топлива</div><div class="v">1.06 млн т</div><div class="s">в месяц</div></div>
-                <div class="panel kpi-card"><div class="k">Металлические руды</div><div class="v">284 тыс. т</div><div class="s">в месяц</div></div>
-                <div class="panel kpi-card"><div class="k">Лесной запас</div><div class="v">1.8 млрд т</div><div class="s warn">локальная перегрузка на западе</div></div>
-                <div class="panel kpi-card"><div class="k">Геол. бюджет</div><div class="v">₳ 3.8 млн</div><div class="s">0.8% госрасходов</div></div>
-              </div>
-              <div class="three-col-layout">
-                <div class="panel compact-card">
-                  <div class="panel-title">РЕЕСТР РЕСУРСОВ <small>основные классы</small></div>
-                  <div class="card-body resource-registry">
-                    <div class="registry-row"><b>Топливо</b><span>уголь · лигнит · нефть · газ · уран · торий</span></div>
-                    <div class="registry-row"><b>Чёрные / легирующие</b><span>железо · марганец · хром · никель · кобальт · вольфрам</span></div>
-                    <div class="registry-row"><b>Цветные</b><span>медь · олово · свинец · цинк · бокситы</span></div>
-                    <div class="registry-row"><b>Редкие / драгоценные</b><span>золото · серебро · PGM · литий · редкоземы</span></div>
-                    <div class="registry-row"><b>Неметаллические</b><span>соль · сера · фосфаты · калий · известняк · графит</span></div>
-                    <div class="registry-row"><b>Возобновляемые</b><span>лес · рыба · почва · пастбища · пресная вода</span></div>
-                    <div class="registry-row"><b>Энергопотоки</b><span>реки · ветер · солнце · геотермальная · приливы</span></div>
-                  </div>
-                </div>
-                <div class="panel compact-card basin-table-wrap">
-                  <div class="panel-title">РАЗВЕДАННЫЕ БАССЕЙНЫ И ПОЯСА <small>выбери строку</small></div>
-                  <table class="data-table basin-table">
-                    <thead><tr><th>Структура</th><th>Ресурс</th><th>Разведано</th><th>Запас</th><th>Добыча</th></tr></thead>
-                    <tbody>
-                      <tr class="selected" data-basin="aurcoal"><td><b>Аурельский бассейн</b></td><td>уголь</td><td>72%</td><td>1.24 млрд т</td><td>488 тыс. т/мес.</td></tr>
-                      <tr data-basin="lioriron"><td><b>Лиорский пояс</b></td><td>железная руда</td><td>61%</td><td>418 млн т</td><td>144 тыс. т/мес.</td></tr>
-                      <tr data-basin="valtcopper"><td><b>Вальтский пояс</b></td><td>медь</td><td>38%</td><td>64 млн т</td><td>18 тыс. т/мес.</td></tr>
-                      <tr data-basin="northgas"><td><b>Северный бассейн</b></td><td>газ</td><td>12%</td><td>оценка низкая</td><td>0</td></tr>
-                      <tr data-basin="westforest"><td><b>Западный массив</b></td><td>лес</td><td>89%</td><td>620 млн т</td><td>310 тыс. т/мес.</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="panel compact-card" id="basinDetail">
-                  <div class="panel-title">ГЕОЛОГИЧЕСКАЯ СТРУКТУРА</div>
-                  <div class="card-body">
-                    <div class="subhead">Уголь · бассейн</div>
-                    <h3 class="detail-title" id="basinName">Аурельский бассейн</h3>
-                    <div class="rowline"><span>Протяжённость</span><b id="basinSize">420 × 96 км</b></div>
-                    <div class="rowline"><span>Мощность пласта</span><b id="basinThick">18–74 м</b></div>
-                    <div class="rowline"><span>Концентрация</span><b id="basinGrade">0.68</b></div>
-                    <div class="rowline"><span>Глубина залегания</span><b id="basinDepth">120–910 м</b></div>
-                    <div class="rowline"><span>Добываемость</span><b id="basinExtract">0.74</b></div>
-                    <div class="rowline"><span>Осталось физически</span><b id="basinRemain">1.24 млрд т</b></div>
-                    <div class="subhead" style="margin:12px 0 5px">Разведанность</div>
-                    <div class="progress"><i id="basinSurveyBar" style="width:72%"></i></div>
-                    <div class="mini-note" id="basinNote" style="margin-top:8px">Известные пласты богаче к центру бассейна; восточная часть изучена слабо.</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="module-view" id="econ-enterprises">
-            <div class="feature-page">
-              <div class="panel header-strip">
-                <div><h2 class="section-title">Предприятия и собственность</h2><p class="section-desc">Предприятие остаётся тем же активом при смене владельца: рабочие, оборудование, склады и история не исчезают.</p></div>
-                <div class="header-actions"><span class="tag">частные · боярские · компании · местные · государственные</span></div>
-              </div>
-              <div class="split-detail-layout">
-                <div class="panel goods-table">
-                  <div class="panel-title">КРУПНЫЕ ПРЕДПРИЯТИЯ <small>интерактивный список</small></div>
-                  <table class="data-table enterprise-table">
-                    <thead><tr><th>Предприятие</th><th>Отрасль</th><th>Владелец</th><th>Рабочие</th><th>Маржа</th><th>Запасы</th></tr></thead>
-                    <tbody>
-                      <tr class="selected" data-enterprise="steel"><td><b>Аурельский металлургический комбинат</b></td><td>металлургия</td><td>частная компания</td><td>8 420</td><td class="good">+11.4%</td><td>18 дней</td></tr>
-                      <tr data-enterprise="coal"><td><b>Северные угольные шахты</b></td><td>добыча</td><td>боярин В. Сарен</td><td>12 600</td><td class="good">+17.8%</td><td>9 дней</td></tr>
-                      <tr data-enterprise="arsenal"><td><b>Государственный арсенал</b></td><td>оружие</td><td>государство</td><td>4 880</td><td>+1.2%</td><td>43 дня</td></tr>
-                      <tr data-enterprise="textile"><td><b>Лиорские мануфактуры</b></td><td>текстиль</td><td>консорциум купцов</td><td>6 730</td><td class="good">+8.1%</td><td>31 день</td></tr>
-                      <tr data-enterprise="rail"><td><b>Аурельская железнодорожная компания</b></td><td>транспорт</td><td>смешанная</td><td>3 940</td><td class="warn">+3.4%</td><td>—</td></tr>
-                      <tr data-enterprise="ship"><td><b>Верфь Ровена</b></td><td>судостроение</td><td>регион Ровен</td><td>2 110</td><td class="warn">−0.8%</td><td>26 дней</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="panel enterprise-detail">
-                  <div class="panel-title">ПРЕДПРИЯТИЕ</div>
-                  <div class="card-body">
-                    <div class="subhead" id="enterpriseSector">Металлургия</div>
-                    <h3 class="detail-title" id="enterpriseName">Аурельский металлургический комбинат</h3>
-                    <div class="rowline"><span>Владелец</span><b id="enterpriseOwner">Аурельское промышленное общество</b></div>
-                    <div class="rowline"><span>Оператор</span><b id="enterpriseManager">директор М. Керн</b></div>
-                    <div class="rowline"><span>Работники</span><b id="enterpriseWorkers">8 420</b></div>
-                    <div class="rowline"><span>Прибыль / год</span><b class="good" id="enterpriseProfit">₳ 7.8 млн</b></div>
-                    <div class="rowline"><span>Оценка актива</span><b id="enterpriseValue">₳ 54 млн</b></div>
-                    <div class="mini-note" id="enterpriseNote" style="margin-top:8px">Покупает уголь и железную руду на локальном рынке, продаёт базовые металлы и железные изделия.</div>
-                    <div class="action-stack" style="margin-top:9px">
-                      <button class="btn primary" id="ownershipAction">Купить государством</button>
-                      <button class="btn" id="enterpriseReport">Открыть отчёт предприятия</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="module-view" id="econ-production">
-            <div class="feature-page">
-              <div class="panel header-strip"><div><h2 class="section-title">Производство и товары v1</h2><p class="section-desc">Небольшое универсальное ядро: inputs → labor / capital / energy → outputs. Новые цепочки добавляются данными.</p></div><div class="header-actions"><span class="tag">14 категорий товаров</span><span class="tag">7 архетипов производства</span></div></div>
-              <div class="production-grid">
-                <div class="panel compact-card">
-                  <div class="panel-title">КАТЕГОРИИ ТОВАРОВ</div>
-                  <div class="goods-chip-grid">
-                    <span class="good-chip">еда</span><span class="good-chip">текстильное сырьё</span><span class="good-chip">текстиль</span><span class="good-chip">древесина</span><span class="good-chip">стройматериалы</span><span class="good-chip">топливо</span><span class="good-chip">базовые металлы</span><span class="good-chip">металлоизделия</span><span class="good-chip">оружие</span><span class="good-chip">химикаты</span><span class="good-chip">бумага и печать</span><span class="good-chip">роскошь</span><span class="good-chip">машины</span><span class="good-chip">транспорт / электротовары</span>
-                  </div>
-                </div>
-                <div class="panel compact-card">
-                  <div class="panel-title">ПРОИЗВОДСТВЕННЫЕ ЦЕПОЧКИ</div>
-                  <div class="recipe-list">
-                    <div class="recipe"><b>Ферма</b><span>земля + труд → еда / волокна</span></div>
-                    <div class="recipe"><b>Мануфактура</b><span>волокна + труд + инструменты → текстиль</span></div>
-                    <div class="recipe"><b>Шахта</b><span>месторождение + труд + оборудование → первичное сырьё</span></div>
-                    <div class="recipe"><b>Металлургия</b><span>руда + топливо + труд → базовые металлы</span></div>
-                    <div class="recipe"><b>Арсенал</b><span>металлы + химикаты + труд → оружие</span></div>
-                    <div class="recipe"><b>Верфь</b><span>древесина / металл + текстиль + труд → транспорт</span></div>
-                    <div class="recipe future"><b>Электрозавод</b><span>металл + машины + электротовары → оборудование</span></div>
-                  </div>
-                </div>
-                <div class="panel compact-card">
-                  <div class="panel-title">ИСТОЧНИКИ СПРОСА</div>
-                  <div class="demand-bars">
-                    <div><span>Население</span><i style="width:78%"></i><b>34%</b></div>
-                    <div><span>Production inputs</span><i style="width:91%"></i><b>39%</b></div>
-                    <div><span>Строительство</span><i style="width:42%"></i><b>12%</b></div>
-                    <div><span>Государство / армия</span><i style="width:28%"></i><b>7%</b></div>
-                    <div><span>Maintenance</span><i style="width:22%"></i><b>5%</b></div>
-                    <div><span>Stockpiles</span><i style="width:16%"></i><b>3%</b></div>
-                  </div>
-                  <div class="mini-note" style="margin-top:9px">Поселение не «съедает металл». Материалы требуют реальные стройки, предприятия, инфраструктура, армия и ремонт.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="module-view" id="econ-materials">
-            <div class="feature-page">
-              <div class="panel header-strip"><div><h2 class="section-title">Материальный цикл и переработка</h2><p class="section-desc">Материя не исчезает после использования: durable goods переходят в stock in use, затем в лом, отходы и вторсырьё.</p></div><div class="header-actions"><span class="tag">будущий слой Waste / Recycling</span></div></div>
-              <div class="material-flow panel">
-                <div class="flow-node">Геологический запас<br><b>100%</b></div><div class="flow-arrow">→</div>
-                <div class="flow-node">Добыча<br><b>первичное сырьё</b></div><div class="flow-arrow">→</div>
-                <div class="flow-node">Товар<br><b>рынок</b></div><div class="flow-arrow">→</div>
-                <div class="flow-node">Stock in use<br><b>годы / десятилетия</b></div><div class="flow-arrow">→</div>
-                <div class="flow-node">Лом / отходы<br><b>сбор</b></div><div class="flow-arrow">→</div>
-                <div class="flow-node">Вторсырьё<br><b>с потерями</b></div>
-              </div>
-              <div class="material-grid">
-                <div class="panel compact-card">
-                  <div class="panel-title">СТАЛЬ В ОБЩЕСТВЕ</div>
-                  <div class="card-body">
-                    <div class="rowline"><span>Stock in use</span><b>11.8 млн т</b></div>
-                    <div class="rowline"><span>Годовой лом</span><b>428 тыс. т</b></div>
-                    <div class="rowline"><span>Собирается</span><b id="steelCollectText">52%</b></div>
-                    <div class="rowline"><span>Выход вторичного металла</span><b id="steelRecovered">204 тыс. т</b></div>
-                    <div class="field" style="margin-top:10px"><label>Политика сбора лома</label><input id="collectionRate" type="range" min="25" max="90" value="52"><div class="range-line"><span>25%</span><b id="collectionRateReadout">52%</b><span>90%</span></div></div>
-                    <button class="btn" id="recyclingSubsidy">Ввести субсидию на сбор</button>
-                  </div>
-                </div>
-                <div class="panel compact-card">
-                  <div class="panel-title">ПЕРЕРАБАТЫВАЕМОСТЬ</div>
-                  <div class="card-body">
-                    <div class="rowline"><span>Сталь / железо</span><b class="good">высокая</b></div>
-                    <div class="rowline"><span>Медь</span><b class="good">очень высокая</b></div>
-                    <div class="rowline"><span>Стекло</span><b class="good">высокая</b></div>
-                    <div class="rowline"><span>Бумага</span><b class="warn">несколько циклов</b></div>
-                    <div class="rowline"><span>Текстиль</span><b class="warn">частичная</b></div>
-                    <div class="rowline"><span>Уголь / газ как топливо</span><b class="bad">диссипативно</b></div>
-                  </div>
-                </div>
-                <div class="panel compact-card">
-                  <div class="panel-title">URBAN MINING <small>пока потенциал</small></div>
-                  <div class="card-body">
-                    <div class="rowline"><span>Медь в сетях</span><b>184 тыс. т</b></div>
-                    <div class="rowline"><span>Сталь в инфраструктуре</span><b>4.2 млн т</b></div>
-                    <div class="rowline"><span>Металл в зданиях</span><b>1.7 млн т</b></div>
-                    <div class="rowline"><span>Доступно сейчас</span><b class="warn">низко</b></div>
-                    <div class="mini-note" style="margin-top:8px">Города постепенно превращаются во вторичные «месторождения», но возврат ограничен сроком службы, сбором, сортировкой и потерями.</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="module-view" id="econ-currency">
-            <div class="feature-page">
-              <div class="panel header-strip">
-                <div><h2 class="section-title">Валюта и денежная система</h2><p class="section-desc">Цена всегда выражена в конкретной валюте. В ранних эпохах важны вес, проба металла, доверие и вексельный курс.</p></div>
-                <div class="header-actions"><button class="btn primary" id="openCurrencyBuilder">Создать / реформировать валюту</button></div>
-              </div>
-              <div class="currency-layout">
-                <div class="panel currency-card">
-                  <div class="panel-title">ОФИЦИАЛЬНАЯ ВАЛЮТА</div>
-                  <div class="currency-symbol" id="currencySymbolBig">₳</div>
-                  <h3 id="currencyNameMain">аурельский талер</h3>
-                  <div class="rowline"><span>Эмитент</span><b>Казначейство Аврелии</b></div>
-                  <div class="rowline"><span>Режим</span><b id="currencyRegime">серебряно-золотой стандарт</b></div>
-                  <div class="rowline"><span>Серебро в базовой монете</span><b id="currencySilver">18.0 г</b></div>
-                  <div class="rowline"><span>Доверие</span><b class="good">76 / 100</b></div>
-                  <div class="rowline"><span>Денежная масса</span><b>₳ 2.16 млрд</b></div>
-                </div>
-                <div class="panel compact-card">
-                  <div class="panel-title">ОБМЕННЫЕ КУРСЫ <small>торговые центры</small></div>
-                  <table class="data-table"><thead><tr><th>Валюта</th><th>Паритет</th><th>Рынок</th><th>7 дн.</th></tr></thead><tbody>
-                    <tr><td><b>норвенский гульден</b></td><td>0.84 ₳</td><td>0.87 ₳</td><td class="bad">+1.2%</td></tr>
-                    <tr><td><b>эстельская крона</b></td><td>1.22 ₳</td><td>1.19 ₳</td><td class="good">−0.6%</td></tr>
-                    <tr><td><b>каденский талер</b></td><td>1.06 ₳</td><td>1.09 ₳</td><td>+0.2%</td></tr>
-                    <tr><td><b>серебро</b></td><td>металл</td><td>₳ 0.052 / г</td><td class="warn">+2.4%</td></tr>
-                  </tbody></table>
-                </div>
-                <div class="panel compact-card">
-                  <div class="panel-title">ДЕНЕЖНАЯ ПОЛИТИКА</div>
-                  <div class="card-body">
-                    <div class="policy-row"><div class="iconbox">Ag</div><div><b>Содержание серебра</b><small>Изменение чеканки может временно помочь казне, но влияет на доверие и курс.</small></div><span class="pill">18.0 г</span></div>
-                    <div class="policy-row"><div class="iconbox">↔</div><div><b>Конвертируемость</b><small>Казначейство обменивает крупные суммы на металл по установленному правилу.</small></div><span class="pill good">действует</span></div>
-                    <div class="policy-row"><div class="iconbox">▤</div><div><b>Бумажные ноты</b><small>Разрешены для крупных расчётов; доверие зависит от резервов и эмитента.</small></div><span class="pill warn">ограниченно</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- GOVERNMENT -->
-    <section class="screen government">
-      <div class="module-page">
-        <div class="panel module-subnav" data-module="government">
-          <button class="active" data-view="gov-cabinet">Кабинет</button>
-          <button data-view="gov-ministries">Министерства</button>
-          <button data-view="gov-coalition">Коалиция</button>
-          <button data-view="gov-appointments">Назначения</button>
-          <button data-view="gov-institutions">Институты</button>
-          <button data-view="gov-identity">Государство</button>
-        </div>
-
-        <div class="module-content">
-          <div class="module-view active" id="gov-cabinet">
-            <div class="gov-cabinet">
-              <div class="panel cabinet-area">
-                <div class="panel-title">КАБИНЕТ МИНИСТРОВ <small>правительство национального развития</small></div>
-                <div>
-                  <div class="pm-card">
-                    <div class="person-portrait">Э.В.</div>
-                    <div>
-                      <div class="subhead">Председатель правительства</div>
-                      <h3>Элиас Варен</h3>
-                      <p>Либеральная партия · в должности 8 месяцев · сформировал коалицию после выборов 1847 года</p>
-                    </div>
-                    <div class="pm-rating"><span class="subhead">Поддержка</span><b>61%</b><small class="good">↑ +2 п.п.</small></div>
-                  </div>
-
-                  <div class="minister-grid">
-                    <div class="minister-card"><div class="person-portrait">М.Р.</div><div><b>Мара Рейн</b><span>Министр финансов</span><small class="good">коалиция · высокая поддержка</small></div></div>
-                    <div class="minister-card"><div class="person-portrait">Т.К.</div><div><b>Тео Кальм</b><span>Внутренние дела</span><small>коалиция · 54% одобрения</small></div></div>
-                    <div class="minister-card"><div class="person-portrait">А.С.</div><div><b>Арон Севель</b><span>Торговля и промышленность</span><small class="good">бизнес +++</small></div></div>
-                    <div class="minister-card"><div class="person-portrait">И.В.</div><div><b>Ирма Вольт</b><span>Иностранные дела</span><small>беспартийная</small></div></div>
-                    <div class="minister-card"><div class="person-portrait">Д.Р.</div><div><b>Дорен Раль</b><span>Военное министерство</span><small class="warn">спор с Минфином</small></div></div>
-                    <div class="minister-card"><div class="person-portrait">О.М.</div><div><b>Ора Мель</b><span>Просвещение</span><small class="good">реформа школ</small></div></div>
-                    <div class="minister-card"><div class="person-portrait">С.Н.</div><div><b>Сорен Нир</b><span>Юстиция</span><small>либерал · юрист</small></div></div>
-                    <div class="minister-card"><div class="person-portrait">Г.Ф.</div><div><b>Грета Фаль</b><span>Земледелие</span><small>аграрный союз</small></div></div>
-                    <div class="minister-card"><div class="person-portrait">К.Т.</div><div><b>Кай Торн</b><span>Общественные работы</span><small class="good">железные дороги</small></div></div>
-                    <div class="minister-card"><div class="person-portrait">Л.Н.</div><div><b>Лея Нор</b><span>Труд и фабрики</span><small class="warn">новое ведомство</small></div></div>
-                    <div class="minister-card"><div class="person-portrait">П.В.</div><div><b>Павел Вир</b><span>Почта и телеграф</span><small>технократ</small></div></div>
-                    <div class="minister-card"><div class="person-portrait">Р.Д.</div><div><b>Рина Даль</b><span>Колонии и территории</span><small>аграрный союз</small></div></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="gov-side">
-                <div class="panel">
-                  <div class="panel-title">ПРАВИТЕЛЬСТВЕННОЕ БОЛЬШИНСТВО <small>139 / 250</small></div>
-                  <div class="card-body">
-                    <div class="rowline"><span>Либеральная партия</span><b>71</b></div>
-                    <div class="rowline"><span>Аграрный союз</span><b>31</b></div>
-                    <div class="rowline"><span>Независимые сторонники</span><b>37</b></div>
-                    <div class="coalition-seats">
-                      <i style="width:28.4%;background:#527c9d"></i>
-                      <i style="width:12.4%;background:#7b875e"></i>
-                      <i style="width:14.8%;background:#9b8350"></i>
-                    </div>
-                    <div style="font-size:8px;color:#66675f;margin-top:5px">Запас большинства: 14 голосов</div>
-                  </div>
-                </div>
-
-                <div class="panel agenda-list">
-                  <div class="panel-title" style="margin:-8px -8px 5px">ПОВЕСТКА КАБИНЕТА <small>14 марта</small></div>
-                  <div class="agenda-item"><div class="agenda-no">1</div><div><b>Дефицит угля</b><small>Минторг предлагает временно снизить импортную пошлину.</small></div><span class="pill bad">срочно</span></div>
-                  <div class="agenda-item"><div class="agenda-no">2</div><div><b>Фабричный закон</b><small>Нужно согласовать позицию коалиции перед голосованием.</small></div><span class="pill warn">2 дня</span></div>
-                  <div class="agenda-item"><div class="agenda-no">3</div><div><b>Северная железная дорога</b><small>Запрос на государственную гарантию по облигациям.</small></div><span class="pill">обсудить</span></div>
-                  <div class="agenda-item"><div class="agenda-no">4</div><div><b>Реформа начальных школ</b><small>Минпросвещения просит увеличить бюджет на 9%.</small></div><span class="pill">неделя</span></div>
-                </div>
-
-                <div class="panel">
-                  <div class="panel-title">СОСТОЯНИЕ КАБИНЕТА</div>
-                  <div class="card-body">
-                    <div class="rowline"><span>Единство правительства</span><b class="good">76%</b></div>
-                    <div class="rowline"><span>Поддержка парламента</span><b>61%</b></div>
-                    <div class="rowline"><span>Следующие выборы</span><b>2 г. 4 мес.</b></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="module-view" id="gov-ministries">
-            <div class="ministry-page">
-              <div class="panel header-strip">
-                <div>
-                  <h2 class="section-title">Министерства</h2>
-                  <p class="section-desc">Структуру правительства можно реформировать. Создание нового министерства требует отдельного закона и большинства в парламенте.</p>
-                </div>
-                <div class="header-actions">
-                  <span class="tag">12 действующих ведомств</span>
-                  <button class="btn primary create-ministry-btn" id="openMinistryBuilder"><strong>＋</strong> Создать министерство</button>
-                </div>
-              </div>
-
-              <div class="ministry-grid" id="ministryGrid">
-                <div class="panel ministry-card">
-                <div class="ministry-title"><div class="iconbox">¤</div><b>Министерство финансов</b></div>
-                <div class="rowline"><span>Бюджет ведомства</span><b>₳ 8.4 млн</b></div>
-                <div class="rowline"><span>Служащие</span><b>4 820</b></div>
-                <div class="rowline"><span>Исполнение бюджета</span><b class="good">96%</b></div>
-                <div class="rowline"><span>Главная задача</span><b>налоговая реформа</b></div>
-              </div>
-              <div class="panel ministry-card">
-                <div class="ministry-title"><div class="iconbox">⚙</div><b>Торговля и промышленность</b></div>
-                <div class="rowline"><span>Бюджет ведомства</span><b>₳ 14.2 млн</b></div>
-                <div class="rowline"><span>Служащие</span><b>7 160</b></div>
-                <div class="rowline"><span>Исполнение бюджета</span><b class="warn">87%</b></div>
-                <div class="rowline"><span>Главная задача</span><b>угольный кризис</b></div>
-              </div>
-              <div class="panel ministry-card">
-                <div class="ministry-title"><div class="iconbox">⌂</div><b>Внутренние дела</b></div>
-                <div class="rowline"><span>Бюджет ведомства</span><b>₳ 32.6 млн</b></div>
-                <div class="rowline"><span>Служащие</span><b>38 400</b></div>
-                <div class="rowline"><span>Исполнение бюджета</span><b>91%</b></div>
-                <div class="rowline"><span>Главная задача</span><b>городские беспорядки</b></div>
-              </div>
-              <div class="panel ministry-card">
-                <div class="ministry-title"><div class="iconbox">⚑</div><b>Военное министерство</b></div>
-                <div class="rowline"><span>Бюджет ведомства</span><b>₳ 74.1 млн</b></div>
-                <div class="rowline"><span>Служащие</span><b>11 200</b></div>
-                <div class="rowline"><span>Исполнение бюджета</span><b class="bad">108%</b></div>
-                <div class="rowline"><span>Главная задача</span><b>перевооружение</b></div>
-              </div>
-              <div class="panel ministry-card">
-                <div class="ministry-title"><div class="iconbox">✎</div><b>Просвещение</b></div>
-                <div class="rowline"><span>Бюджет ведомства</span><b>₳ 21.8 млн</b></div>
-                <div class="rowline"><span>Служащие</span><b>9 700</b></div>
-                <div class="rowline"><span>Исполнение бюджета</span><b class="good">98%</b></div>
-                <div class="rowline"><span>Главная задача</span><b>начальные школы</b></div>
-              </div>
-              <div class="panel ministry-card">
-                <div class="ministry-title"><div class="iconbox">⚖</div><b>Юстиция</b></div>
-                <div class="rowline"><span>Бюджет ведомства</span><b>₳ 10.6 млн</b></div>
-                <div class="rowline"><span>Служащие</span><b>6 140</b></div>
-                <div class="rowline"><span>Исполнение бюджета</span><b>94%</b></div>
-                <div class="rowline"><span>Главная задача</span><b>судебная реформа</b></div>
-              </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="module-view" id="gov-coalition">
-            <div class="trade-grid">
-              <div class="panel">
-                <div class="panel-title">КОАЛИЦИОННОЕ СОГЛАШЕНИЕ</div>
-                <div class="card-body">
-                  <div class="rowline"><span>Правительственные места</span><b>139 / 250</b></div>
-                  <div class="rowline"><span>Минимум для большинства</span><b>126</b></div>
-                  <div class="rowline"><span>Партийная дисциплина</span><b>82%</b></div>
-                  <div class="rowline"><span>Риск распада</span><b class="warn">умеренный</b></div>
-                  <div class="subhead" style="margin:13px 0 6px">Обязательства</div>
-                  <div class="mini-note">Либералы: налоговая реформа, промышленное развитие, независимость суда.</div>
-                  <div class="mini-note" style="margin-top:6px">Аграрии: защита землевладельцев, сельская инфраструктура, умеренные тарифы.</div>
-                </div>
-              </div>
-
-              <div class="panel">
-                <div class="panel-title">ТОЧКИ КОНФЛИКТА</div>
-                <div class="card-body">
-                  <div class="policy-row"><div class="iconbox">⚒</div><div><b>Фабричный закон</b><small>Либеральное крыло за; аграрии опасаются расширения регулирования.</small></div><span class="pill bad">сильный</span></div>
-                  <div class="policy-row"><div class="iconbox">%</div><div><b>Тарифы на импорт</b><small>Промышленники требуют защиты; аграрии хотят дешёвые машины.</small></div><span class="pill warn">средний</span></div>
-                  <div class="policy-row"><div class="iconbox">✎</div><div><b>Школьная реформа</b><small>Спор о финансировании из местных или центральных налогов.</small></div><span class="pill">низкий</span></div>
-                </div>
-              </div>
-
-              <div class="panel" style="grid-column:1/-1">
-                <div class="panel-title">ПОДДЕРЖКА ПРАВИТЕЛЬСТВА ПО ФРАКЦИЯМ</div>
-                <div class="card-body" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
-                  <div class="mini-note"><b>Либералы</b><br><span class="good">91% поддерживают кабинет</span></div>
-                  <div class="mini-note"><b>Аграрии</b><br><span class="good">83%</span></div>
-                  <div class="mini-note"><b>Независимые</b><br><span class="warn">57%</span></div>
-                  <div class="mini-note"><b>Социалисты</b><br><span class="bad">22%</span></div>
-                  <div class="mini-note"><b>Консерваторы</b><br><span class="bad">11%</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="module-view" id="gov-appointments">
-            <div class="appointment-layout">
-              <div class="panel office-list">
-                <div class="panel-title" style="margin:-7px -7px 7px">ВАКАНСИИ <small>3 открыто</small></div>
-                <div class="office-item active"><b>Глава Статистического бюро</b><small>Назначает правительство · срок 6 лет</small></div>
-                <div class="office-item"><b>Губернатор Северной Аурелии</b><small>Требуется утверждение Сената</small></div>
-                <div class="office-item"><b>Заместитель министра торговли</b><small>Назначает министр</small></div>
-              </div>
-
-              <div class="panel" style="padding:9px">
-                <div class="subhead">Кандидаты · глава Статистического бюро</div>
-                <div class="candidate-grid">
-                  <div class="candidate-card panel">
-                    <div class="person-portrait">Н.К.</div>
-                    <b>Нора Кель</b><div class="section-desc">экономист · беспартийная</div>
-                    <div class="trait-list">
-                      <div class="rowline"><span>Поддержка парламента</span><b class="good">68%</b></div>
-                      <div class="rowline"><span>Репутация</span><b>высокая</b></div>
-                      <div class="rowline"><span>Приоритет</span><b>перепись</b></div>
-                    </div>
-                    <button class="btn primary" style="margin-top:8px">Назначить</button>
-                  </div>
-                  <div class="candidate-card panel">
-                    <div class="person-portrait">Б.С.</div>
-                    <b>Берен Саль</b><div class="section-desc">чиновник · либерал</div>
-                    <div class="trait-list">
-                      <div class="rowline"><span>Поддержка парламента</span><b>74%</b></div>
-                      <div class="rowline"><span>Репутация</span><b>средняя</b></div>
-                      <div class="rowline"><span>Приоритет</span><b>налоговые данные</b></div>
-                    </div>
-                    <button class="btn primary" style="margin-top:8px">Назначить</button>
-                  </div>
-                  <div class="candidate-card panel">
-                    <div class="person-portrait">Э.Р.</div>
-                    <b>Эрвин Рот</b><div class="section-desc">математик · независимый</div>
-                    <div class="trait-list">
-                      <div class="rowline"><span>Поддержка парламента</span><b class="warn">49%</b></div>
-                      <div class="rowline"><span>Репутация</span><b class="good">очень высокая</b></div>
-                      <div class="rowline"><span>Приоритет</span><b>методология</b></div>
-                    </div>
-                    <button class="btn primary" style="margin-top:8px">Назначить</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="module-view" id="gov-institutions">
-            <div class="institution-grid">
-              <div class="panel institution-card"><h3>Центральный банк</h3><div class="rowline"><span>Статус</span><b>частично независим</b></div><div class="rowline"><span>Глава</span><b>Р. Кост</b></div><div class="rowline"><span>Ставка</span><b>4.5%</b></div><div class="rowline"><span>Доверие</span><b class="good">72%</b></div></div>
-              <div class="panel institution-card"><h3>Высший суд</h3><div class="rowline"><span>Судьи</span><b>7</b></div><div class="rowline"><span>Вакансии</span><b>1</b></div><div class="rowline"><span>Независимость</span><b class="good">высокая</b></div><div class="rowline"><span>Дел в очереди</span><b>18</b></div></div>
-              <div class="panel institution-card"><h3>Счётная палата</h3><div class="rowline"><span>Штат</span><b>640</b></div><div class="rowline"><span>Аудитов в год</span><b>84</b></div><div class="rowline"><span>Эффективность</span><b>66%</b></div><div class="rowline"><span>Открытые дела</span><b class="warn">12</b></div></div>
-              <div class="panel institution-card"><h3>Статистическое бюро</h3><div class="rowline"><span>Охват данных</span><b class="warn">76%</b></div><div class="rowline"><span>Последняя перепись</span><b>1845</b></div><div class="rowline"><span>Точность ВВП</span><b class="warn">средняя</b></div><div class="rowline"><span>Вакансия главы</span><b class="bad">да</b></div></div>
-              <div class="panel institution-card"><h3>Государственная служба</h3><div class="rowline"><span>Чиновники</span><b>42 100</b></div><div class="rowline"><span>Профессионализация</span><b>58%</b></div><div class="rowline"><span>Коррупционный риск</span><b class="warn">средний</b></div><div class="rowline"><span>Стоимость</span><b>₳ 36 млн</b></div></div>
-              <div class="panel institution-card"><h3>Местное самоуправление</h3><div class="rowline"><span>Автономия</span><b>41%</b></div><div class="rowline"><span>Регионов</span><b>9</b></div><div class="rowline"><span>Выборных советов</span><b>6 / 9</b></div><div class="rowline"><span>Финансовая зависимость</span><b class="warn">высокая</b></div></div>
-            </div>
-          </div>
-
-
-          <div class="module-view" id="gov-identity">
-            <div class="feature-page">
-              <div class="panel header-strip">
-                <div><h2 class="section-title">Государственная идентичность</h2><p class="section-desc">Название, флаг, валюта и символы — изменяемое состояние мира. Любая смена проходит через политическую процедуру.</p></div>
-                <div class="header-actions"><button class="btn primary" id="openIdentityBuilder">Предложить реформу идентичности</button></div>
-              </div>
-              <div class="identity-layout">
-                <div class="panel identity-hero">
-                  <div class="identity-flag" id="identityFlagPreview"></div>
-                  <div>
-                    <div class="subhead">Официальное название</div>
-                    <h2 id="identityOfficialName">Республика Аврелия</h2>
-                    <p id="identityForm">федеративная парламентская республика</p>
-                    <div class="identity-tags"><span class="tag">коротко: <b id="identityShortName">Аврелия</b></span><span class="tag">валюта: <b id="identityCurrency">аурельский талер</b></span><span class="tag">столица: Аурель</span></div>
-                  </div>
-                </div>
-                <div class="panel compact-card">
-                  <div class="panel-title">СИМВОЛЫ И ТИТУЛЫ</div>
-                  <div class="card-body">
-                    <div class="rowline"><span>Государственный флаг</span><b>официальный</b></div>
-                    <div class="rowline"><span>Герб</span><b>щит Аврелии</b></div>
-                    <div class="rowline"><span>Девиз</span><b id="identityMotto">«Закон и достоинство»</b></div>
-                    <div class="rowline"><span>Глава государства</span><b>Президент Республики</b></div>
-                    <div class="rowline"><span>Правительство</span><b>Совет министров</b></div>
-                  </div>
-                </div>
-                <div class="panel compact-card">
-                  <div class="panel-title">ИСТОРИЯ ИЗМЕНЕНИЙ</div>
-                  <div class="card-body timeline">
-                    <div class="timeline-item"><b>1821 · Республика Аврелия</b><span>новая конституция и государственный флаг</span></div>
-                    <div class="timeline-item"><b>1832 · Денежная реформа</b><span>введён аурельский талер</span></div>
-                    <div class="timeline-item current"><b>1848 · текущая идентичность</b><span>изменения не рассматриваются</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-
-    <!-- SCIENCE -->
-    <section class="screen science">
-      <div class="module-page">
-        <div class="panel module-subnav" data-module="science">
-          <button class="active" data-view="science-overview">Обзор</button>
-          <button data-view="science-researchers">Учёные</button>
-          <button data-view="science-projects">Проекты</button>
-          <button data-view="science-grants">Гранты и институты</button>
-        </div>
-        <div class="module-content">
-          <div class="module-view active" id="science-overview">
-            <div class="feature-page">
-              <div class="panel header-strip"><div><h2 class="section-title">Наука и исследования</h2><p class="section-desc">Государство не «исследует технологии» напрямую. Исследуют люди и учреждения; власть создаёт условия, гранты и приоритеты.</p></div><div class="header-actions"><span class="tag">фундаментальная отдача неизвестна</span></div></div>
-              <div class="kpi-grid">
-                <div class="panel kpi-card"><div class="k">Учёные и инженеры</div><div class="v">1 284</div><div class="s">в академиях, вузах и частных мастерских</div></div>
-                <div class="panel kpi-card"><div class="k">Госгранты</div><div class="v">₳ 4.6 млн</div><div class="s good">↑ +8% к прошлому году</div></div>
-                <div class="panel kpi-card"><div class="k">Активные проекты</div><div class="v">73</div><div class="s">18 фундаментальных</div></div>
-                <div class="panel kpi-card"><div class="k">Международный обмен</div><div class="v">62 / 100</div><div class="s">учёные активно публикуются</div></div>
-                <div class="panel kpi-card"><div class="k">Утечка умов</div><div class="v">низкая</div><div class="s good">+14 прибывших специалистов</div></div>
-                <div class="panel kpi-card"><div class="k">Точность приборов</div><div class="v">71 / 100</div><div class="s">стекло, металл, химреактивы</div></div>
-              </div>
-              <div class="science-grid">
-                <div class="panel compact-card electricity-card">
-                  <div class="panel-title">ЭЛЕКТРИЧЕСТВО <small>цепочка знаний</small></div>
-                  <div class="knowledge-chain">
-                    <div class="knowledge-node done">Электростатика<br><small>известно</small></div>
-                    <div class="chain-arrow">→</div>
-                    <div class="knowledge-node done">Проводники<br><small>известно</small></div>
-                    <div class="chain-arrow">→</div>
-                    <div class="knowledge-node done">Накопление заряда<br><small>известно</small></div>
-                    <div class="chain-arrow">→</div>
-                    <div class="knowledge-node done">Постоянный ток<br><small>известно</small></div>
-                    <div class="chain-arrow">→</div>
-                    <div class="knowledge-node active">Электромагнетизм<br><small>активно</small></div>
-                    <div class="chain-arrow">→</div>
-                    <div class="knowledge-node">Индукция<br><small>частично</small></div>
-                    <div class="chain-arrow">→</div>
-                    <div class="knowledge-node">Генераторы<br><small>не освоено</small></div>
-                  </div>
-                  <div class="subhead" style="margin:12px 0 5px">Общий уровень понимания</div>
-                  <div class="progress"><i id="electricityProgress" style="width:62%"></i></div>
-                  <div class="mini-note" style="margin-top:8px">Ветка не является жёстким tech tree: независимые проекты могут идти параллельно, а открытия распространяются через публикации, переписку, миграцию и промышленную практику.</div>
-                </div>
-                <div class="panel compact-card">
-                  <div class="panel-title">ЗАПРОСЫ УЧЁНЫХ <small>решение правительства</small></div>
-                  <div class="grant-request" data-grant="volta"><b>Проф. Лев Арден · физика</b><small>Просит ₳ 84 тыс. на лабораторию токов и магнитных полей.</small><div><button class="btn grant-btn" data-action="partial">Частично</button><button class="btn primary grant-btn" data-action="approve">Одобрить</button><button class="btn grant-btn" data-action="decline">Отклонить</button></div></div>
-                  <div class="grant-request" data-grant="mine"><b>Инж. Мара Фель · горное дело</b><small>₳ 42 тыс. на экспериментальный насос для глубоких шахт.</small><div><button class="btn grant-btn" data-action="partial">Частично</button><button class="btn primary grant-btn" data-action="approve">Одобрить</button><button class="btn grant-btn" data-action="decline">Отклонить</button></div></div>
-                  <div class="grant-request" data-grant="chem"><b>Докт. Яна Ров · химия</b><small>₳ 29 тыс. на исследование электролиза солей металлов.</small><div><button class="btn grant-btn" data-action="partial">Частично</button><button class="btn primary grant-btn" data-action="approve">Одобрить</button><button class="btn grant-btn" data-action="decline">Отклонить</button></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="module-view" id="science-researchers">
-            <div class="researcher-grid">
-              <div class="panel researcher-card"><div class="person-portrait">Л.А.</div><h3>Лев Арден</h3><div class="section-desc">физика · электричество / магнетизм</div><div class="rowline"><span>Способность</span><b>0.84</b></div><div class="rowline"><span>Репутация</span><b class="good">высокая</b></div><div class="rowline"><span>Любопытство</span><b>0.93</b></div><div class="rowline"><span>Финансирование</span><b class="warn">низкое</b></div></div>
-              <div class="panel researcher-card"><div class="person-portrait">М.Ф.</div><h3>Мара Фель</h3><div class="section-desc">инженерия · насосы / механика</div><div class="rowline"><span>Способность</span><b>0.79</b></div><div class="rowline"><span>Репутация</span><b>средняя</b></div><div class="rowline"><span>Практичность</span><b>0.96</b></div><div class="rowline"><span>Работодатель</span><b>частные шахты</b></div></div>
-              <div class="panel researcher-card"><div class="person-portrait">Я.Р.</div><h3>Яна Ров</h3><div class="section-desc">химия · электрохимия</div><div class="rowline"><span>Способность</span><b>0.88</b></div><div class="rowline"><span>Репутация</span><b>растёт</b></div><div class="rowline"><span>Публикации</span><b>14</b></div><div class="rowline"><span>Институт</span><b>Академия наук</b></div></div>
-              <div class="panel researcher-card"><div class="person-portrait">Э.К.</div><h3>Эрен Коль</h3><div class="section-desc">геология · уголь / рудные пояса</div><div class="rowline"><span>Способность</span><b>0.76</b></div><div class="rowline"><span>Репутация</span><b>средняя</b></div><div class="rowline"><span>Экспедиции</span><b>9</b></div><div class="rowline"><span>Контракт</span><b>Геологическая служба</b></div></div>
-            </div>
-          </div>
-
-          <div class="module-view" id="science-projects">
-            <div class="project-grid-big">
-              <div class="panel project-card"><div class="panel-title">ЭЛЕКТРОМАГНИТНАЯ ИНДУКЦИЯ <small>фундаментальное</small></div><div class="card-body"><div class="rowline"><span>Руководитель</span><b>Лев Арден</b></div><div class="rowline"><span>Команда</span><b>7 человек</b></div><div class="rowline"><span>Оснащение</span><b class="warn">63%</b></div><div class="subhead" style="margin:10px 0 4px">Прогресс понимания</div><div class="progress"><i style="width:58%"></i></div><div class="mini-note" style="margin-top:8px">Практическая польза неизвестна. Возможные связи: магниты, ток, механическое движение.</div></div></div>
-              <div class="panel project-card"><div class="panel-title">ГЛУБОКИЕ ШАХТНЫЕ НАСОСЫ <small>прикладное</small></div><div class="card-body"><div class="rowline"><span>Руководитель</span><b>Мара Фель</b></div><div class="rowline"><span>Заказчик</span><b>угольные шахты</b></div><div class="rowline"><span>Материалы</span><b class="bad">дефицит стали</b></div><div class="subhead" style="margin:10px 0 4px">Испытания</div><div class="progress"><i style="width:71%"></i></div><div class="mini-note" style="margin-top:8px">Если удачно, повысит доступность более глубоких пластов без изменения физического запаса месторождения.</div></div></div>
-              <div class="panel project-card"><div class="panel-title">ЭЛЕКТРОЛИЗ СОЛЕЙ <small>экспериментальное</small></div><div class="card-body"><div class="rowline"><span>Руководитель</span><b>Яна Ров</b></div><div class="rowline"><span>Институт</span><b>Академия наук</b></div><div class="rowline"><span>Финансирование</span><b>₳ 18 тыс.</b></div><div class="subhead" style="margin:10px 0 4px">Результаты</div><div class="progress"><i style="width:43%"></i></div><div class="mini-note" style="margin-top:8px">Побочный результат может оказаться важнее исходной цели проекта.</div></div></div>
-            </div>
-          </div>
-
-          <div class="module-view" id="science-grants">
-            <div class="trade-grid">
-              <div class="panel"><div class="panel-title">НАУЧНЫЕ ИНСТИТУТЫ</div><div class="card-body"><div class="rowline"><span>Королевская / Национальная академия</span><b>₳ 1.4 млн</b></div><div class="rowline"><span>Аурельский университет</span><b>₳ 1.1 млн</b></div><div class="rowline"><span>Геологическая служба</span><b>₳ 0.8 млн</b></div><div class="rowline"><span>Военно-инженерная академия</span><b>₳ 0.7 млн</b></div><div class="rowline"><span>Частные общества</span><b>₳ 0.6 млн</b></div></div></div>
-              <div class="panel"><div class="panel-title">ПОЛИТИКА ФИНАНСИРОВАНИЯ</div><div class="card-body"><div class="policy-row"><div class="iconbox">✦</div><div><b>Фундаментальные гранты</b><small>Учёные сами выбирают темы; отдача непредсказуема.</small></div><span class="pill good">активно</span></div><div class="policy-row"><div class="iconbox">⚙</div><div><b>Инженерные премии</b><small>Награда за решения конкретных государственных проблем.</small></div><span class="pill">₳ 120 тыс.</span></div><div class="policy-row"><div class="iconbox">↔</div><div><b>Иностранные специалисты</b><small>Упрощённый найм и приглашение исследователей.</small></div><span class="pill good">открыто</span></div></div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- LAWS -->
-    <section class="screen laws">
-      <div class="module-page">
-        <div class="panel module-subnav" data-module="laws">
-          <button class="active" data-law-filter="bills">Законопроекты</button>
-          <button data-law-filter="active">Действующие законы</button>
-          <button data-law-filter="constitution">Конституция</button>
-          <span class="tag" style="margin-left:auto">Парламентская сессия № 42</span>
-        </div>
-
-        <div class="module-content">
-          <div class="law-workspace">
-            <div class="panel law-list">
-              <div class="panel-title">НА РАССМОТРЕНИИ <small>7 проектов</small></div>
-              <div class="law-list-scroll">
-                <div class="law-item active" data-law="factory">
-                  <div class="law-item-top"><span>№ 184 · 2 чтение</span><span class="pill warn">2 дня</span></div>
-                  <h4>О фабричном труде</h4>
-                  <p>Рабочая неделя, детский труд и фабричные инспекции.</p>
-                </div>
-                <div class="law-item" data-law="tax">
-                  <div class="law-item-top"><span>№ 281 · комитет</span><span class="pill">8 дней</span></div>
-                  <h4>О налогообложении предприятий</h4>
-                  <p>Корпоративный налог и инвестиционный вычет.</p>
-                </div>
-                <div class="law-item" data-law="rail">
-                  <div class="law-item-top"><span>№ 203 · 1 чтение</span><span class="pill">11 дней</span></div>
-                  <h4>О железнодорожных концессиях</h4>
-                  <p>Гарантии частным компаниям и правила отчуждения земли.</p>
-                </div>
-                <div class="law-item" data-law="school">
-                  <div class="law-item-top"><span>№ 196 · комитет</span><span class="pill">14 дней</span></div>
-                  <h4>О начальном образовании</h4>
-                  <p>Сеть государственных школ и финансирование учителей.</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="panel law-document">
-              <div class="law-doc-head">
-                <div class="law-seal">A</div>
-                <h2 id="lawTitle">ЗАКОНОПРОЕКТ № 184</h2>
-                <p id="lawSubtitle">О фабричном труде · редакция ко второму чтению</p>
-              </div>
-              <div class="law-body" id="lawBody">
-                <h3>Статья I. Продолжительность труда</h3>
-                <p>Установить максимальную продолжительность рабочей недели на фабриках и мануфактурах в размере шестидесяти часов.</p>
-
-                <h3>Статья II. Труд несовершеннолетних</h3>
-                <p>Запретить наём детей младше десяти лет на промышленные предприятия. Для работников от десяти до четырнадцати лет установить сокращённый рабочий день.</p>
-
-                <h3>Статья III. Фабричные инспекции</h3>
-                <p>Учредить при Министерстве внутренних дел корпус фабричных инспекторов с правом посещения предприятий, составления предписаний и передачи нарушений в суд.</p>
-
-                <h3>Статья IV. Вступление в силу</h3>
-                <p>Настоящий закон вступает в силу через шесть месяцев после официального опубликования.</p>
-              </div>
-              <div class="law-doc-actions">
-                <button class="btn" id="openAmendmentBuilder">Предложить поправку</button>
-                <button class="btn primary law-action" data-action="negotiate">Открыть переговоры</button>
-                <button class="btn law-action" data-action="committee">Вернуть в комитет</button>
-                <button class="btn law-action" data-action="withdraw">Отозвать проект</button>
-              </div>
-            </div>
-
-            <div class="panel law-analysis">
-              <div class="panel-title">ПОЛИТИЧЕСКИЙ И ЭКОНОМИЧЕСКИЙ АНАЛИЗ</div>
-              <div class="analysis-block">
-                <div class="analysis-card">
-                  <h4>Прогноз голосования</h4>
-                  <div class="rowline"><span>За</span><b class="good" id="lawFor">127</b></div>
-                  <div class="rowline"><span>Не определились</span><b class="warn" id="lawUndecided">29</b></div>
-                  <div class="rowline"><span>Против</span><b class="bad" id="lawAgainst">94</b></div>
-                  <div class="support-bar" style="margin-top:7px">
-                    <i class="for" id="lawForBar" style="width:50.8%"></i>
-                    <i class="undecided" id="lawUndecidedBar" style="width:11.6%"></i>
-                    <i class="against" id="lawAgainstBar" style="width:37.6%"></i>
-                  </div>
-                </div>
-
-                <div class="analysis-card">
-                  <h4>Оценка последствий</h4>
-                  <div id="lawImpacts">
-                    <div class="rowline"><span>Расходы бизнеса</span><b class="bad">+2.8%</b></div>
-                    <div class="rowline"><span>Доход рабочих</span><b class="good">+1.4%</b></div>
-                    <div class="rowline"><span>Промышленный выпуск</span><b class="warn">−0.4…−1.2%</b></div>
-                    <div class="rowline"><span>Бюджет</span><b class="bad">−₳ 1.8 млн</b></div>
-                  </div>
-                  <div style="font-size:8px;color:#66675f;margin-top:6px">Уверенность оценки: <b id="lawConfidence">низкая</b></div>
-                </div>
-
-                <div class="analysis-card">
-                  <h4>Прохождение закона</h4>
-                  <div class="timeline" id="lawTimeline">
-                    <div class="timeline-item"><b>Внесён в палату</b><span>2 марта 1848</span></div>
-                    <div class="timeline-item"><b>Первое чтение</b><span>принят 156 голосами</span></div>
-                    <div class="timeline-item current"><b>Второе чтение</b><span>голосование через 2 дня</span></div>
-                    <div class="timeline-item"><b>Третье чтение</b><span>ожидается</span></div>
-                    <div class="timeline-item"><b>Подпись главы государства</b><span>ожидается</span></div>
-                  </div>
-                </div>
-
-                <div class="analysis-card">
-                  <h4>Поправки</h4>
-                  <div id="amendmentList">
-                  <div class="amendment"><b>№ 184-12</b> · снизить рабочую неделю до 58 часов <span class="warn">· спорная</span></div>
-                  <div class="amendment"><b>№ 184-18</b> · отсрочить введение инспекций на год <span class="good">· вероятна</span></div>
-                  <div class="amendment"><b>№ 184-21</b> · исключить предприятия до 20 работников <span>· комитет</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="law-toast" id="lawToast"></div>
-        </div>
-      </div>
-    </section>
-
   </main>
-
-  <nav class="mobile-nav" aria-label="Мобильная навигация">
-    <label for="t-map"><span>◈</span><b>Карта</b></label>
-    <label for="t-party"><span>◆</span><b>Партия</b></label>
-    <label for="t-parliament"><span>◔</span><b>Парламент</b></label>
-    <label for="t-economy"><span>▦</span><b>Экономика</b></label>
-    <label for="t-government"><span>♜</span><b>Правительство</b></label>
-    <label for="t-laws"><span>▤</span><b>Законы</b></label>
-    <label for="t-science"><span>✦</span><b>Наука</b></label>
-  </nav>
 </div>
-
-
-<div class="ministry-builder" id="ministryBuilder" aria-hidden="true">
-  <div class="panel builder-window">
-    <div class="builder-head">
-      <div>
-        <div style="font-size:8px;opacity:.8;letter-spacing:.08em">ПРАВИТЕЛЬСТВЕННАЯ РЕФОРМА</div>
-        <h2>Учреждение нового министерства</h2>
-      </div>
-      <button class="builder-close" id="closeMinistryBuilder">×</button>
-    </div>
-
-    <div class="builder-body">
-      <div class="builder-grid" id="builderFormView">
-        <div>
-          <div class="builder-section">
-            <h3>1. Структура ведомства</h3>
-
-            <div class="field">
-              <label for="ministryName">Название</label>
-              <input id="ministryName" type="text" value="Министерство науки и изобретений" maxlength="70">
-            </div>
-
-            <div class="field">
-              <label for="ministryDesc">Задача министерства</label>
-              <textarea id="ministryDesc">Координация государственных исследований, патентов, технических школ и поддержки изобретателей.</textarea>
-            </div>
-
-            <div class="field">
-              <label>Годовой бюджет</label>
-              <input id="ministryBudget" type="range" min="2" max="40" step="1" value="12">
-              <div class="range-line"><span>₳ 2 млн</span><b id="budgetReadout">₳ 12 млн / год</b><span>₳ 40 млн</span></div>
-            </div>
-
-            <div class="field">
-              <label>Размер аппарата</label>
-              <select id="ministrySize">
-                <option value="small">Малое ведомство</option>
-                <option value="medium" selected>Обычное министерство</option>
-                <option value="large">Крупное министерство</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="builder-section" style="margin-top:9px">
-            <h3>2. Полномочия</h3>
-            <div class="competency-grid">
-              <label class="competency">
-                <input type="checkbox" class="ministry-comp" value="science" checked>
-                <span><b>Наука и исследования</b><small>Гранты, академии, исследования и координация новых технологий.</small></span>
-              </label>
-              <label class="competency">
-                <input type="checkbox" class="ministry-comp" value="statistics">
-                <span><b>Государственная статистика</b><small>Переписи, экономические данные и качество прогнозов.</small></span>
-              </label>
-              <label class="competency">
-                <input type="checkbox" class="ministry-comp" value="industry">
-                <span><b>Промышленная политика</b><small>Стандарты, субсидии, государственные заказы и отраслевые программы.</small></span>
-              </label>
-              <label class="competency">
-                <input type="checkbox" class="ministry-comp" value="labor">
-                <span><b>Труд</b><small>Инспекции, трудовые споры и отношения работников с предприятиями.</small></span>
-              </label>
-              <label class="competency">
-                <input type="checkbox" class="ministry-comp" value="education" checked>
-                <span><b>Техническое образование</b><small>Инженерные школы, подготовка специалистов и профессиональное обучение.</small></span>
-              </label>
-              <label class="competency">
-                <input type="checkbox" class="ministry-comp" value="infrastructure">
-                <span><b>Инфраструктура</b><small>Планирование дорог, железных дорог, каналов и государственных строек.</small></span>
-              </label>
-              <label class="competency">
-                <input type="checkbox" class="ministry-comp" value="trade">
-                <span><b>Торговля</b><small>Таможни, торговые договоры и контроль внешней торговли.</small></span>
-              </label>
-              <label class="competency">
-                <input type="checkbox" class="ministry-comp" value="health">
-                <span><b>Общественное здоровье</b><small>Санитарные нормы, эпидемии и медицинская администрация.</small></span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <div class="builder-section">
-            <h3>3. Ожидаемое влияние на симуляцию</h3>
-            <div class="effect-list" id="ministryEffects"></div>
-
-            <div class="mini-note" style="margin-top:8px">
-              Полномочия реально меняют параметры симуляции. Чем шире ведомство, тем больше возможностей, но тем выше бюджет, бюрократия и риск конфликтов с существующими министерствами.
-            </div>
-          </div>
-
-          <div class="builder-section" style="margin-top:9px">
-            <h3>4. Парламентская поддержка</h3>
-
-            <div class="vote-preview">
-              <div class="vote-preview-top">
-                <div>
-                  <div class="subhead">Прогноз голосования</div>
-                  <b><span id="ministryYes">143</span> / 250 за</b>
-                </div>
-                <div style="text-align:right">
-                  <div class="subhead">Нужно</div>
-                  <b>126</b>
-                </div>
-              </div>
-
-              <div class="vote-bar">
-                <i class="vote-yes" id="ministryYesBar"></i>
-                <i class="vote-und" id="ministryUndBar"></i>
-                <i class="vote-no" id="ministryNoBar"></i>
-              </div>
-
-              <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:8px">
-                <span class="good">За: <b id="ministryYesSmall">143</b></span>
-                <span class="warn">Не определились: <b id="ministryUnd">27</b></span>
-                <span class="bad">Против: <b id="ministryNo">80</b></span>
-              </div>
-            </div>
-
-            <svg class="builder-vote-svg" id="ministryVoteSvg" viewBox="0 0 520 190" preserveAspectRatio="xMidYMid meet">
-              <g id="ministryVoteSeats"></g>
-              <rect x="205" y="154" width="110" height="24" fill="#b8b096" stroke="#6e7068"/>
-              <text x="260" y="170" text-anchor="middle" font-size="9" font-weight="900" fill="#30322e">ПРЕЗИДИУМ</text>
-            </svg>
-
-            <div class="mini-note" id="ministrySupportNote" style="margin-top:8px"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="builder-result" id="builderResult">
-        <div class="panel result-card">
-          <div class="subhead">Итог голосования</div>
-          <h3 id="builderResultTitle">Закон принят</h3>
-          <p id="builderResultText" style="font:12px/1.4 Georgia,serif;margin:0"></p>
-
-          <div class="result-votes">
-            <div><b class="good" id="resultYes">0</b><span>За</span></div>
-            <div><b class="warn" id="resultUnd">0</b><span>Воздержались</span></div>
-            <div><b class="bad" id="resultNo">0</b><span>Против</span></div>
-          </div>
-
-          <button class="btn primary" id="resultDone">Продолжить</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="builder-footer" id="builderFooter">
-      <div class="builder-footer-left">Создание министерства оформляется отдельным законом. Без 126 голосов из 250 ведомство не появится.</div>
-      <div class="builder-footer-actions">
-        <button class="btn" id="cancelMinistryBuilder">Отмена</button>
-        <button class="btn primary" id="submitMinistryBill">Внести законопроект и провести голосование</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<div class="generic-modal" id="currencyBuilder" aria-hidden="true">
-  <div class="panel modal-window">
-    <div class="builder-head"><div><div class="subhead" style="color:#e9e1c9">ДЕНЕЖНАЯ РЕФОРМА</div><h2>Создать или изменить валюту</h2></div><button class="builder-close" data-close-modal="currencyBuilder">×</button></div>
-    <div class="modal-body two-pane-form">
-      <div class="builder-section">
-        <h3>Параметры валюты</h3>
-        <div class="field"><label>Название</label><input id="newCurrencyName" type="text" value="аурельский талер"></div>
-        <div class="field"><label>Символ</label><input id="newCurrencySymbol" type="text" value="₳" maxlength="3"></div>
-        <div class="field"><label>Номиналы</label><input id="newCurrencyDenoms" type="text" value="1, 2, 5, 10, 20, 50"></div>
-        <div class="field"><label>Тип</label><select id="newCurrencyType"><option value="metallic">металлическая</option><option value="mixed" selected>смешанная</option><option value="paper">бумажная</option><option value="fiat">fiat</option></select></div>
-        <div class="field"><label>Металлическая база</label><select id="newCurrencyBacking"><option>серебро</option><option selected>серебро + золото</option><option>золото</option><option>нет</option></select></div>
-        <div class="field"><label>Серебро в базовой монете, г</label><input id="newCurrencySilver" type="range" min="0" max="30" step="0.5" value="18"><div class="range-line"><span>0</span><b id="currencySilverReadout">18.0 г</b><span>30</span></div></div>
-      </div>
-      <div class="builder-section">
-        <h3>Политико-экономический прогноз</h3>
-        <div class="effect-list" id="currencyEffects"></div>
-        <div class="vote-preview"><div class="vote-preview-top"><div><div class="subhead">Прогноз голосования</div><b><span id="currencyVoteYes">147</span> / 250 за</b></div><div><div class="subhead">Нужно</div><b>126</b></div></div><div class="vote-bar"><i class="vote-yes" id="currencyVoteYesBar"></i><i class="vote-und" id="currencyVoteUndBar"></i><i class="vote-no" id="currencyVoteNoBar"></i></div><div class="mini-note" id="currencyVoteNote" style="margin-top:8px"></div></div>
-      </div>
-    </div>
-    <div class="builder-footer"><div class="builder-footer-left">Реформа затрагивает цены, налоги, долги, контракты, чеканку и внешние курсы.</div><div class="builder-footer-actions"><button class="btn" data-close-modal="currencyBuilder">Отмена</button><button class="btn primary" id="applyCurrencyReform">Внести реформу</button></div></div>
-  </div>
-</div>
-
-<div class="generic-modal" id="identityBuilder" aria-hidden="true">
-  <div class="panel modal-window">
-    <div class="builder-head"><div><div class="subhead" style="color:#e9e1c9">ГОСУДАРСТВЕННАЯ РЕФОРМА</div><h2>Изменение идентичности государства</h2></div><button class="builder-close" data-close-modal="identityBuilder">×</button></div>
-    <div class="modal-body two-pane-form">
-      <div class="builder-section">
-        <h3>Новая идентичность</h3>
-        <div class="field"><label>Официальное название</label><input id="newOfficialName" type="text" value="Республика Аврелия"></div>
-        <div class="field"><label>Короткое название</label><input id="newShortName" type="text" value="Аврелия"></div>
-        <div class="field"><label>Форма / официальный титул</label><input id="newGovernmentForm" type="text" value="федеративная парламентская республика"></div>
-        <div class="field"><label>Девиз</label><input id="newMotto" type="text" value="Закон и достоинство"></div>
-        <div class="field"><label>Загрузить новый флаг</label><input id="flagUpload" type="file" accept="image/*"><div class="mini-note">Изображение используется только как визуальный asset. В игре сам флаг всё равно должен быть официально принят.</div></div>
-        <div class="field"><label>Политический масштаб изменения</label><select id="identityChangeType"><option value="minor">символическое / малое</option><option value="constitutional" selected>конституционное</option><option value="revolutionary">революционное</option></select></div>
-      </div>
-      <div class="builder-section">
-        <h3>Предварительная реакция</h3>
-        <div class="identity-flag large-preview" id="identityFlagModalPreview"></div>
-        <div class="effect-list" id="identityEffects"></div>
-        <div class="vote-preview"><div class="vote-preview-top"><div><div class="subhead">Поддержка процедуры</div><b><span id="identityVoteYes">138</span> / 250</b></div><div><div class="subhead">Нужно</div><b>126</b></div></div><div class="vote-bar"><i class="vote-yes" id="identityVoteYesBar"></i><i class="vote-und" id="identityVoteUndBar"></i><i class="vote-no" id="identityVoteNoBar"></i></div><div class="mini-note" id="identityVoteNote" style="margin-top:8px"></div></div>
-      </div>
-    </div>
-    <div class="builder-footer"><div class="builder-footer-left">Последствия зависят от смысла реформы: смена оттенка флага и революционная смена режима не равнозначны.</div><div class="builder-footer-actions"><button class="btn" data-close-modal="identityBuilder">Отмена</button><button class="btn primary" id="applyIdentityReform">Провести процедуру</button></div></div>
-  </div>
-</div>
-
 
 <div class="drawer-backdrop" id="drawerBackdrop"></div>
-<aside class="notification-drawer" id="notificationDrawer" aria-hidden="true">
-  <div class="drawer-head"><div><div class="subhead" style="color:#e9e1c9">ЖУРНАЛ СОБЫТИЙ</div><h3>Уведомления и ход времени</h3></div><button class="drawer-close" id="closeNotificationDrawer" type="button">×</button></div>
-  <div class="drawer-list" id="notificationList"></div>
-  <div class="drawer-actions"><button class="btn" id="markNotificationsRead">Прочитать всё</button><button class="btn" id="pauseFromDrawer">Пауза</button><button class="btn primary" id="advanceWeek">+7 дней</button></div>
+<aside class="drawer" id="eventDrawer">
+  <div class="drawer-head"><h2>Журнал событий</h2><button id="closeLog">×</button></div>
+  <div id="fullLog" class="log-list drawer-log"></div>
 </aside>
 
-<div class="generic-modal prototype-modal" id="amendmentBuilder" aria-hidden="true">
-  <div class="panel modal-window">
-    <div class="builder-head"><div><div class="subhead" style="color:#e9e1c9">ПАРЛАМЕНТСКАЯ ПРОЦЕДУРА</div><h2>Внести поправку</h2></div><button class="builder-close" data-close-modal="amendmentBuilder">×</button></div>
-    <div class="modal-body modal-grid">
-      <div class="builder-section">
-        <h3>Текст поправки</h3>
-        <div class="field"><label>Законопроект</label><input id="amendmentLawName" type="text" readonly></div>
-        <div class="field"><label>Действие</label><select id="amendmentMode"><option value="replace">Изменить статью</option><option value="add">Добавить статью</option><option value="delete">Удалить статью</option></select></div>
-        <div class="field"><label>Статья</label><select id="amendmentArticle"></select></div>
-        <div class="field"><label>Новый текст</label><textarea id="amendmentText" rows="6">Установить переходный период и поручить правительству представить отчёт об исполнении закона через один год.</textarea></div>
-      </div>
-      <div class="builder-section">
-        <h3>Прогноз</h3>
-        <div class="effect-list" id="amendmentEffects"></div>
-        <div class="vote-preview"><div class="vote-preview-top"><div><div class="subhead">Поддержка поправки</div><b><span id="amendmentYes">0</span> / 250</b></div><div><div class="subhead">Нужно</div><b>126</b></div></div><div class="vote-bar"><i class="vote-yes" id="amendmentYesBar"></i><i class="vote-und" id="amendmentUndBar"></i><i class="vote-no" id="amendmentNoBar"></i></div><div class="mini-note" id="amendmentVoteNote" style="margin-top:8px"></div></div>
-      </div>
-    </div>
-    <div class="builder-footer"><div class="builder-footer-left">Это интерактивный прототип: поправка реально изменяет текст выбранного законопроекта в текущей сессии.</div><div class="builder-footer-actions"><button class="btn" data-close-modal="amendmentBuilder">Отмена</button><button class="btn primary" id="submitAmendment">Внести и голосовать</button></div></div>
+<div class="modal-backdrop" id="modalBackdrop"></div>
+
+<div class="modal" id="partyModal">
+  <div class="modal-head"><h2>Редактировать партию</h2><button data-close>×</button></div>
+  <div class="modal-body form-grid">
+    <label>Название<input id="partyNameInput"></label>
+    <label>Аббревиатура<input id="partyShortInput" maxlength="8"></label>
+    <label>Лозунг<input id="partySloganInput"></label>
+    <label>Цвет<input id="partyColorInput" type="color"></label>
   </div>
+  <div class="modal-actions"><button data-close>Отмена</button><button class="primary" id="saveParty">Сохранить</button></div>
 </div>
 
-<div class="generic-modal prototype-modal" id="negotiationBuilder" aria-hidden="true">
-  <div class="panel modal-window">
-    <div class="builder-head"><div><div class="subhead" style="color:#e9e1c9">КОАЛИЦИОННЫЕ ПЕРЕГОВОРЫ</div><h2>Собрать большинство</h2></div><button class="builder-close" data-close-modal="negotiationBuilder">×</button></div>
-    <div class="modal-body modal-grid">
-      <div class="builder-section">
-        <h3>Предложения фракциям</h3>
-        <label class="negotiation-option"><input type="checkbox" class="negotiation-choice" value="delay"><span><b>Отсрочить вступление в силу</b><small>Умеренные и часть консерваторов легче поддержат проект.</small></span><b>+9</b></label>
-        <label class="negotiation-option"><input type="checkbox" class="negotiation-choice" value="subsidy"><span><b>Компенсации малым предприятиям</b><small>Снижает сопротивление бизнеса, но создаёт расход бюджета.</small></span><b>+13</b></label>
-        <label class="negotiation-option"><input type="checkbox" class="negotiation-choice" value="inspection"><span><b>Ослабить инспекционные полномочия</b><small>Даёт голоса справа, но ухудшает эффективность закона.</small></span><b>+8</b></label>
-        <label class="negotiation-option"><input type="checkbox" class="negotiation-choice" value="partyDeal"><span><b>Коалиционная уступка по следующему законопроекту</b><small>Политическая цена проявится позже.</small></span><b>+11</b></label>
-      </div>
-      <div class="builder-section">
-        <h3>Итог переговоров</h3>
-        <div class="effect-list" id="negotiationEffects"></div>
-        <div class="vote-preview"><div class="vote-preview-top"><div><div class="subhead">Ожидается «за»</div><b><span id="negotiationYes">0</span> / 250</b></div><div><div class="subhead">Большинство</div><b>126</b></div></div><div class="vote-bar"><i class="vote-yes" id="negotiationYesBar"></i><i class="vote-und" id="negotiationUndBar"></i><i class="vote-no" id="negotiationNoBar"></i></div></div>
-      </div>
-    </div>
-    <div class="builder-footer"><div class="builder-footer-left">Переговоры меняют поддержку текущего законопроекта и могут породить будущие обязательства.</div><div class="builder-footer-actions"><button class="btn" data-close-modal="negotiationBuilder">Отмена</button><button class="btn primary" id="applyNegotiation">Заключить договорённости</button></div></div>
+<div class="modal" id="congressModal">
+  <div class="modal-head"><h2>Партийный съезд</h2><button data-close>×</button></div>
+  <div class="modal-body">
+    <p>Выберите председателя партии.</p>
+    <div id="congressChoices" class="candidate-list"></div>
   </div>
+  <div class="modal-actions"><button data-close>Отмена</button><button class="primary" id="runCongress">Провести голосование</button></div>
 </div>
 
-<div class="generic-modal prototype-modal" id="provinceDetailModal" aria-hidden="true">
-  <div class="panel modal-window">
-    <div class="builder-head"><div><div class="subhead" style="color:#e9e1c9">ПРОВИНЦИЯ</div><h2 id="provinceModalTitle">Аурельская провинция</h2></div><button class="builder-close" data-close-modal="provinceDetailModal">×</button></div>
-    <div class="modal-body">
-      <div class="province-stat-grid" id="provinceModalStats"></div>
-      <div class="builder-section" style="margin-top:9px"><h3>Локальные действия</h3><div class="mini-note" id="provinceActionNote">Государство влияет через бюджет, инфраструктуру и разведку, а не вручную создаёт каждое предприятие.</div><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:9px"><button class="btn primary" id="provinceInfrastructureBtn">Инфраструктурная программа · ₳ 5 млн</button><button class="btn" id="provinceSurveyBtn">Геологическая разведка · ₳ 1.5 млн</button></div></div>
-    </div>
-    <div class="builder-footer"><div class="builder-footer-left">Локальный прототип: изменения отражаются в карточке провинции и журнале событий.</div><div class="builder-footer-actions"><button class="btn primary" data-close-modal="provinceDetailModal">Готово</button></div></div>
+<div class="modal" id="amendmentModal">
+  <div class="modal-head"><h2>Поправка к законопроекту</h2><button data-close>×</button></div>
+  <div class="modal-body form-grid">
+    <label>Статья<select id="amendmentArticle"></select></label>
+    <label>Действие<select id="amendmentMode"><option value="replace">Изменить</option><option value="add">Добавить новую</option><option value="delete">Удалить</option></select></label>
+    <label class="span2">Текст<textarea id="amendmentText" rows="5">Установить переходный период и провести повторную оценку через один год.</textarea></label>
   </div>
+  <div class="modal-actions"><button data-close>Отмена</button><button class="primary" id="applyAmendment">Внести поправку</button></div>
 </div>
 
-<div class="generic-modal prototype-modal" id="reportModal" aria-hidden="true">
-  <div class="panel modal-window">
-    <div class="builder-head"><div><div class="subhead" style="color:#e9e1c9">АНАЛИТИЧЕСКИЙ ОТЧЁТ</div><h2 id="reportModalTitle">Экономический доклад</h2></div><button class="builder-close" data-close-modal="reportModal">×</button></div>
-    <div class="modal-body" id="reportModalBody"></div>
-    <div class="builder-footer"><div class="builder-footer-left">Все цифры в прототипе демонстрационные, но состояние меняется с ходом времени и действиями игрока.</div><div class="builder-footer-actions"><button class="btn" id="exportPrototypeJson">Экспорт состояния JSON</button><button class="btn primary" data-close-modal="reportModal">Закрыть</button></div></div>
+<div class="modal" id="identityModal">
+  <div class="modal-head"><h2>Реформа государственной идентичности</h2><button data-close>×</button></div>
+  <div class="modal-body form-grid">
+    <label>Официальное название<input id="newStateName"></label>
+    <label>Короткое имя<input id="newStateShort"></label>
+    <label>Форма государства<input id="newStateForm"></label>
+    <label>Девиз<input id="newStateMotto"></label>
+    <label class="span2">Новый флаг<input id="newFlagFile" type="file" accept="image/*"></label>
   </div>
+  <div class="modal-actions"><button data-close>Отмена</button><button class="primary" id="applyIdentity">Провести голосование</button></div>
 </div>
 
-
-<div class="generic-modal prototype-modal" id="partyEditModal" aria-hidden="true">
-  <div class="panel modal-window party-modal-window">
-    <div class="builder-head"><div><div class="subhead" style="color:#e9e1c9">ВНУТРИПАРТИЙНОЕ РЕШЕНИЕ</div><h2>Настройки политической партии</h2></div><button class="builder-close" data-close-modal="partyEditModal">×</button></div>
-    <div class="modal-body modal-grid">
-      <div class="builder-section">
-        <h3>Идентичность</h3>
-        <div class="field"><label>Название</label><input id="partyEditName" type="text" value="Либеральная партия"></div>
-        <div class="field"><label>Аббревиатура</label><input id="partyEditShort" type="text" value="ЛП" maxlength="8"></div>
-        <div class="field"><label>Лозунг</label><input id="partyEditSlogan" type="text" value="Свобода, закон, развитие"></div>
-        <div class="field"><label>Партийный цвет</label><input id="partyEditColor" type="color" value="#527c9d"></div>
-      </div>
-      <div class="builder-section">
-        <h3>Последствия</h3>
-        <div class="modal-summary">Переименование и визуальная идентичность партии — внутреннее решение организации. Резкий ребрендинг может позже влиять на узнаваемость и лояльность членов; в прототипе это отражается небольшим штрафом к узнаваемости.</div>
-        <div class="party-brand-preview"><i id="partyBrandPreviewDot"></i><div><b id="partyBrandPreviewName">Либеральная партия</b><small id="partyBrandPreviewSlogan">Свобода, закон, развитие</small></div></div>
-      </div>
-    </div>
-    <div class="builder-footer"><div class="builder-footer-left">Это изменение касается партии, а не официального названия государства.</div><div class="builder-footer-actions"><button class="btn" data-close-modal="partyEditModal">Отмена</button><button class="btn primary" id="applyPartyEdit">Утвердить на исполкоме</button></div></div>
+<div class="modal" id="currencyModal">
+  <div class="modal-head"><h2>Денежная реформа</h2><button data-close>×</button></div>
+  <div class="modal-body form-grid">
+    <label>Название<input id="newCurrencyName"></label>
+    <label>Символ<input id="newCurrencySymbol" maxlength="3"></label>
+    <label>Тип<select id="newCurrencyType"><option>металлическая</option><option>смешанная</option><option>бумажная</option><option>fiat</option></select></label>
+    <label>Серебро в единице, г<input id="newCurrencySilver" type="number" min="0" step="0.5"></label>
   </div>
+  <div class="modal-actions"><button data-close>Отмена</button><button class="primary" id="applyCurrency">Провести реформу</button></div>
 </div>
 
-<div class="generic-modal prototype-modal" id="partyCongressModal" aria-hidden="true">
-  <div class="panel modal-window party-modal-window">
-    <div class="builder-head"><div><div class="subhead" style="color:#e9e1c9">ПАРТИЙНЫЙ СЪЕЗД</div><h2>Выборы председателя партии</h2></div><button class="builder-close" data-close-modal="partyCongressModal">×</button></div>
-    <div class="modal-body">
-      <div class="congress-candidates">
-        <label class="congress-candidate selected"><input type="radio" name="partyLeaderChoice" value="Элиас Варен" checked><span class="candidate-avatar">ЭВ</span><div><b>Элиас Варен</b><small>реформатор · действующий лидер · поддержка делегатов 61%</small></div></label>
-        <label class="congress-candidate"><input type="radio" name="partyLeaderChoice" value="Мара Рейн"><span class="candidate-avatar">МР</span><div><b>Мара Рейн</b><small>умеренное крыло · финансовая компетентность · 24%</small></div></label>
-        <label class="congress-candidate"><input type="radio" name="partyLeaderChoice" value="Арон Севель"><span class="candidate-avatar">АС</span><div><b>Арон Севель</b><small>промышленное крыло · сильные доноры · 15%</small></div></label>
-      </div>
-      <div class="mini-note" style="margin-top:9px">Игрок управляет партией как политической силой. Смена лидера меняет лицо партии; если президентом станет ваш действующий лидер, интерфейс явно покажет, что вы заняли высшую должность через партийную политику.</div>
-    </div>
-    <div class="builder-footer"><div class="builder-footer-left">Съезд может вызвать внутреннюю борьбу и временно снизить организацию.</div><div class="builder-footer-actions"><button class="btn" data-close-modal="partyCongressModal">Отмена</button><button class="btn primary" id="runPartyCongress">Провести голосование делегатов</button></div></div>
-  </div>
-</div>
-
-<div class="global-toast" id="globalToast"></div>
-
+<div class="toast" id="toast"></div>
 <script src="app.js"></script>
-
 </body>
 </html>
