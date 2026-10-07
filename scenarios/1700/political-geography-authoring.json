@@ -1,0 +1,4920 @@
+{
+  "version": 1,
+  "year": 1700,
+  "datasetId": "mandate-world-v1",
+  "description": "Mandate World 1700 is a gameplay-oriented, historically recognizable starting scenario. Borders and political entities are intentionally simplified.",
+  "authoringBasis": "Independent gameplay dataset. Modern sourceCountry and centroid bbox are explicit authoring proxies. No historical-basemaps polygons, feature IDs, assignments or mappings are imported.",
+  "references": [
+    {
+      "url": "https://www.cabinet.ox.ac.uk/node/11106",
+      "use": "Broad European circa-1700 context only; no coordinates or boundaries copied."
+    },
+    {
+      "url": "https://asia.si.edu/education/educator-resources/teaching-china-with-the-smithsonian/explore-by-dynasty/qing-dynasty/",
+      "use": "Qing dynasty identification only; no geography copied."
+    },
+    {
+      "url": "https://www.iranicaonline.org/articles/safavids/",
+      "use": "Safavid-era identification only; no geography copied."
+    }
+  ],
+  "polities": [
+    {
+      "id": "aceh",
+      "name": "Sultanate of Aceh",
+      "shortName": "Sultanate of Aceh",
+      "type": "sultanate",
+      "color": "#6ce9df"
+    },
+    {
+      "id": "afghan_frontier",
+      "name": "Afghan Frontier Principalities",
+      "shortName": "Afghan Frontier Principalities",
+      "type": "frontier",
+      "color": "#84c50a"
+    },
+    {
+      "id": "ainu",
+      "name": "Ainu Lands",
+      "shortName": "Ainu Lands",
+      "type": "indigenous_region",
+      "color": "#5406d4"
+    },
+    {
+      "id": "akan",
+      "name": "Akan States",
+      "shortName": "Akan States",
+      "type": "confederation",
+      "color": "#98b4b7"
+    },
+    {
+      "id": "algiers",
+      "name": "Regency of Algiers",
+      "shortName": "Regency of Algiers",
+      "type": "regency",
+      "color": "#f82ff4"
+    },
+    {
+      "id": "amazon_regions",
+      "name": "Amazonian Confederations",
+      "shortName": "Amazonian Confederations",
+      "type": "indigenous_region",
+      "color": "#0a10f8"
+    },
+    {
+      "id": "angola_portuguese",
+      "name": "Portuguese Angola Holdings",
+      "shortName": "Portuguese Angola Holdings",
+      "type": "colonial_administration",
+      "color": "#2586c1"
+    },
+    {
+      "id": "arabian_tribes",
+      "name": "Arabian Tribal Confederations",
+      "shortName": "Arabian Tribal Confederations",
+      "type": "tribal_confederation",
+      "color": "#9a7e71"
+    },
+    {
+      "id": "arakan",
+      "name": "Kingdom of Arakan",
+      "shortName": "Arakan",
+      "type": "kingdom",
+      "color": "#aa1836"
+    },
+    {
+      "id": "arctic_america",
+      "name": "Arctic Indigenous Lands",
+      "shortName": "Arctic Indigenous Lands",
+      "type": "indigenous_region",
+      "color": "#e28224"
+    },
+    {
+      "id": "assam",
+      "name": "Ahom Kingdom",
+      "shortName": "Ahom Kingdom",
+      "type": "kingdom",
+      "color": "#dcae23"
+    },
+    {
+      "id": "atlantic_english",
+      "name": "English Atlantic Island Holdings",
+      "shortName": "English Atlantic Island Holdings",
+      "type": "colonial_administration",
+      "color": "#29b4ca"
+    },
+    {
+      "id": "atlantic_portuguese",
+      "name": "Portuguese Atlantic Islands",
+      "shortName": "Portuguese Atlantic Islands",
+      "type": "colonial_administration",
+      "color": "#e081df"
+    },
+    {
+      "id": "australia_north",
+      "name": "Northern Australian Confederations",
+      "shortName": "Northern Australian Confederations",
+      "type": "indigenous_region",
+      "color": "#02f6d1"
+    },
+    {
+      "id": "australia_southeast",
+      "name": "Southeastern Australian Confederations",
+      "shortName": "Southeastern Australian Confederations",
+      "type": "indigenous_region",
+      "color": "#fb9836"
+    },
+    {
+      "id": "australia_west",
+      "name": "Western Australian Confederations",
+      "shortName": "Western Australian Confederations",
+      "type": "indigenous_region",
+      "color": "#3a2721"
+    },
+    {
+      "id": "bavaria",
+      "name": "Electorate of Bavaria",
+      "shortName": "Electorate of Bavaria",
+      "type": "electorate",
+      "color": "#9abc86"
+    },
+    {
+      "id": "benin_kingdom",
+      "name": "Kingdom of Benin",
+      "shortName": "Benin",
+      "type": "kingdom",
+      "color": "#9ae3b6"
+    },
+    {
+      "id": "bhutan",
+      "name": "Bhutan",
+      "shortName": "Bhutan",
+      "type": "religious_polity",
+      "color": "#4395ea"
+    },
+    {
+      "id": "borneo_regions",
+      "name": "Borneo River Confederations",
+      "shortName": "Borneo River Confederations",
+      "type": "decentralized_region",
+      "color": "#7cfa04"
+    },
+    {
+      "id": "brandenburg_prussia",
+      "name": "Brandenburg-Prussia",
+      "shortName": "Brandenburg-Prussia",
+      "type": "electorate",
+      "color": "#096f44"
+    },
+    {
+      "id": "brazil_portuguese",
+      "name": "Portuguese Brazil",
+      "shortName": "Portuguese Brazil",
+      "type": "colonial_administration",
+      "color": "#b68814"
+    },
+    {
+      "id": "brunei",
+      "name": "Sultanate of Brunei",
+      "shortName": "Sultanate of Brunei",
+      "type": "sultanate",
+      "color": "#5ae762"
+    },
+    {
+      "id": "bukhara",
+      "name": "Khanate of Bukhara",
+      "shortName": "Khanate of Bukhara",
+      "type": "khanate",
+      "color": "#4fd650"
+    },
+    {
+      "id": "burma",
+      "name": "Restored Toungoo Burma",
+      "shortName": "Restored Toungoo Burma",
+      "type": "kingdom",
+      "color": "#122705"
+    },
+    {
+      "id": "cambodia",
+      "name": "Kingdom of Cambodia",
+      "shortName": "Cambodia",
+      "type": "kingdom",
+      "color": "#5632bb"
+    },
+    {
+      "id": "cameroon_regions",
+      "name": "Cameroon Highlands and Coastal Polities",
+      "shortName": "Cameroon Highlands and Coastal Polities",
+      "type": "decentralized_region",
+      "color": "#a184c5"
+    },
+    {
+      "id": "cape_voc",
+      "name": "Dutch Cape Settlement",
+      "shortName": "Dutch Cape Settlement",
+      "type": "colonial_administration",
+      "color": "#878ffa"
+    },
+    {
+      "id": "cayenne",
+      "name": "French Cayenne Holdings",
+      "shortName": "French Cayenne Holdings",
+      "type": "colonial_administration",
+      "color": "#624383"
+    },
+    {
+      "id": "ceylon_voc",
+      "name": "Dutch Ceylon Holdings",
+      "shortName": "Dutch Ceylon Holdings",
+      "type": "colonial_administration",
+      "color": "#322220"
+    },
+    {
+      "id": "champa",
+      "name": "Champa Principalities",
+      "shortName": "Champa Principalities",
+      "type": "principality",
+      "color": "#6627b2"
+    },
+    {
+      "id": "circassian",
+      "name": "Circassian Confederations",
+      "shortName": "Circassian Confederations",
+      "type": "tribal_confederation",
+      "color": "#1f1638"
+    },
+    {
+      "id": "comoros",
+      "name": "Comorian Sultanates",
+      "shortName": "Comorian Sultanates",
+      "type": "confederation",
+      "color": "#37c0d9"
+    },
+    {
+      "id": "congo_forests",
+      "name": "Congo Forest Communities",
+      "shortName": "Congo Forest Communities",
+      "type": "decentralized_region",
+      "color": "#2ba881"
+    },
+    {
+      "id": "courland",
+      "name": "Duchy of Courland",
+      "shortName": "Duchy of Courland",
+      "type": "duchy",
+      "color": "#92480a"
+    },
+    {
+      "id": "crimean_khanate",
+      "name": "Crimean Khanate",
+      "shortName": "Crimean Khanate",
+      "type": "khanate",
+      "color": "#116a0e"
+    },
+    {
+      "id": "dahomey",
+      "name": "Dahomey and Coastal States",
+      "shortName": "Dahomey and Coastal States",
+      "type": "kingdom",
+      "color": "#34f284"
+    },
+    {
+      "id": "danish_caribbean",
+      "name": "Danish Caribbean Holdings",
+      "shortName": "Danish Caribbean Holdings",
+      "type": "colonial_administration",
+      "color": "#e0a9a2"
+    },
+    {
+      "id": "darfur",
+      "name": "Sultanate of Darfur",
+      "shortName": "Sultanate of Darfur",
+      "type": "sultanate",
+      "color": "#30cb2e"
+    },
+    {
+      "id": "den_norway",
+      "name": "Denmark-Norway",
+      "shortName": "Denmark-Norway",
+      "type": "monarchy",
+      "color": "#259763"
+    },
+    {
+      "id": "dutch_caribbean",
+      "name": "Dutch Caribbean Holdings",
+      "shortName": "Dutch Caribbean Holdings",
+      "type": "colonial_administration",
+      "color": "#3c7273"
+    },
+    {
+      "id": "dutch_guiana",
+      "name": "Dutch Guiana",
+      "shortName": "Dutch Guiana",
+      "type": "colonial_administration",
+      "color": "#3d0632"
+    },
+    {
+      "id": "dzungar",
+      "name": "Dzungar Khanate",
+      "shortName": "Dzungar Khanate",
+      "type": "khanate",
+      "color": "#15233d"
+    },
+    {
+      "id": "east_african_regions",
+      "name": "East African Highland Confederations",
+      "shortName": "East African Highland Confederations",
+      "type": "decentralized_region",
+      "color": "#98125c"
+    },
+    {
+      "id": "egypt_ottoman",
+      "name": "Ottoman Egypt",
+      "shortName": "Ottoman Egypt",
+      "type": "dependency",
+      "color": "#6d0062"
+    },
+    {
+      "id": "emilian_duchies",
+      "name": "Emilian Duchies",
+      "shortName": "Emilian Duchies",
+      "type": "duchy",
+      "color": "#d63119"
+    },
+    {
+      "id": "eng_stuart",
+      "name": "Kingdom of England and Ireland",
+      "shortName": "England and Ireland",
+      "type": "kingdom",
+      "color": "#a8434a"
+    },
+    {
+      "id": "english_america",
+      "name": "English Atlantic Colonies",
+      "shortName": "English Atlantic Colonies",
+      "type": "colonial_administration",
+      "color": "#cc4900"
+    },
+    {
+      "id": "english_caribbean",
+      "name": "English Caribbean Colonies",
+      "shortName": "English Caribbean Colonies",
+      "type": "colonial_administration",
+      "color": "#2b17d1"
+    },
+    {
+      "id": "equatorial_forests",
+      "name": "Equatorial Forest Confederations",
+      "shortName": "Equatorial Forest Confederations",
+      "type": "decentralized_region",
+      "color": "#752e7b"
+    },
+    {
+      "id": "ethiopia",
+      "name": "Ethiopian Empire",
+      "shortName": "Ethiopian Empire",
+      "type": "empire",
+      "color": "#abca12"
+    },
+    {
+      "id": "fra_bourbon",
+      "name": "Kingdom of France",
+      "shortName": "France",
+      "type": "kingdom",
+      "color": "#3659ad"
+    },
+    {
+      "id": "french_caribbean",
+      "name": "French Caribbean Colonies",
+      "shortName": "French Caribbean Colonies",
+      "type": "colonial_administration",
+      "color": "#070d4e"
+    },
+    {
+      "id": "futa",
+      "name": "Futa Highland Confederations",
+      "shortName": "Futa Highland Confederations",
+      "type": "tribal_confederation",
+      "color": "#c75ed6"
+    },
+    {
+      "id": "genoa",
+      "name": "Republic of Genoa",
+      "shortName": "Genoa",
+      "type": "republic",
+      "color": "#7509f3"
+    },
+    {
+      "id": "georgian_kingdoms",
+      "name": "Georgian Kingdoms",
+      "shortName": "Georgian Kingdoms",
+      "type": "confederation",
+      "color": "#87939b"
+    },
+    {
+      "id": "great_lakes",
+      "name": "Great Lakes Kingdoms",
+      "shortName": "Great Lakes Kingdoms",
+      "type": "confederation",
+      "color": "#6ffddf"
+    },
+    {
+      "id": "great_plains",
+      "name": "Great Plains Confederations",
+      "shortName": "Great Plains Confederations",
+      "type": "indigenous_region",
+      "color": "#671c23"
+    },
+    {
+      "id": "habsburg",
+      "name": "Habsburg Monarchy",
+      "shortName": "Habsburg Monarchy",
+      "type": "monarchy",
+      "color": "#c6b893"
+    },
+    {
+      "id": "hanover",
+      "name": "Electorate of Hanover",
+      "shortName": "Electorate of Hanover",
+      "type": "electorate",
+      "color": "#a8a7f1"
+    },
+    {
+      "id": "hausa",
+      "name": "Hausa States",
+      "shortName": "Hausa States",
+      "type": "confederation",
+      "color": "#086ce3"
+    },
+    {
+      "id": "hawaiian",
+      "name": "Hawaiian Chiefdoms",
+      "shortName": "Hawaiian Chiefdoms",
+      "type": "confederation",
+      "color": "#cacd19"
+    },
+    {
+      "id": "hejaz",
+      "name": "Sharifate of Hejaz",
+      "shortName": "Sharifate of Hejaz",
+      "type": "sharifate",
+      "color": "#63be9d"
+    },
+    {
+      "id": "igbo_regions",
+      "name": "Igbo Communities",
+      "shortName": "Igbo Communities",
+      "type": "decentralized_region",
+      "color": "#0a62e8"
+    },
+    {
+      "id": "indian_ocean_frontier",
+      "name": "Indian Ocean Island Frontiers",
+      "shortName": "Indian Ocean Island Frontiers",
+      "type": "frontier",
+      "color": "#2792ef"
+    },
+    {
+      "id": "iroquois",
+      "name": "Haudenosaunee Confederacy",
+      "shortName": "Haudenosaunee Confederacy",
+      "type": "tribal_confederation",
+      "color": "#4b99e6"
+    },
+    {
+      "id": "java_voc",
+      "name": "Dutch Java Holdings",
+      "shortName": "Dutch Java Holdings",
+      "type": "colonial_administration",
+      "color": "#0e73ba"
+    },
+    {
+      "id": "jolof",
+      "name": "Jolof and Senegambian States",
+      "shortName": "Jolof and Senegambian States",
+      "type": "confederation",
+      "color": "#fa69c9"
+    },
+    {
+      "id": "joseon",
+      "name": "Joseon Korea",
+      "shortName": "Joseon Korea",
+      "type": "kingdom",
+      "color": "#657ba8"
+    },
+    {
+      "id": "kandy",
+      "name": "Kingdom of Kandy",
+      "shortName": "Kandy",
+      "type": "kingdom",
+      "color": "#e01a52"
+    },
+    {
+      "id": "kanem_bornu",
+      "name": "Kanem-Bornu",
+      "shortName": "Kanem-Bornu",
+      "type": "kingdom",
+      "color": "#534fcf"
+    },
+    {
+      "id": "kazakh_hordes",
+      "name": "Kazakh Hordes",
+      "shortName": "Kazakh Hordes",
+      "type": "tribal_confederation",
+      "color": "#0c3433"
+    },
+    {
+      "id": "khiva",
+      "name": "Khanate of Khiva",
+      "shortName": "Khanate of Khiva",
+      "type": "khanate",
+      "color": "#d75953"
+    },
+    {
+      "id": "khoisan",
+      "name": "Khoisan Lands",
+      "shortName": "Khoisan Lands",
+      "type": "indigenous_region",
+      "color": "#205cbb"
+    },
+    {
+      "id": "kongo",
+      "name": "Kingdom of Kongo",
+      "shortName": "Kongo",
+      "type": "kingdom",
+      "color": "#7fbc52"
+    },
+    {
+      "id": "kyrgyz_frontier",
+      "name": "Kyrgyz Mountain Confederations",
+      "shortName": "Kyrgyz Mountain Confederations",
+      "type": "tribal_confederation",
+      "color": "#a27a75"
+    },
+    {
+      "id": "lao_kingdoms",
+      "name": "Lao Kingdoms",
+      "shortName": "Lao Kingdoms",
+      "type": "confederation",
+      "color": "#806ece"
+    },
+    {
+      "id": "louisiana",
+      "name": "French Louisiana Frontier",
+      "shortName": "French Louisiana Frontier",
+      "type": "colonial_administration",
+      "color": "#527a24"
+    },
+    {
+      "id": "luba",
+      "name": "Luba Kingdom",
+      "shortName": "Luba Kingdom",
+      "type": "kingdom",
+      "color": "#eeb0db"
+    },
+    {
+      "id": "lunda",
+      "name": "Lunda Confederation",
+      "shortName": "Lunda Confederation",
+      "type": "confederation",
+      "color": "#691b0f"
+    },
+    {
+      "id": "macao_portuguese",
+      "name": "Portuguese Macau",
+      "shortName": "Portuguese Macau",
+      "type": "colonial_administration",
+      "color": "#07abb7"
+    },
+    {
+      "id": "malabar",
+      "name": "Malabar Kingdoms",
+      "shortName": "Malabar Kingdoms",
+      "type": "confederation",
+      "color": "#eab123"
+    },
+    {
+      "id": "malagasy",
+      "name": "Malagasy Kingdoms",
+      "shortName": "Malagasy Kingdoms",
+      "type": "confederation",
+      "color": "#449431"
+    },
+    {
+      "id": "malay_sultanates",
+      "name": "Malay Sultanates",
+      "shortName": "Malay Sultanates",
+      "type": "confederation",
+      "color": "#535340"
+    },
+    {
+      "id": "maldives",
+      "name": "Sultanate of Maldives",
+      "shortName": "Sultanate of Maldives",
+      "type": "sultanate",
+      "color": "#8a9d76"
+    },
+    {
+      "id": "malta_order",
+      "name": "Order of Malta",
+      "shortName": "Order of Malta",
+      "type": "military_order",
+      "color": "#569718"
+    },
+    {
+      "id": "maori",
+      "name": "Maori Confederations",
+      "shortName": "Maori Confederations",
+      "type": "indigenous_region",
+      "color": "#d22e5c"
+    },
+    {
+      "id": "mapuche",
+      "name": "Mapuche Confederations",
+      "shortName": "Mapuche Confederations",
+      "type": "tribal_confederation",
+      "color": "#353c66"
+    },
+    {
+      "id": "maratha",
+      "name": "Maratha Confederation",
+      "shortName": "Maratha Confederation",
+      "type": "confederation",
+      "color": "#bc2767"
+    },
+    {
+      "id": "maravi",
+      "name": "Maravi Confederation",
+      "shortName": "Maravi Confederation",
+      "type": "confederation",
+      "color": "#6eeb2c"
+    },
+    {
+      "id": "mataram",
+      "name": "Mataram Sultanate",
+      "shortName": "Mataram Sultanate",
+      "type": "sultanate",
+      "color": "#f6f394"
+    },
+    {
+      "id": "melanesian",
+      "name": "Melanesian Island Confederations",
+      "shortName": "Melanesian Island Confederations",
+      "type": "indigenous_region",
+      "color": "#dff267"
+    },
+    {
+      "id": "micronesian",
+      "name": "Micronesian Island Confederations",
+      "shortName": "Micronesian Island Confederations",
+      "type": "indigenous_region",
+      "color": "#f10025"
+    },
+    {
+      "id": "milan",
+      "name": "Duchy of Milan",
+      "shortName": "Duchy of Milan",
+      "type": "duchy",
+      "color": "#6ba933"
+    },
+    {
+      "id": "mindanao",
+      "name": "Mindanao Sultanates",
+      "shortName": "Mindanao Sultanates",
+      "type": "confederation",
+      "color": "#3c8caa"
+    },
+    {
+      "id": "moldavia",
+      "name": "Principality of Moldavia",
+      "shortName": "Principality of Moldavia",
+      "type": "principality",
+      "color": "#a60239"
+    },
+    {
+      "id": "morocco",
+      "name": "Sultanate of Morocco",
+      "shortName": "Sultanate of Morocco",
+      "type": "sultanate",
+      "color": "#79ab26"
+    },
+    {
+      "id": "mossi",
+      "name": "Mossi Kingdoms",
+      "shortName": "Mossi Kingdoms",
+      "type": "confederation",
+      "color": "#c74a6e"
+    },
+    {
+      "id": "mozambique_portuguese",
+      "name": "Portuguese Mozambique Holdings",
+      "shortName": "Portuguese Mozambique Holdings",
+      "type": "colonial_administration",
+      "color": "#e4dab5"
+    },
+    {
+      "id": "mughal",
+      "name": "Mughal Empire",
+      "shortName": "Mughal Empire",
+      "type": "empire",
+      "color": "#258e72"
+    },
+    {
+      "id": "mysore",
+      "name": "Kingdom of Mysore",
+      "shortName": "Mysore",
+      "type": "kingdom",
+      "color": "#86a151"
+    },
+    {
+      "id": "naples_sicily",
+      "name": "Kingdoms of Naples and Sicily",
+      "shortName": "Kingdoms of Naples and Sicily",
+      "type": "monarchy",
+      "color": "#12ca64"
+    },
+    {
+      "id": "nepal_hills",
+      "name": "Nepal Hill Kingdoms",
+      "shortName": "Nepal Hill Kingdoms",
+      "type": "confederation",
+      "color": "#396b3e"
+    },
+    {
+      "id": "new_france",
+      "name": "New France",
+      "shortName": "New France",
+      "type": "colonial_administration",
+      "color": "#7d3154"
+    },
+    {
+      "id": "new_mexico",
+      "name": "Spanish Northern Frontier",
+      "shortName": "Spanish Northern Frontier",
+      "type": "colonial_administration",
+      "color": "#c9fe99"
+    },
+    {
+      "id": "new_spain",
+      "name": "Viceroyalty of New Spain",
+      "shortName": "New Spain",
+      "type": "colonial_administration",
+      "color": "#7af171"
+    },
+    {
+      "id": "nguyen",
+      "name": "Nguyen Southern Vietnam",
+      "shortName": "Nguyen Southern Vietnam",
+      "type": "lordship",
+      "color": "#e56698"
+    },
+    {
+      "id": "nilotic_regions",
+      "name": "Nilotic River Confederations",
+      "shortName": "Nilotic River Confederations",
+      "type": "decentralized_region",
+      "color": "#27c75d"
+    },
+    {
+      "id": "nld_republic",
+      "name": "Dutch Republic",
+      "shortName": "Dutch Republic",
+      "type": "republic",
+      "color": "#d27b35"
+    },
+    {
+      "id": "north_german_states",
+      "name": "North German Imperial States",
+      "shortName": "North German Imperial States",
+      "type": "confederation",
+      "color": "#890015"
+    },
+    {
+      "id": "northeast_siberian",
+      "name": "Northeastern Siberian Communities",
+      "shortName": "Northeastern Siberian Communities",
+      "type": "indigenous_region",
+      "color": "#d7d899"
+    },
+    {
+      "id": "northern_woodlands",
+      "name": "Northern Woodland Confederations",
+      "shortName": "Northern Woodland Confederations",
+      "type": "indigenous_region",
+      "color": "#941942"
+    },
+    {
+      "id": "oman",
+      "name": "Imamate of Oman",
+      "shortName": "Imamate of Oman",
+      "type": "imamate",
+      "color": "#37480a"
+    },
+    {
+      "id": "ottoman",
+      "name": "Ottoman Empire",
+      "shortName": "Ottoman Empire",
+      "type": "empire",
+      "color": "#a53538"
+    },
+    {
+      "id": "oyo",
+      "name": "Oyo Empire",
+      "shortName": "Oyo Empire",
+      "type": "empire",
+      "color": "#807bfc"
+    },
+    {
+      "id": "pacific_america",
+      "name": "Pacific Coast Indigenous Polities",
+      "shortName": "Pacific Coast Indigenous Polities",
+      "type": "indigenous_region",
+      "color": "#804f4e"
+    },
+    {
+      "id": "pampas_regions",
+      "name": "Pampas and Patagonian Confederations",
+      "shortName": "Pampas and Patagonian Confederations",
+      "type": "indigenous_region",
+      "color": "#de21a6"
+    },
+    {
+      "id": "papal",
+      "name": "Papal States",
+      "shortName": "Papal States",
+      "type": "ecclesiastical_state",
+      "color": "#fc1260"
+    },
+    {
+      "id": "papuan",
+      "name": "Papuan Communities",
+      "shortName": "Papuan Communities",
+      "type": "indigenous_region",
+      "color": "#9484c8"
+    },
+    {
+      "id": "peru",
+      "name": "Viceroyalty of Peru",
+      "shortName": "Peru",
+      "type": "colonial_administration",
+      "color": "#e021f4"
+    },
+    {
+      "id": "philippines_spanish",
+      "name": "Spanish Philippines",
+      "shortName": "Spanish Philippines",
+      "type": "colonial_administration",
+      "color": "#4b8153"
+    },
+    {
+      "id": "plc",
+      "name": "Polish-Lithuanian Commonwealth",
+      "shortName": "Polish-Lithuanian Commonwealth",
+      "type": "commonwealth",
+      "color": "#b15c80"
+    },
+    {
+      "id": "polynesian",
+      "name": "Polynesian Island Confederations",
+      "shortName": "Polynesian Island Confederations",
+      "type": "indigenous_region",
+      "color": "#85e3b6"
+    },
+    {
+      "id": "por_monarchy",
+      "name": "Kingdom of Portugal",
+      "shortName": "Portugal",
+      "type": "kingdom",
+      "color": "#287650"
+    },
+    {
+      "id": "qing",
+      "name": "Qing Empire",
+      "shortName": "Qing Empire",
+      "type": "empire",
+      "color": "#dfb951"
+    },
+    {
+      "id": "ragusa",
+      "name": "Republic of Ragusa",
+      "shortName": "Ragusa",
+      "type": "republic",
+      "color": "#33d2e9"
+    },
+    {
+      "id": "rajput",
+      "name": "Rajput Principalities",
+      "shortName": "Rajput Principalities",
+      "type": "confederation",
+      "color": "#c89471"
+    },
+    {
+      "id": "rhenish_states",
+      "name": "Rhenish Imperial States",
+      "shortName": "Rhenish Imperial States",
+      "type": "confederation",
+      "color": "#3f59c9"
+    },
+    {
+      "id": "rozwi",
+      "name": "Rozwi Empire",
+      "shortName": "Rozwi Empire",
+      "type": "empire",
+      "color": "#56fff7"
+    },
+    {
+      "id": "rus_tsardom",
+      "name": "Russian Tsardom",
+      "shortName": "Russian Tsardom",
+      "type": "tsardom",
+      "color": "#37664d"
+    },
+    {
+      "id": "ryukyu",
+      "name": "Ryukyu Kingdom",
+      "shortName": "Ryukyu Kingdom",
+      "type": "kingdom",
+      "color": "#248113"
+    },
+    {
+      "id": "safavid",
+      "name": "Safavid Persia",
+      "shortName": "Safavid Persia",
+      "type": "empire",
+      "color": "#8050a1"
+    },
+    {
+      "id": "saharan_confederations",
+      "name": "Saharan Confederations",
+      "shortName": "Saharan Confederations",
+      "type": "tribal_confederation",
+      "color": "#4be116"
+    },
+    {
+      "id": "sahel_states",
+      "name": "Sahelian Principalities",
+      "shortName": "Sahelian Principalities",
+      "type": "confederation",
+      "color": "#f5431e"
+    },
+    {
+      "id": "savoy",
+      "name": "Duchy of Savoy",
+      "shortName": "Duchy of Savoy",
+      "type": "duchy",
+      "color": "#c77089"
+    },
+    {
+      "id": "saxony",
+      "name": "Electorate of Saxony",
+      "shortName": "Electorate of Saxony",
+      "type": "electorate",
+      "color": "#5b81cc"
+    },
+    {
+      "id": "sco_stuart",
+      "name": "Kingdom of Scotland",
+      "shortName": "Scotland",
+      "type": "kingdom",
+      "color": "#3f57a3"
+    },
+    {
+      "id": "sennar",
+      "name": "Sultanate of Sennar",
+      "shortName": "Sultanate of Sennar",
+      "type": "sultanate",
+      "color": "#8b2150"
+    },
+    {
+      "id": "siam",
+      "name": "Kingdom of Ayutthaya",
+      "shortName": "Ayutthaya",
+      "type": "kingdom",
+      "color": "#024b11"
+    },
+    {
+      "id": "somali_sultanates",
+      "name": "Somali Sultanates",
+      "shortName": "Somali Sultanates",
+      "type": "confederation",
+      "color": "#3fb64b"
+    },
+    {
+      "id": "southeast_america",
+      "name": "Southeastern Indigenous Confederations",
+      "shortName": "Southeastern Indigenous Confederations",
+      "type": "indigenous_region",
+      "color": "#11ae17"
+    },
+    {
+      "id": "southern_bantu",
+      "name": "Southern African Chiefdoms",
+      "shortName": "Southern African Chiefdoms",
+      "type": "decentralized_region",
+      "color": "#f32be4"
+    },
+    {
+      "id": "spa_monarchy",
+      "name": "Spanish Monarchy",
+      "shortName": "Spanish Monarchy",
+      "type": "monarchy",
+      "color": "#dbac38"
+    },
+    {
+      "id": "spanish_caribbean",
+      "name": "Spanish Caribbean",
+      "shortName": "Spanish Caribbean",
+      "type": "colonial_administration",
+      "color": "#34ec7f"
+    },
+    {
+      "id": "spanish_netherlands",
+      "name": "Spanish Netherlands",
+      "shortName": "Spanish Netherlands",
+      "type": "dependency",
+      "color": "#49820f"
+    },
+    {
+      "id": "spice_voc",
+      "name": "Dutch Spice Island Holdings",
+      "shortName": "Dutch Spice Island Holdings",
+      "type": "colonial_administration",
+      "color": "#b9569f"
+    },
+    {
+      "id": "sumatra_regions",
+      "name": "Sumatran Principalities",
+      "shortName": "Sumatran Principalities",
+      "type": "confederation",
+      "color": "#91e821"
+    },
+    {
+      "id": "swabian_states",
+      "name": "Swabian Imperial States",
+      "shortName": "Swabian Imperial States",
+      "type": "confederation",
+      "color": "#3e8eb1"
+    },
+    {
+      "id": "swahili_coast",
+      "name": "Swahili Coastal Sultanates",
+      "shortName": "Swahili Coastal Sultanates",
+      "type": "confederation",
+      "color": "#890050"
+    },
+    {
+      "id": "swe_monarchy",
+      "name": "Kingdom of Sweden",
+      "shortName": "Sweden",
+      "type": "kingdom",
+      "color": "#4084b4"
+    },
+    {
+      "id": "swiss_cantons",
+      "name": "Swiss Cantons",
+      "shortName": "Swiss Cantons",
+      "type": "confederation",
+      "color": "#72606d"
+    },
+    {
+      "id": "tamil_states",
+      "name": "Tamil Principalities",
+      "shortName": "Tamil Principalities",
+      "type": "confederation",
+      "color": "#6fe0fe"
+    },
+    {
+      "id": "tasmania",
+      "name": "Tasmanian Indigenous Lands",
+      "shortName": "Tasmanian Indigenous Lands",
+      "type": "indigenous_region",
+      "color": "#08b136"
+    },
+    {
+      "id": "tibet",
+      "name": "Tibetan Polity",
+      "shortName": "Tibetan Polity",
+      "type": "religious_polity",
+      "color": "#ec1299"
+    },
+    {
+      "id": "timor_polities",
+      "name": "Timor Polities",
+      "shortName": "Timor Polities",
+      "type": "confederation",
+      "color": "#aa2597"
+    },
+    {
+      "id": "tokugawa",
+      "name": "Tokugawa Japan",
+      "shortName": "Tokugawa Japan",
+      "type": "shogunate",
+      "color": "#c3a1bb"
+    },
+    {
+      "id": "tonga",
+      "name": "Tongan Polity",
+      "shortName": "Tongan Polity",
+      "type": "kingdom",
+      "color": "#d67aad"
+    },
+    {
+      "id": "transylvania",
+      "name": "Principality of Transylvania",
+      "shortName": "Principality of Transylvania",
+      "type": "principality",
+      "color": "#9eb89c"
+    },
+    {
+      "id": "trinh",
+      "name": "Trinh Northern Vietnam",
+      "shortName": "Trinh Northern Vietnam",
+      "type": "lordship",
+      "color": "#09a19c"
+    },
+    {
+      "id": "tripoli",
+      "name": "Regency of Tripoli",
+      "shortName": "Regency of Tripoli",
+      "type": "regency",
+      "color": "#8d5d94"
+    },
+    {
+      "id": "tunis",
+      "name": "Regency of Tunis",
+      "shortName": "Regency of Tunis",
+      "type": "regency",
+      "color": "#c82880"
+    },
+    {
+      "id": "tuscany",
+      "name": "Grand Duchy of Tuscany",
+      "shortName": "Grand Duchy of Tuscany",
+      "type": "grand_duchy",
+      "color": "#1aae04"
+    },
+    {
+      "id": "upper_guinea",
+      "name": "Upper Guinea Forest Communities",
+      "shortName": "Upper Guinea Forest Communities",
+      "type": "decentralized_region",
+      "color": "#e0f64a"
+    },
+    {
+      "id": "venice",
+      "name": "Republic of Venice",
+      "shortName": "Venice",
+      "type": "republic",
+      "color": "#83486a"
+    },
+    {
+      "id": "wallachia",
+      "name": "Principality of Wallachia",
+      "shortName": "Principality of Wallachia",
+      "type": "principality",
+      "color": "#7fde15"
+    },
+    {
+      "id": "yemen",
+      "name": "Yemeni Imamate",
+      "shortName": "Yemeni Imamate",
+      "type": "imamate",
+      "color": "#4401e7"
+    },
+    {
+      "id": "zambezi_regions",
+      "name": "Zambezi and Mozambique Polities",
+      "shortName": "Zambezi and Mozambique Polities",
+      "type": "decentralized_region",
+      "color": "#c976c0"
+    }
+  ],
+  "majorPolityIds": [
+    "brandenburg_prussia",
+    "brazil_portuguese",
+    "den_norway",
+    "eng_stuart",
+    "english_america",
+    "ethiopia",
+    "fra_bourbon",
+    "habsburg",
+    "joseon",
+    "morocco",
+    "mughal",
+    "new_france",
+    "new_spain",
+    "nld_republic",
+    "oman",
+    "ottoman",
+    "papal",
+    "peru",
+    "plc",
+    "por_monarchy",
+    "qing",
+    "rus_tsardom",
+    "safavid",
+    "savoy",
+    "siam",
+    "spa_monarchy",
+    "swe_monarchy",
+    "tokugawa",
+    "venice"
+  ],
+  "rules": [
+    {
+      "id": "world-001-fra_bourbon",
+      "match": {
+        "sourceCountry": "FRA"
+      },
+      "ownerPolityId": "fra_bourbon",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-002-fra_bourbon",
+      "match": {
+        "sourceCountry": "MCO"
+      },
+      "ownerPolityId": "fra_bourbon",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-003-cayenne",
+      "match": {
+        "sourceCountry": "FRA",
+        "bbox": [
+          -55,
+          0,
+          -50,
+          7
+        ]
+      },
+      "ownerPolityId": "cayenne",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-004-spa_monarchy",
+      "match": {
+        "sourceCountry": "ESP"
+      },
+      "ownerPolityId": "spa_monarchy",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-005-spa_monarchy",
+      "match": {
+        "sourceCountry": "AND"
+      },
+      "ownerPolityId": "spa_monarchy",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-006-spa_monarchy",
+      "match": {
+        "sourceCountry": "GIB"
+      },
+      "ownerPolityId": "spa_monarchy",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-007-por_monarchy",
+      "match": {
+        "sourceCountry": "PRT"
+      },
+      "ownerPolityId": "por_monarchy",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-008-eng_stuart",
+      "match": {
+        "sourceCountry": "GBR"
+      },
+      "ownerPolityId": "eng_stuart",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-009-eng_stuart",
+      "match": {
+        "sourceCountry": "IRL"
+      },
+      "ownerPolityId": "eng_stuart",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-010-eng_stuart",
+      "match": {
+        "sourceCountry": "IMN"
+      },
+      "ownerPolityId": "eng_stuart",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-011-eng_stuart",
+      "match": {
+        "sourceCountry": "GGY"
+      },
+      "ownerPolityId": "eng_stuart",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-012-eng_stuart",
+      "match": {
+        "sourceCountry": "JEY"
+      },
+      "ownerPolityId": "eng_stuart",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-013-sco_stuart",
+      "match": {
+        "sourceCountry": "GBR",
+        "bbox": [
+          -9,
+          55.5,
+          0,
+          61
+        ]
+      },
+      "ownerPolityId": "sco_stuart",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-014-nld_republic",
+      "match": {
+        "sourceCountry": "NLD"
+      },
+      "ownerPolityId": "nld_republic",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-015-habsburg",
+      "match": {
+        "sourceCountry": "AUT"
+      },
+      "ownerPolityId": "habsburg",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-016-habsburg",
+      "match": {
+        "sourceCountry": "CZE"
+      },
+      "ownerPolityId": "habsburg",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-017-habsburg",
+      "match": {
+        "sourceCountry": "HUN"
+      },
+      "ownerPolityId": "habsburg",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-018-habsburg",
+      "match": {
+        "sourceCountry": "SVK"
+      },
+      "ownerPolityId": "habsburg",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-019-habsburg",
+      "match": {
+        "sourceCountry": "SVN"
+      },
+      "ownerPolityId": "habsburg",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-020-habsburg",
+      "match": {
+        "sourceCountry": "HRV"
+      },
+      "ownerPolityId": "habsburg",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-021-plc",
+      "match": {
+        "sourceCountry": "POL"
+      },
+      "ownerPolityId": "plc",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-022-plc",
+      "match": {
+        "sourceCountry": "LTU"
+      },
+      "ownerPolityId": "plc",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-023-plc",
+      "match": {
+        "sourceCountry": "BLR"
+      },
+      "ownerPolityId": "plc",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-024-plc",
+      "match": {
+        "sourceCountry": "UKR"
+      },
+      "ownerPolityId": "plc",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-025-rus_tsardom",
+      "match": {
+        "sourceCountry": "RUS"
+      },
+      "ownerPolityId": "rus_tsardom",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-026-northeast_siberian",
+      "match": {
+        "sourceCountry": "RUS",
+        "bbox": [
+          155,
+          50,
+          -165,
+          76
+        ]
+      },
+      "ownerPolityId": "northeast_siberian",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-027-circassian",
+      "match": {
+        "sourceCountry": "RUS",
+        "bbox": [
+          37,
+          42,
+          45,
+          45
+        ]
+      },
+      "ownerPolityId": "circassian",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-028-ottoman",
+      "match": {
+        "sourceCountry": "TUR"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-029-ottoman",
+      "match": {
+        "sourceCountry": "GRC"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-030-ottoman",
+      "match": {
+        "sourceCountry": "BGR"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-031-ottoman",
+      "match": {
+        "sourceCountry": "ALB"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-032-ottoman",
+      "match": {
+        "sourceCountry": "MKD"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-033-ottoman",
+      "match": {
+        "sourceCountry": "BIH"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-034-ottoman",
+      "match": {
+        "sourceCountry": "SRB"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-035-ottoman",
+      "match": {
+        "sourceCountry": "KOS"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-036-ottoman",
+      "match": {
+        "sourceCountry": "MNE"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-037-ottoman",
+      "match": {
+        "sourceCountry": "CYP"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-038-ottoman",
+      "match": {
+        "sourceCountry": "CYN"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-039-ottoman",
+      "match": {
+        "sourceCountry": "CNM"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-040-ottoman",
+      "match": {
+        "sourceCountry": "WSB"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-041-ottoman",
+      "match": {
+        "sourceCountry": "ESB"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-042-ottoman",
+      "match": {
+        "sourceCountry": "SYR"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-043-ottoman",
+      "match": {
+        "sourceCountry": "LBN"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-044-ottoman",
+      "match": {
+        "sourceCountry": "ISR"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-045-ottoman",
+      "match": {
+        "sourceCountry": "PSX"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-046-ottoman",
+      "match": {
+        "sourceCountry": "JOR"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-047-ottoman",
+      "match": {
+        "sourceCountry": "IRQ"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-048-ottoman",
+      "match": {
+        "sourceCountry": "KWT"
+      },
+      "ownerPolityId": "ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-049-swe_monarchy",
+      "match": {
+        "sourceCountry": "SWE"
+      },
+      "ownerPolityId": "swe_monarchy",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-050-swe_monarchy",
+      "match": {
+        "sourceCountry": "FIN"
+      },
+      "ownerPolityId": "swe_monarchy",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-051-swe_monarchy",
+      "match": {
+        "sourceCountry": "EST"
+      },
+      "ownerPolityId": "swe_monarchy",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-052-swe_monarchy",
+      "match": {
+        "sourceCountry": "LVA"
+      },
+      "ownerPolityId": "swe_monarchy",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-053-swe_monarchy",
+      "match": {
+        "sourceCountry": "ALD"
+      },
+      "ownerPolityId": "swe_monarchy",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-054-den_norway",
+      "match": {
+        "sourceCountry": "DNK"
+      },
+      "ownerPolityId": "den_norway",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-055-den_norway",
+      "match": {
+        "sourceCountry": "NOR"
+      },
+      "ownerPolityId": "den_norway",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-056-den_norway",
+      "match": {
+        "sourceCountry": "ISL"
+      },
+      "ownerPolityId": "den_norway",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-057-den_norway",
+      "match": {
+        "sourceCountry": "FRO"
+      },
+      "ownerPolityId": "den_norway",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-058-den_norway",
+      "match": {
+        "sourceCountry": "GRL"
+      },
+      "ownerPolityId": "den_norway",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-059-papal",
+      "match": {
+        "sourceCountry": "VAT"
+      },
+      "ownerPolityId": "papal",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-060-genoa",
+      "match": {
+        "sourceCountry": "FRA",
+        "bbox": [
+          8,
+          41,
+          10,
+          43.5
+        ]
+      },
+      "ownerPolityId": "genoa",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-061-rhenish_states",
+      "match": {
+        "sourceCountry": "DEU"
+      },
+      "ownerPolityId": "rhenish_states",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-062-rhenish_states",
+      "match": {
+        "sourceCountry": "LUX"
+      },
+      "ownerPolityId": "rhenish_states",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-063-spanish_netherlands",
+      "match": {
+        "sourceCountry": "BEL"
+      },
+      "ownerPolityId": "spanish_netherlands",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-064-swiss_cantons",
+      "match": {
+        "sourceCountry": "CHE"
+      },
+      "ownerPolityId": "swiss_cantons",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-065-swiss_cantons",
+      "match": {
+        "sourceCountry": "LIE"
+      },
+      "ownerPolityId": "swiss_cantons",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-066-courland",
+      "match": {
+        "sourceCountry": "LVA",
+        "bbox": [
+          20.5,
+          55.5,
+          24.3,
+          57.5
+        ]
+      },
+      "ownerPolityId": "courland",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-067-crimean_khanate",
+      "match": {
+        "sourceCountry": "UKR",
+        "bbox": [
+          29,
+          44,
+          37.5,
+          47
+        ]
+      },
+      "ownerPolityId": "crimean_khanate",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-068-wallachia",
+      "match": {
+        "sourceCountry": "ROU"
+      },
+      "ownerPolityId": "wallachia",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-069-moldavia",
+      "match": {
+        "sourceCountry": "MDA"
+      },
+      "ownerPolityId": "moldavia",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-070-moldavia",
+      "match": {
+        "sourceCountry": "ROU",
+        "bbox": [
+          25,
+          46,
+          30.5,
+          48.6
+        ]
+      },
+      "ownerPolityId": "moldavia",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-071-transylvania",
+      "match": {
+        "sourceCountry": "ROU",
+        "bbox": [
+          19,
+          45.2,
+          24.99,
+          48.5
+        ]
+      },
+      "ownerPolityId": "transylvania",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-072-ragusa",
+      "match": {
+        "sourceCountry": "HRV",
+        "bbox": [
+          17.4,
+          42.2,
+          18.6,
+          43.1
+        ]
+      },
+      "ownerPolityId": "ragusa",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-073-malta_order",
+      "match": {
+        "sourceCountry": "MLT"
+      },
+      "ownerPolityId": "malta_order",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-074-naples_sicily",
+      "match": {
+        "sourceCountry": "ITA"
+      },
+      "ownerPolityId": "naples_sicily",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-075-savoy",
+      "match": {
+        "sourceCountry": "ITA",
+        "bbox": [
+          6,
+          43,
+          8.39,
+          46.4
+        ]
+      },
+      "ownerPolityId": "savoy",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-076-genoa",
+      "match": {
+        "sourceCountry": "ITA",
+        "bbox": [
+          8.4,
+          43,
+          9.69,
+          44.8
+        ]
+      },
+      "ownerPolityId": "genoa",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-077-milan",
+      "match": {
+        "sourceCountry": "ITA",
+        "bbox": [
+          8.4,
+          44.81,
+          11.29,
+          47
+        ]
+      },
+      "ownerPolityId": "milan",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-078-venice",
+      "match": {
+        "sourceCountry": "ITA",
+        "bbox": [
+          11.3,
+          44.5,
+          14,
+          47.2
+        ]
+      },
+      "ownerPolityId": "venice",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-079-tuscany",
+      "match": {
+        "sourceCountry": "ITA",
+        "bbox": [
+          9.7,
+          42.5,
+          11.79,
+          44.49
+        ]
+      },
+      "ownerPolityId": "tuscany",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-080-emilian_duchies",
+      "match": {
+        "sourceCountry": "ITA",
+        "bbox": [
+          9.7,
+          44.5,
+          11.29,
+          44.8
+        ]
+      },
+      "ownerPolityId": "emilian_duchies",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-081-papal",
+      "match": {
+        "sourceCountry": "ITA",
+        "bbox": [
+          11.8,
+          41.4,
+          14,
+          44.49
+        ]
+      },
+      "ownerPolityId": "papal",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-082-bavaria",
+      "match": {
+        "sourceCountry": "DEU",
+        "bbox": [
+          10,
+          47,
+          13.9,
+          50.59
+        ]
+      },
+      "ownerPolityId": "bavaria",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-083-saxony",
+      "match": {
+        "sourceCountry": "DEU",
+        "bbox": [
+          11.5,
+          50.6,
+          15,
+          51.79
+        ]
+      },
+      "ownerPolityId": "saxony",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-084-brandenburg_prussia",
+      "match": {
+        "sourceCountry": "DEU",
+        "bbox": [
+          11.5,
+          51.8,
+          15,
+          54
+        ]
+      },
+      "ownerPolityId": "brandenburg_prussia",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-085-hanover",
+      "match": {
+        "sourceCountry": "DEU",
+        "bbox": [
+          8.5,
+          51.8,
+          11.49,
+          54
+        ]
+      },
+      "ownerPolityId": "hanover",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-086-swabian_states",
+      "match": {
+        "sourceCountry": "DEU",
+        "bbox": [
+          7.3,
+          47,
+          9.99,
+          50.59
+        ]
+      },
+      "ownerPolityId": "swabian_states",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-087-north_german_states",
+      "match": {
+        "sourceCountry": "DEU",
+        "bbox": [
+          7,
+          54.01,
+          15,
+          56
+        ]
+      },
+      "ownerPolityId": "north_german_states",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-088-brandenburg_prussia",
+      "match": {
+        "sourceCountry": "POL",
+        "bbox": [
+          14,
+          52.5,
+          19.99,
+          54.9
+        ]
+      },
+      "ownerPolityId": "brandenburg_prussia",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-089-brandenburg_prussia",
+      "match": {
+        "sourceCountry": "POL",
+        "bbox": [
+          20,
+          53,
+          23,
+          55
+        ]
+      },
+      "ownerPolityId": "brandenburg_prussia",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-090-brandenburg_prussia",
+      "match": {
+        "sourceCountry": "RUS",
+        "bbox": [
+          19,
+          54,
+          23,
+          56
+        ]
+      },
+      "ownerPolityId": "brandenburg_prussia",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-091-habsburg",
+      "match": {
+        "sourceCountry": "POL",
+        "bbox": [
+          14.5,
+          49,
+          19.5,
+          51.49
+        ]
+      },
+      "ownerPolityId": "habsburg",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-092-rus_tsardom",
+      "match": {
+        "sourceCountry": "UKR",
+        "bbox": [
+          32.5,
+          47.01,
+          41,
+          53
+        ]
+      },
+      "ownerPolityId": "rus_tsardom",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-093-qing",
+      "match": {
+        "sourceCountry": "CHN"
+      },
+      "ownerPolityId": "qing",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-094-qing",
+      "match": {
+        "sourceCountry": "HKG"
+      },
+      "ownerPolityId": "qing",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-095-qing",
+      "match": {
+        "sourceCountry": "TWN"
+      },
+      "ownerPolityId": "qing",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-096-qing",
+      "match": {
+        "sourceCountry": "MNG"
+      },
+      "ownerPolityId": "qing",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-097-tokugawa",
+      "match": {
+        "sourceCountry": "JPN"
+      },
+      "ownerPolityId": "tokugawa",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-098-joseon",
+      "match": {
+        "sourceCountry": "KOR"
+      },
+      "ownerPolityId": "joseon",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-099-joseon",
+      "match": {
+        "sourceCountry": "PRK"
+      },
+      "ownerPolityId": "joseon",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-100-ryukyu",
+      "match": {
+        "sourceCountry": "JPN",
+        "bbox": [
+          122,
+          24,
+          131.5,
+          29.2
+        ]
+      },
+      "ownerPolityId": "ryukyu",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-101-ainu",
+      "match": {
+        "sourceCountry": "JPN",
+        "bbox": [
+          139,
+          41.5,
+          147,
+          46
+        ]
+      },
+      "ownerPolityId": "ainu",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-102-mughal",
+      "match": {
+        "sourceCountry": "IND"
+      },
+      "ownerPolityId": "mughal",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-103-mughal",
+      "match": {
+        "sourceCountry": "PAK"
+      },
+      "ownerPolityId": "mughal",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-104-mughal",
+      "match": {
+        "sourceCountry": "BGD"
+      },
+      "ownerPolityId": "mughal",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-105-maratha",
+      "match": {
+        "sourceCountry": "IND",
+        "bbox": [
+          72,
+          15,
+          77.2,
+          21.5
+        ]
+      },
+      "ownerPolityId": "maratha",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-106-rajput",
+      "match": {
+        "sourceCountry": "IND",
+        "bbox": [
+          69,
+          23,
+          77.2,
+          29.5
+        ]
+      },
+      "ownerPolityId": "rajput",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-107-mysore",
+      "match": {
+        "sourceCountry": "IND",
+        "bbox": [
+          74,
+          11,
+          78.5,
+          14.99
+        ]
+      },
+      "ownerPolityId": "mysore",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-108-tamil_states",
+      "match": {
+        "sourceCountry": "IND",
+        "bbox": [
+          77,
+          8,
+          80.5,
+          10.99
+        ]
+      },
+      "ownerPolityId": "tamil_states",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-109-malabar",
+      "match": {
+        "sourceCountry": "IND",
+        "bbox": [
+          72,
+          8,
+          76.99,
+          10.99
+        ]
+      },
+      "ownerPolityId": "malabar",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-110-assam",
+      "match": {
+        "sourceCountry": "IND",
+        "bbox": [
+          89,
+          24,
+          98,
+          30
+        ]
+      },
+      "ownerPolityId": "assam",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-111-nepal_hills",
+      "match": {
+        "sourceCountry": "NPL"
+      },
+      "ownerPolityId": "nepal_hills",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-112-bhutan",
+      "match": {
+        "sourceCountry": "BTN"
+      },
+      "ownerPolityId": "bhutan",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-113-tibet",
+      "match": {
+        "sourceCountry": "CHN",
+        "bbox": [
+          78,
+          27,
+          98.5,
+          35
+        ]
+      },
+      "ownerPolityId": "tibet",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-114-dzungar",
+      "match": {
+        "sourceCountry": "CHN",
+        "bbox": [
+          73,
+          35.01,
+          96,
+          49.5
+        ]
+      },
+      "ownerPolityId": "dzungar",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-115-safavid",
+      "match": {
+        "sourceCountry": "IRN"
+      },
+      "ownerPolityId": "safavid",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-116-safavid",
+      "match": {
+        "sourceCountry": "ARM"
+      },
+      "ownerPolityId": "safavid",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-117-safavid",
+      "match": {
+        "sourceCountry": "AZE"
+      },
+      "ownerPolityId": "safavid",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-118-georgian_kingdoms",
+      "match": {
+        "sourceCountry": "GEO"
+      },
+      "ownerPolityId": "georgian_kingdoms",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-119-afghan_frontier",
+      "match": {
+        "sourceCountry": "AFG"
+      },
+      "ownerPolityId": "afghan_frontier",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-120-safavid",
+      "match": {
+        "sourceCountry": "AFG",
+        "bbox": [
+          59,
+          29,
+          65,
+          35
+        ]
+      },
+      "ownerPolityId": "safavid",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-121-bukhara",
+      "match": {
+        "sourceCountry": "UZB"
+      },
+      "ownerPolityId": "bukhara",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-122-bukhara",
+      "match": {
+        "sourceCountry": "TJK"
+      },
+      "ownerPolityId": "bukhara",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-123-khiva",
+      "match": {
+        "sourceCountry": "TKM"
+      },
+      "ownerPolityId": "khiva",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-124-khiva",
+      "match": {
+        "sourceCountry": "UZB",
+        "bbox": [
+          55,
+          40,
+          62,
+          46
+        ]
+      },
+      "ownerPolityId": "khiva",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-125-kazakh_hordes",
+      "match": {
+        "sourceCountry": "KAZ"
+      },
+      "ownerPolityId": "kazakh_hordes",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-126-kazakh_hordes",
+      "match": {
+        "sourceCountry": "KAB"
+      },
+      "ownerPolityId": "kazakh_hordes",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-127-kyrgyz_frontier",
+      "match": {
+        "sourceCountry": "KGZ"
+      },
+      "ownerPolityId": "kyrgyz_frontier",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-128-siam",
+      "match": {
+        "sourceCountry": "THA"
+      },
+      "ownerPolityId": "siam",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-129-burma",
+      "match": {
+        "sourceCountry": "MMR"
+      },
+      "ownerPolityId": "burma",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-130-arakan",
+      "match": {
+        "sourceCountry": "MMR",
+        "bbox": [
+          92,
+          17,
+          95,
+          21.8
+        ]
+      },
+      "ownerPolityId": "arakan",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-131-lao_kingdoms",
+      "match": {
+        "sourceCountry": "LAO"
+      },
+      "ownerPolityId": "lao_kingdoms",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-132-cambodia",
+      "match": {
+        "sourceCountry": "KHM"
+      },
+      "ownerPolityId": "cambodia",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-133-trinh",
+      "match": {
+        "sourceCountry": "VNM"
+      },
+      "ownerPolityId": "trinh",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-134-nguyen",
+      "match": {
+        "sourceCountry": "VNM",
+        "bbox": [
+          103,
+          8,
+          110,
+          17.49
+        ]
+      },
+      "ownerPolityId": "nguyen",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-135-champa",
+      "match": {
+        "territoryIds": [
+          "gb:VNM:81297802B15274858883665",
+          "gb:VNM:81297802B18401806223645",
+          "gb:VNM:81297802B27744921596224",
+          "gb:VNM:81297802B28811761284346",
+          "gb:VNM:81297802B29051358194838",
+          "gb:VNM:81297802B29162792012865",
+          "gb:VNM:81297802B34862108658790",
+          "gb:VNM:81297802B36488646512837",
+          "gb:VNM:81297802B38165084831058",
+          "gb:VNM:81297802B43116981701202",
+          "gb:VNM:81297802B45644811289425",
+          "gb:VNM:81297802B48689828615161",
+          "gb:VNM:81297802B48811804766969",
+          "gb:VNM:81297802B51561347842325",
+          "gb:VNM:81297802B54055270393742",
+          "gb:VNM:81297802B56109009945364",
+          "gb:VNM:81297802B57264474428475",
+          "gb:VNM:81297802B57943820891789",
+          "gb:VNM:81297802B58085294619279",
+          "gb:VNM:81297802B58839501230111",
+          "gb:VNM:81297802B59459676884366",
+          "gb:VNM:81297802B68033195953544",
+          "gb:VNM:81297802B72254139131894",
+          "gb:VNM:81297802B73162737965460",
+          "gb:VNM:81297802B74216529473028",
+          "gb:VNM:81297802B76244887601508",
+          "gb:VNM:81297802B8003578408571",
+          "gb:VNM:81297802B8144414429904",
+          "gb:VNM:81297802B83612510149562",
+          "gb:VNM:81297802B84889732636102",
+          "gb:VNM:81297802B85821133415944",
+          "gb:VNM:81297802B86448730167777",
+          "gb:VNM:81297802B87924827202169",
+          "gb:VNM:81297802B88768197538102",
+          "gb:VNM:81297802B88990967828920",
+          "gb:VNM:81297802B90799057915407",
+          "gb:VNM:81297802B90979220295161",
+          "gb:VNM:81297802B93158398760307",
+          "gb:VNM:81297802B94482771357603",
+          "gb:VNM:81297802B96415917644052",
+          "residual:VNM:VNM-479",
+          "residual:VNM:VNM-481",
+          "residual:VNM:VNM-496"
+        ]
+      },
+      "ownerPolityId": "champa",
+      "reason": "Gameplay approximation: explicit canonical atom list for a nested regional carve-out; strategic readability, not exact historical boundaries."
+    },
+    {
+      "id": "world-136-malay_sultanates",
+      "match": {
+        "sourceCountry": "MYS"
+      },
+      "ownerPolityId": "malay_sultanates",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-137-malay_sultanates",
+      "match": {
+        "sourceCountry": "SGP"
+      },
+      "ownerPolityId": "malay_sultanates",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-138-mataram",
+      "match": {
+        "sourceCountry": "IDN"
+      },
+      "ownerPolityId": "mataram",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-139-brunei",
+      "match": {
+        "sourceCountry": "BRN"
+      },
+      "ownerPolityId": "brunei",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-140-aceh",
+      "match": {
+        "sourceCountry": "IDN",
+        "bbox": [
+          94,
+          3,
+          99,
+          7
+        ]
+      },
+      "ownerPolityId": "aceh",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-141-sumatra_regions",
+      "match": {
+        "sourceCountry": "IDN",
+        "bbox": [
+          98,
+          -6,
+          106,
+          2.99
+        ]
+      },
+      "ownerPolityId": "sumatra_regions",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-142-borneo_regions",
+      "match": {
+        "sourceCountry": "IDN",
+        "bbox": [
+          108,
+          -5,
+          120,
+          5
+        ]
+      },
+      "ownerPolityId": "borneo_regions",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-143-java_voc",
+      "match": {
+        "territoryIds": [
+          "gb:IDN:22746128B13880384963573",
+          "gb:IDN:22746128B19624873108228",
+          "gb:IDN:22746128B21128962092426",
+          "gb:IDN:22746128B25933583546422",
+          "gb:IDN:22746128B3242616561013",
+          "gb:IDN:22746128B34542084533901",
+          "gb:IDN:22746128B38845978082923",
+          "gb:IDN:22746128B43709097539954",
+          "gb:IDN:22746128B4401734887211",
+          "gb:IDN:22746128B49036162018248",
+          "gb:IDN:22746128B53430054982428",
+          "gb:IDN:22746128B5353616278909",
+          "gb:IDN:22746128B53840275251202",
+          "gb:IDN:22746128B54763839112631",
+          "gb:IDN:22746128B58252967349746",
+          "gb:IDN:22746128B62533997811788",
+          "gb:IDN:22746128B62876177397182",
+          "gb:IDN:22746128B63896883204987",
+          "gb:IDN:22746128B64737377738458",
+          "gb:IDN:22746128B66421464971893",
+          "gb:IDN:22746128B66929526216355",
+          "gb:IDN:22746128B71762235135177",
+          "gb:IDN:22746128B73297609500416",
+          "gb:IDN:22746128B73481124779947",
+          "gb:IDN:22746128B73767534141998",
+          "gb:IDN:22746128B74302729610221",
+          "gb:IDN:22746128B76055711701199",
+          "gb:IDN:22746128B7613374511026",
+          "gb:IDN:22746128B79755996911998",
+          "gb:IDN:22746128B79756617117888",
+          "gb:IDN:22746128B82825120895999",
+          "gb:IDN:22746128B85966169947265",
+          "gb:IDN:22746128B90150108137034",
+          "gb:IDN:22746128B93686700937380",
+          "gb:IDN:22746128B94381737455512",
+          "gb:IDN:22746128B99423643145371",
+          "residual:IDN:IDN-1223",
+          "residual:IDN:IDN-1226",
+          "residual:IDN:IDN-1227",
+          "residual:IDN:IDN-1229"
+        ]
+      },
+      "ownerPolityId": "java_voc",
+      "reason": "Gameplay approximation: explicit canonical atom list for a nested regional carve-out; strategic readability, not exact historical boundaries."
+    },
+    {
+      "id": "world-144-spice_voc",
+      "match": {
+        "sourceCountry": "IDN",
+        "bbox": [
+          125,
+          -9,
+          133,
+          3
+        ]
+      },
+      "ownerPolityId": "spice_voc",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-145-borneo_regions",
+      "match": {
+        "sourceCountry": "MYS",
+        "bbox": [
+          108,
+          -1,
+          120,
+          8
+        ]
+      },
+      "ownerPolityId": "borneo_regions",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-146-philippines_spanish",
+      "match": {
+        "sourceCountry": "PHL"
+      },
+      "ownerPolityId": "philippines_spanish",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-147-philippines_spanish",
+      "match": {
+        "sourceCountry": "GUM"
+      },
+      "ownerPolityId": "philippines_spanish",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-148-philippines_spanish",
+      "match": {
+        "sourceCountry": "MNP"
+      },
+      "ownerPolityId": "philippines_spanish",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-149-mindanao",
+      "match": {
+        "sourceCountry": "PHL",
+        "bbox": [
+          119,
+          5,
+          127,
+          9.5
+        ]
+      },
+      "ownerPolityId": "mindanao",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-150-kandy",
+      "match": {
+        "sourceCountry": "LKA"
+      },
+      "ownerPolityId": "kandy",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-151-ceylon_voc",
+      "match": {
+        "sourceCountry": "LKA",
+        "bbox": [
+          79.4,
+          5.5,
+          80.4,
+          9.8
+        ]
+      },
+      "ownerPolityId": "ceylon_voc",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-152-maldives",
+      "match": {
+        "sourceCountry": "MDV"
+      },
+      "ownerPolityId": "maldives",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-153-timor_polities",
+      "match": {
+        "sourceCountry": "TLS"
+      },
+      "ownerPolityId": "timor_polities",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-154-macao_portuguese",
+      "match": {
+        "sourceCountry": "MAC"
+      },
+      "ownerPolityId": "macao_portuguese",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-155-oman",
+      "match": {
+        "sourceCountry": "OMN"
+      },
+      "ownerPolityId": "oman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-156-yemen",
+      "match": {
+        "sourceCountry": "YEM"
+      },
+      "ownerPolityId": "yemen",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-157-arabian_tribes",
+      "match": {
+        "sourceCountry": "SAU"
+      },
+      "ownerPolityId": "arabian_tribes",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-158-arabian_tribes",
+      "match": {
+        "sourceCountry": "ARE"
+      },
+      "ownerPolityId": "arabian_tribes",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-159-arabian_tribes",
+      "match": {
+        "sourceCountry": "QAT"
+      },
+      "ownerPolityId": "arabian_tribes",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-160-arabian_tribes",
+      "match": {
+        "sourceCountry": "BHR"
+      },
+      "ownerPolityId": "arabian_tribes",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-161-hejaz",
+      "match": {
+        "sourceCountry": "SAU",
+        "bbox": [
+          35,
+          18,
+          41,
+          29
+        ]
+      },
+      "ownerPolityId": "hejaz",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-162-morocco",
+      "match": {
+        "sourceCountry": "MAR"
+      },
+      "ownerPolityId": "morocco",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-163-algiers",
+      "match": {
+        "sourceCountry": "DZA"
+      },
+      "ownerPolityId": "algiers",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-164-tunis",
+      "match": {
+        "sourceCountry": "TUN"
+      },
+      "ownerPolityId": "tunis",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-165-tripoli",
+      "match": {
+        "sourceCountry": "LBY"
+      },
+      "ownerPolityId": "tripoli",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-166-egypt_ottoman",
+      "match": {
+        "sourceCountry": "EGY"
+      },
+      "ownerPolityId": "egypt_ottoman",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-167-ethiopia",
+      "match": {
+        "sourceCountry": "ETH"
+      },
+      "ownerPolityId": "ethiopia",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-168-ethiopia",
+      "match": {
+        "sourceCountry": "ERI"
+      },
+      "ownerPolityId": "ethiopia",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-169-somali_sultanates",
+      "match": {
+        "sourceCountry": "SOM"
+      },
+      "ownerPolityId": "somali_sultanates",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-170-somali_sultanates",
+      "match": {
+        "sourceCountry": "SOL"
+      },
+      "ownerPolityId": "somali_sultanates",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-171-somali_sultanates",
+      "match": {
+        "sourceCountry": "DJI"
+      },
+      "ownerPolityId": "somali_sultanates",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-172-darfur",
+      "match": {
+        "sourceCountry": "SDN"
+      },
+      "ownerPolityId": "darfur",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-173-sennar",
+      "match": {
+        "sourceCountry": "SDN",
+        "bbox": [
+          30,
+          9,
+          38,
+          18
+        ]
+      },
+      "ownerPolityId": "sennar",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-174-nilotic_regions",
+      "match": {
+        "sourceCountry": "SDS"
+      },
+      "ownerPolityId": "nilotic_regions",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-175-saharan_confederations",
+      "match": {
+        "sourceCountry": "SAH"
+      },
+      "ownerPolityId": "saharan_confederations",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-176-saharan_confederations",
+      "match": {
+        "sourceCountry": "MRT"
+      },
+      "ownerPolityId": "saharan_confederations",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-177-sahel_states",
+      "match": {
+        "sourceCountry": "MLI"
+      },
+      "ownerPolityId": "sahel_states",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-178-sahel_states",
+      "match": {
+        "sourceCountry": "NER"
+      },
+      "ownerPolityId": "sahel_states",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-179-kanem_bornu",
+      "match": {
+        "sourceCountry": "TCD"
+      },
+      "ownerPolityId": "kanem_bornu",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-180-kanem_bornu",
+      "match": {
+        "sourceCountry": "NGA",
+        "bbox": [
+          11,
+          10,
+          15,
+          14
+        ]
+      },
+      "ownerPolityId": "kanem_bornu",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-181-hausa",
+      "match": {
+        "sourceCountry": "NGA"
+      },
+      "ownerPolityId": "hausa",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-182-oyo",
+      "match": {
+        "sourceCountry": "NGA",
+        "bbox": [
+          2,
+          6,
+          5.3,
+          10.5
+        ]
+      },
+      "ownerPolityId": "oyo",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-183-benin_kingdom",
+      "match": {
+        "sourceCountry": "NGA",
+        "bbox": [
+          5.31,
+          5,
+          7.5,
+          8
+        ]
+      },
+      "ownerPolityId": "benin_kingdom",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-184-igbo_regions",
+      "match": {
+        "sourceCountry": "NGA",
+        "bbox": [
+          7.51,
+          4,
+          10,
+          8
+        ]
+      },
+      "ownerPolityId": "igbo_regions",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-185-jolof",
+      "match": {
+        "sourceCountry": "SEN"
+      },
+      "ownerPolityId": "jolof",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-186-jolof",
+      "match": {
+        "sourceCountry": "GMB"
+      },
+      "ownerPolityId": "jolof",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-187-futa",
+      "match": {
+        "sourceCountry": "GIN"
+      },
+      "ownerPolityId": "futa",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-188-futa",
+      "match": {
+        "sourceCountry": "GNB"
+      },
+      "ownerPolityId": "futa",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-189-akan",
+      "match": {
+        "sourceCountry": "GHA"
+      },
+      "ownerPolityId": "akan",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-190-akan",
+      "match": {
+        "sourceCountry": "CIV"
+      },
+      "ownerPolityId": "akan",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-191-dahomey",
+      "match": {
+        "sourceCountry": "BEN"
+      },
+      "ownerPolityId": "dahomey",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-192-dahomey",
+      "match": {
+        "sourceCountry": "TGO"
+      },
+      "ownerPolityId": "dahomey",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-193-mossi",
+      "match": {
+        "sourceCountry": "BFA"
+      },
+      "ownerPolityId": "mossi",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-194-upper_guinea",
+      "match": {
+        "sourceCountry": "LBR"
+      },
+      "ownerPolityId": "upper_guinea",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-195-upper_guinea",
+      "match": {
+        "sourceCountry": "SLE"
+      },
+      "ownerPolityId": "upper_guinea",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-196-cameroon_regions",
+      "match": {
+        "sourceCountry": "CMR"
+      },
+      "ownerPolityId": "cameroon_regions",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-197-equatorial_forests",
+      "match": {
+        "sourceCountry": "GAB"
+      },
+      "ownerPolityId": "equatorial_forests",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-198-equatorial_forests",
+      "match": {
+        "sourceCountry": "GNQ"
+      },
+      "ownerPolityId": "equatorial_forests",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-199-equatorial_forests",
+      "match": {
+        "sourceCountry": "CAF"
+      },
+      "ownerPolityId": "equatorial_forests",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-200-kongo",
+      "match": {
+        "sourceCountry": "COG"
+      },
+      "ownerPolityId": "kongo",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-201-luba",
+      "match": {
+        "sourceCountry": "COD"
+      },
+      "ownerPolityId": "luba",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-202-lunda",
+      "match": {
+        "sourceCountry": "AGO"
+      },
+      "ownerPolityId": "lunda",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-203-lunda",
+      "match": {
+        "sourceCountry": "ZMB"
+      },
+      "ownerPolityId": "lunda",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-204-kongo",
+      "match": {
+        "sourceCountry": "AGO",
+        "bbox": [
+          11,
+          -8,
+          16,
+          -4
+        ]
+      },
+      "ownerPolityId": "kongo",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-205-congo_forests",
+      "match": {
+        "sourceCountry": "COD",
+        "bbox": [
+          12,
+          -4,
+          31,
+          5
+        ]
+      },
+      "ownerPolityId": "congo_forests",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-206-great_lakes",
+      "match": {
+        "sourceCountry": "UGA"
+      },
+      "ownerPolityId": "great_lakes",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-207-great_lakes",
+      "match": {
+        "sourceCountry": "RWA"
+      },
+      "ownerPolityId": "great_lakes",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-208-great_lakes",
+      "match": {
+        "sourceCountry": "BDI"
+      },
+      "ownerPolityId": "great_lakes",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-209-east_african_regions",
+      "match": {
+        "sourceCountry": "TZA"
+      },
+      "ownerPolityId": "east_african_regions",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-210-east_african_regions",
+      "match": {
+        "sourceCountry": "KEN"
+      },
+      "ownerPolityId": "east_african_regions",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-211-swahili_coast",
+      "match": {
+        "sourceCountry": "KEN",
+        "bbox": [
+          39,
+          -5,
+          42,
+          0.5
+        ]
+      },
+      "ownerPolityId": "swahili_coast",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-212-swahili_coast",
+      "match": {
+        "sourceCountry": "TZA",
+        "bbox": [
+          38,
+          -12,
+          41,
+          -4
+        ]
+      },
+      "ownerPolityId": "swahili_coast",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-213-maravi",
+      "match": {
+        "sourceCountry": "MWI"
+      },
+      "ownerPolityId": "maravi",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-214-rozwi",
+      "match": {
+        "sourceCountry": "ZWE"
+      },
+      "ownerPolityId": "rozwi",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-215-zambezi_regions",
+      "match": {
+        "sourceCountry": "MOZ"
+      },
+      "ownerPolityId": "zambezi_regions",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-216-mozambique_portuguese",
+      "match": {
+        "sourceCountry": "MOZ",
+        "bbox": [
+          39,
+          -18,
+          41,
+          -10
+        ]
+      },
+      "ownerPolityId": "mozambique_portuguese",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-217-angola_portuguese",
+      "match": {
+        "sourceCountry": "AGO",
+        "bbox": [
+          11,
+          -13,
+          14,
+          -8.01
+        ]
+      },
+      "ownerPolityId": "angola_portuguese",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-218-khoisan",
+      "match": {
+        "sourceCountry": "NAM"
+      },
+      "ownerPolityId": "khoisan",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-219-khoisan",
+      "match": {
+        "sourceCountry": "BWA"
+      },
+      "ownerPolityId": "khoisan",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-220-khoisan",
+      "match": {
+        "sourceCountry": "ZAF"
+      },
+      "ownerPolityId": "khoisan",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-221-southern_bantu",
+      "match": {
+        "sourceCountry": "LSO"
+      },
+      "ownerPolityId": "southern_bantu",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-222-southern_bantu",
+      "match": {
+        "sourceCountry": "SWZ"
+      },
+      "ownerPolityId": "southern_bantu",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-223-southern_bantu",
+      "match": {
+        "sourceCountry": "ZAF",
+        "bbox": [
+          27,
+          -34,
+          34,
+          -22
+        ]
+      },
+      "ownerPolityId": "southern_bantu",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-224-cape_voc",
+      "match": {
+        "sourceCountry": "ZAF",
+        "bbox": [
+          17,
+          -35,
+          20,
+          -32
+        ]
+      },
+      "ownerPolityId": "cape_voc",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-225-malagasy",
+      "match": {
+        "sourceCountry": "MDG"
+      },
+      "ownerPolityId": "malagasy",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-226-comoros",
+      "match": {
+        "sourceCountry": "COM"
+      },
+      "ownerPolityId": "comoros",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-227-atlantic_portuguese",
+      "match": {
+        "sourceCountry": "CPV"
+      },
+      "ownerPolityId": "atlantic_portuguese",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-228-atlantic_portuguese",
+      "match": {
+        "sourceCountry": "STP"
+      },
+      "ownerPolityId": "atlantic_portuguese",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-229-indian_ocean_frontier",
+      "match": {
+        "sourceCountry": "MUS"
+      },
+      "ownerPolityId": "indian_ocean_frontier",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-230-indian_ocean_frontier",
+      "match": {
+        "sourceCountry": "SYC"
+      },
+      "ownerPolityId": "indian_ocean_frontier",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-231-indian_ocean_frontier",
+      "match": {
+        "sourceCountry": "IOA"
+      },
+      "ownerPolityId": "indian_ocean_frontier",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-232-indian_ocean_frontier",
+      "match": {
+        "sourceCountry": "IOT"
+      },
+      "ownerPolityId": "indian_ocean_frontier",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-233-atlantic_english",
+      "match": {
+        "sourceCountry": "SHN"
+      },
+      "ownerPolityId": "atlantic_english",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-234-new_spain",
+      "match": {
+        "sourceCountry": "MEX"
+      },
+      "ownerPolityId": "new_spain",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-235-new_spain",
+      "match": {
+        "sourceCountry": "GTM"
+      },
+      "ownerPolityId": "new_spain",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-236-new_spain",
+      "match": {
+        "sourceCountry": "HND"
+      },
+      "ownerPolityId": "new_spain",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-237-new_spain",
+      "match": {
+        "sourceCountry": "SLV"
+      },
+      "ownerPolityId": "new_spain",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-238-new_spain",
+      "match": {
+        "sourceCountry": "NIC"
+      },
+      "ownerPolityId": "new_spain",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-239-new_spain",
+      "match": {
+        "sourceCountry": "CRI"
+      },
+      "ownerPolityId": "new_spain",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-240-new_spain",
+      "match": {
+        "sourceCountry": "BLZ"
+      },
+      "ownerPolityId": "new_spain",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-241-peru",
+      "match": {
+        "sourceCountry": "PER"
+      },
+      "ownerPolityId": "peru",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-242-peru",
+      "match": {
+        "sourceCountry": "ECU"
+      },
+      "ownerPolityId": "peru",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-243-peru",
+      "match": {
+        "sourceCountry": "BOL"
+      },
+      "ownerPolityId": "peru",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-244-peru",
+      "match": {
+        "sourceCountry": "COL"
+      },
+      "ownerPolityId": "peru",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-245-peru",
+      "match": {
+        "sourceCountry": "VEN"
+      },
+      "ownerPolityId": "peru",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-246-peru",
+      "match": {
+        "sourceCountry": "CHL"
+      },
+      "ownerPolityId": "peru",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-247-peru",
+      "match": {
+        "sourceCountry": "ARG"
+      },
+      "ownerPolityId": "peru",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-248-peru",
+      "match": {
+        "sourceCountry": "PRY"
+      },
+      "ownerPolityId": "peru",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-249-peru",
+      "match": {
+        "sourceCountry": "URY"
+      },
+      "ownerPolityId": "peru",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-250-brazil_portuguese",
+      "match": {
+        "sourceCountry": "BRA"
+      },
+      "ownerPolityId": "brazil_portuguese",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-251-brazil_portuguese",
+      "match": {
+        "sourceCountry": "BRI"
+      },
+      "ownerPolityId": "brazil_portuguese",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-252-english_america",
+      "match": {
+        "sourceCountry": "BMU"
+      },
+      "ownerPolityId": "english_america",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-253-new_france",
+      "match": {
+        "sourceCountry": "SPM"
+      },
+      "ownerPolityId": "new_france",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-254-spanish_caribbean",
+      "match": {
+        "sourceCountry": "CUB"
+      },
+      "ownerPolityId": "spanish_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-255-spanish_caribbean",
+      "match": {
+        "sourceCountry": "DOM"
+      },
+      "ownerPolityId": "spanish_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-256-spanish_caribbean",
+      "match": {
+        "sourceCountry": "PRI"
+      },
+      "ownerPolityId": "spanish_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-257-spanish_caribbean",
+      "match": {
+        "sourceCountry": "TTO"
+      },
+      "ownerPolityId": "spanish_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-258-spanish_caribbean",
+      "match": {
+        "sourceCountry": "USG"
+      },
+      "ownerPolityId": "spanish_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-259-english_caribbean",
+      "match": {
+        "sourceCountry": "JAM"
+      },
+      "ownerPolityId": "english_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-260-english_caribbean",
+      "match": {
+        "sourceCountry": "BRB"
+      },
+      "ownerPolityId": "english_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-261-english_caribbean",
+      "match": {
+        "sourceCountry": "BHS"
+      },
+      "ownerPolityId": "english_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-262-english_caribbean",
+      "match": {
+        "sourceCountry": "ATG"
+      },
+      "ownerPolityId": "english_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-263-english_caribbean",
+      "match": {
+        "sourceCountry": "KNA"
+      },
+      "ownerPolityId": "english_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-264-english_caribbean",
+      "match": {
+        "sourceCountry": "AIA"
+      },
+      "ownerPolityId": "english_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-265-english_caribbean",
+      "match": {
+        "sourceCountry": "MSR"
+      },
+      "ownerPolityId": "english_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-266-english_caribbean",
+      "match": {
+        "sourceCountry": "VGB"
+      },
+      "ownerPolityId": "english_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-267-english_caribbean",
+      "match": {
+        "sourceCountry": "CYM"
+      },
+      "ownerPolityId": "english_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-268-english_caribbean",
+      "match": {
+        "sourceCountry": "TCA"
+      },
+      "ownerPolityId": "english_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-269-french_caribbean",
+      "match": {
+        "sourceCountry": "HTI"
+      },
+      "ownerPolityId": "french_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-270-french_caribbean",
+      "match": {
+        "sourceCountry": "DMA"
+      },
+      "ownerPolityId": "french_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-271-french_caribbean",
+      "match": {
+        "sourceCountry": "GRD"
+      },
+      "ownerPolityId": "french_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-272-french_caribbean",
+      "match": {
+        "sourceCountry": "LCA"
+      },
+      "ownerPolityId": "french_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-273-french_caribbean",
+      "match": {
+        "sourceCountry": "VCT"
+      },
+      "ownerPolityId": "french_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-274-french_caribbean",
+      "match": {
+        "sourceCountry": "BLM"
+      },
+      "ownerPolityId": "french_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-275-french_caribbean",
+      "match": {
+        "sourceCountry": "MAF"
+      },
+      "ownerPolityId": "french_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-276-dutch_guiana",
+      "match": {
+        "sourceCountry": "SUR"
+      },
+      "ownerPolityId": "dutch_guiana",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-277-dutch_guiana",
+      "match": {
+        "sourceCountry": "GUY"
+      },
+      "ownerPolityId": "dutch_guiana",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-278-dutch_caribbean",
+      "match": {
+        "sourceCountry": "ABW"
+      },
+      "ownerPolityId": "dutch_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-279-dutch_caribbean",
+      "match": {
+        "sourceCountry": "CUW"
+      },
+      "ownerPolityId": "dutch_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-280-dutch_caribbean",
+      "match": {
+        "sourceCountry": "SXM"
+      },
+      "ownerPolityId": "dutch_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-281-danish_caribbean",
+      "match": {
+        "sourceCountry": "VIR"
+      },
+      "ownerPolityId": "danish_caribbean",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-282-northern_woodlands",
+      "match": {
+        "sourceCountry": "CAN"
+      },
+      "ownerPolityId": "northern_woodlands",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-283-great_plains",
+      "match": {
+        "sourceCountry": "USA"
+      },
+      "ownerPolityId": "great_plains",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-284-pampas_regions",
+      "match": {
+        "sourceCountry": "SPI"
+      },
+      "ownerPolityId": "pampas_regions",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-285-english_america",
+      "match": {
+        "sourceCountry": "USA",
+        "bbox": [
+          -80,
+          32,
+          -66,
+          45
+        ]
+      },
+      "ownerPolityId": "english_america",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-286-new_france",
+      "match": {
+        "sourceCountry": "CAN",
+        "bbox": [
+          -82,
+          44.5,
+          -52,
+          50
+        ]
+      },
+      "ownerPolityId": "new_france",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-287-new_france",
+      "match": {
+        "sourceCountry": "USA",
+        "bbox": [
+          -90,
+          45.01,
+          -80.01,
+          50
+        ]
+      },
+      "ownerPolityId": "new_france",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-288-iroquois",
+      "match": {
+        "sourceCountry": "USA",
+        "bbox": [
+          -82,
+          40,
+          -80.01,
+          45
+        ]
+      },
+      "ownerPolityId": "iroquois",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-289-southeast_america",
+      "match": {
+        "sourceCountry": "USA",
+        "bbox": [
+          -95,
+          25,
+          -80.01,
+          39.99
+        ]
+      },
+      "ownerPolityId": "southeast_america",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-290-louisiana",
+      "match": {
+        "territoryIds": [
+          "gb:USA:52423323B11311228308505",
+          "gb:USA:52423323B11820263063705",
+          "gb:USA:52423323B12079840078739",
+          "gb:USA:52423323B14076853941124",
+          "gb:USA:52423323B14772926115181",
+          "gb:USA:52423323B15053613174821",
+          "gb:USA:52423323B15986189273737",
+          "gb:USA:52423323B160469889501",
+          "gb:USA:52423323B1657804385540",
+          "gb:USA:52423323B17641695203494",
+          "gb:USA:52423323B18014802865122",
+          "gb:USA:52423323B19097717333078",
+          "gb:USA:52423323B19390518070965",
+          "gb:USA:52423323B20567432013188",
+          "gb:USA:52423323B2117474870364",
+          "gb:USA:52423323B21456355443716",
+          "gb:USA:52423323B23057609078581",
+          "gb:USA:52423323B23335905027720",
+          "gb:USA:52423323B23715920537836",
+          "gb:USA:52423323B23771932588071",
+          "gb:USA:52423323B23830846230255",
+          "gb:USA:52423323B24194597484154",
+          "gb:USA:52423323B24545032731493",
+          "gb:USA:52423323B24848348476701",
+          "gb:USA:52423323B24893766187997",
+          "gb:USA:52423323B25245708603821",
+          "gb:USA:52423323B25529270179074",
+          "gb:USA:52423323B25598587831507",
+          "gb:USA:52423323B2577811037468",
+          "gb:USA:52423323B26230724482566",
+          "gb:USA:52423323B27353189607616",
+          "gb:USA:52423323B28730875803746",
+          "gb:USA:52423323B29165954447352",
+          "gb:USA:52423323B29286377635453",
+          "gb:USA:52423323B29389566845482",
+          "gb:USA:52423323B30857528698803",
+          "gb:USA:52423323B30990812518613",
+          "gb:USA:52423323B31191129139810",
+          "gb:USA:52423323B32105317711789",
+          "gb:USA:52423323B33468312624541",
+          "gb:USA:52423323B33706621992499",
+          "gb:USA:52423323B35235503549305",
+          "gb:USA:52423323B35376266327581",
+          "gb:USA:52423323B35410834026832",
+          "gb:USA:52423323B35543237136284",
+          "gb:USA:52423323B36093874947415",
+          "gb:USA:52423323B36098505966546",
+          "gb:USA:52423323B37261590367764",
+          "gb:USA:52423323B3743396317208",
+          "gb:USA:52423323B3769936214170",
+          "gb:USA:52423323B37806009634223",
+          "gb:USA:52423323B37899299883293",
+          "gb:USA:52423323B37981066335759",
+          "gb:USA:52423323B38488721572151",
+          "gb:USA:52423323B38725107036826",
+          "gb:USA:52423323B3940547538762",
+          "gb:USA:52423323B39960691316428",
+          "gb:USA:52423323B40127238387579",
+          "gb:USA:52423323B40462865306568",
+          "gb:USA:52423323B41002783843524",
+          "gb:USA:52423323B41224890056443",
+          "gb:USA:52423323B41402843963170",
+          "gb:USA:52423323B41893440986627",
+          "gb:USA:52423323B43258201859657",
+          "gb:USA:52423323B43439565608947",
+          "gb:USA:52423323B43564787012059",
+          "gb:USA:52423323B43837481936937",
+          "gb:USA:52423323B44396431202896",
+          "gb:USA:52423323B44422856436283",
+          "gb:USA:52423323B4494633873446",
+          "gb:USA:52423323B45931526647810",
+          "gb:USA:52423323B46957105965070",
+          "gb:USA:52423323B48551637922403",
+          "gb:USA:52423323B48909389322021",
+          "gb:USA:52423323B48999249202093",
+          "gb:USA:52423323B49877300936601",
+          "gb:USA:52423323B50058154101732",
+          "gb:USA:52423323B51053676953804",
+          "gb:USA:52423323B51296070216913",
+          "gb:USA:52423323B51319827777546",
+          "gb:USA:52423323B51482059036815",
+          "gb:USA:52423323B51801670345561",
+          "gb:USA:52423323B51911308321419",
+          "gb:USA:52423323B52169661365979",
+          "gb:USA:52423323B52253353626941",
+          "gb:USA:52423323B53043457363296",
+          "gb:USA:52423323B53823188034237",
+          "gb:USA:52423323B54234500160423",
+          "gb:USA:52423323B54445613947141",
+          "gb:USA:52423323B54713673319448",
+          "gb:USA:52423323B54730656664663",
+          "gb:USA:52423323B5552577354441",
+          "gb:USA:52423323B55662622252090",
+          "gb:USA:52423323B55664774745263",
+          "gb:USA:52423323B55765441585507",
+          "gb:USA:52423323B55894153877564",
+          "gb:USA:52423323B55967272276048",
+          "gb:USA:52423323B56025650408789",
+          "gb:USA:52423323B56069196588266",
+          "gb:USA:52423323B56288271705093",
+          "gb:USA:52423323B56578424845475",
+          "gb:USA:52423323B57223393950",
+          "gb:USA:52423323B58371871806637",
+          "gb:USA:52423323B58734474241288",
+          "gb:USA:52423323B5889391019890",
+          "gb:USA:52423323B59210924893707",
+          "gb:USA:52423323B604862894411",
+          "gb:USA:52423323B60870654888201",
+          "gb:USA:52423323B62333237786738",
+          "gb:USA:52423323B62370676746754",
+          "gb:USA:52423323B63120007754805",
+          "gb:USA:52423323B63572960553065",
+          "gb:USA:52423323B64400488372532",
+          "gb:USA:52423323B65966089908040",
+          "gb:USA:52423323B66255567298861",
+          "gb:USA:52423323B66491934783020",
+          "gb:USA:52423323B66757955193379",
+          "gb:USA:52423323B67948009560092",
+          "gb:USA:52423323B68160313903633",
+          "gb:USA:52423323B70135651340823",
+          "gb:USA:52423323B70780869118489",
+          "gb:USA:52423323B70800953145175",
+          "gb:USA:52423323B70902388420636",
+          "gb:USA:52423323B71527325360101",
+          "gb:USA:52423323B71639417282094",
+          "gb:USA:52423323B72303975114408",
+          "gb:USA:52423323B72643453207653",
+          "gb:USA:52423323B72947560407101",
+          "gb:USA:52423323B73222976979842",
+          "gb:USA:52423323B73294334838827",
+          "gb:USA:52423323B73536950246469",
+          "gb:USA:52423323B73997952467862",
+          "gb:USA:52423323B7471592660560",
+          "gb:USA:52423323B7472749595525",
+          "gb:USA:52423323B74744192559134",
+          "gb:USA:52423323B76219766339167",
+          "gb:USA:52423323B76509893462522",
+          "gb:USA:52423323B76935168618959",
+          "gb:USA:52423323B77626952716253",
+          "gb:USA:52423323B7824405482289",
+          "gb:USA:52423323B78580900034992",
+          "gb:USA:52423323B79314410482452",
+          "gb:USA:52423323B79783446194500",
+          "gb:USA:52423323B80007668106022",
+          "gb:USA:52423323B80774695679496",
+          "gb:USA:52423323B81117065692480",
+          "gb:USA:52423323B82106170335401",
+          "gb:USA:52423323B8225934162220",
+          "gb:USA:52423323B82335716857681",
+          "gb:USA:52423323B82500281635270",
+          "gb:USA:52423323B83124951000608",
+          "gb:USA:52423323B83504400209000",
+          "gb:USA:52423323B83513729343256",
+          "gb:USA:52423323B83762983029089",
+          "gb:USA:52423323B83967641525386",
+          "gb:USA:52423323B83994293092269",
+          "gb:USA:52423323B84817986944382",
+          "gb:USA:52423323B85485871485151",
+          "gb:USA:52423323B85732268037337",
+          "gb:USA:52423323B85918245780607",
+          "gb:USA:52423323B86572463849564",
+          "gb:USA:52423323B87068688197244",
+          "gb:USA:52423323B87929534363237",
+          "gb:USA:52423323B90005102118407",
+          "gb:USA:52423323B90141807319554",
+          "gb:USA:52423323B90263846548439",
+          "gb:USA:52423323B91490874625057",
+          "gb:USA:52423323B9154242656865",
+          "gb:USA:52423323B92305544895329",
+          "gb:USA:52423323B92446440923992",
+          "gb:USA:52423323B9246238437830",
+          "gb:USA:52423323B93324902631491",
+          "gb:USA:52423323B93742797793260",
+          "gb:USA:52423323B93785778655007",
+          "gb:USA:52423323B93973889783850",
+          "gb:USA:52423323B94132750651187",
+          "gb:USA:52423323B94843923052061",
+          "gb:USA:52423323B9626966163113",
+          "gb:USA:52423323B97407151829576",
+          "gb:USA:52423323B9748869428654",
+          "gb:USA:52423323B97917914395582",
+          "gb:USA:52423323B98267290722512",
+          "gb:USA:52423323B98282084999585",
+          "gb:USA:52423323B98305313857375",
+          "gb:USA:52423323B98518761698174",
+          "gb:USA:52423323B98678441689198",
+          "gb:USA:52423323B99370817960855",
+          "residual:USA:USA-3535"
+        ]
+      },
+      "ownerPolityId": "louisiana",
+      "reason": "Gameplay approximation: explicit canonical atom list for a nested regional carve-out; strategic readability, not exact historical boundaries."
+    },
+    {
+      "id": "world-291-new_mexico",
+      "match": {
+        "sourceCountry": "USA",
+        "bbox": [
+          -115,
+          30,
+          -100,
+          36
+        ]
+      },
+      "ownerPolityId": "new_mexico",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-292-pacific_america",
+      "match": {
+        "sourceCountry": "USA",
+        "bbox": [
+          -125,
+          36.01,
+          -115,
+          49
+        ]
+      },
+      "ownerPolityId": "pacific_america",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-293-arctic_america",
+      "match": {
+        "sourceCountry": "USA",
+        "bbox": [
+          -180,
+          50,
+          -125,
+          72
+        ]
+      },
+      "ownerPolityId": "arctic_america",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-294-arctic_america",
+      "match": {
+        "sourceCountry": "CAN",
+        "bbox": [
+          -145,
+          60,
+          -50,
+          85
+        ]
+      },
+      "ownerPolityId": "arctic_america",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-295-mapuche",
+      "match": {
+        "sourceCountry": "CHL",
+        "bbox": [
+          -77,
+          -56,
+          -66,
+          -36
+        ]
+      },
+      "ownerPolityId": "mapuche",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-296-pampas_regions",
+      "match": {
+        "sourceCountry": "ARG",
+        "bbox": [
+          -74,
+          -56,
+          -53,
+          -35
+        ]
+      },
+      "ownerPolityId": "pampas_regions",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-297-amazon_regions",
+      "match": {
+        "sourceCountry": "BRA",
+        "bbox": [
+          -74,
+          -13,
+          -48,
+          6
+        ]
+      },
+      "ownerPolityId": "amazon_regions",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-298-amazon_regions",
+      "match": {
+        "sourceCountry": "PER",
+        "bbox": [
+          -75,
+          -11,
+          -68,
+          0
+        ]
+      },
+      "ownerPolityId": "amazon_regions",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-299-amazon_regions",
+      "match": {
+        "sourceCountry": "COL",
+        "bbox": [
+          -75,
+          -5,
+          -66,
+          1
+        ]
+      },
+      "ownerPolityId": "amazon_regions",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-300-amazon_regions",
+      "match": {
+        "sourceCountry": "VEN",
+        "bbox": [
+          -68,
+          -1,
+          -59,
+          5
+        ]
+      },
+      "ownerPolityId": "amazon_regions",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-301-australia_north",
+      "match": {
+        "sourceCountry": "AUS"
+      },
+      "ownerPolityId": "australia_north",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-302-australia_north",
+      "match": {
+        "sourceCountry": "ATC"
+      },
+      "ownerPolityId": "australia_north",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-303-australia_north",
+      "match": {
+        "sourceCountry": "CSI"
+      },
+      "ownerPolityId": "australia_north",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-304-australia_southeast",
+      "match": {
+        "sourceCountry": "AUS",
+        "bbox": [
+          135,
+          -40,
+          154,
+          -28
+        ]
+      },
+      "ownerPolityId": "australia_southeast",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-305-australia_west",
+      "match": {
+        "sourceCountry": "AUS",
+        "bbox": [
+          112,
+          -40,
+          134.99,
+          -22
+        ]
+      },
+      "ownerPolityId": "australia_west",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-306-tasmania",
+      "match": {
+        "sourceCountry": "AUS",
+        "bbox": [
+          143,
+          -45,
+          150,
+          -40.01
+        ]
+      },
+      "ownerPolityId": "tasmania",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-307-maori",
+      "match": {
+        "sourceCountry": "NZL"
+      },
+      "ownerPolityId": "maori",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-308-papuan",
+      "match": {
+        "sourceCountry": "PNG"
+      },
+      "ownerPolityId": "papuan",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-309-papuan",
+      "match": {
+        "sourceCountry": "IDN",
+        "bbox": [
+          133.01,
+          -11,
+          142,
+          1
+        ]
+      },
+      "ownerPolityId": "papuan",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-310-melanesian",
+      "match": {
+        "sourceCountry": "SLB"
+      },
+      "ownerPolityId": "melanesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-311-melanesian",
+      "match": {
+        "sourceCountry": "VUT"
+      },
+      "ownerPolityId": "melanesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-312-melanesian",
+      "match": {
+        "sourceCountry": "NCL"
+      },
+      "ownerPolityId": "melanesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-313-melanesian",
+      "match": {
+        "sourceCountry": "FJI"
+      },
+      "ownerPolityId": "melanesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-314-melanesian",
+      "match": {
+        "sourceCountry": "NFK"
+      },
+      "ownerPolityId": "melanesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-315-micronesian",
+      "match": {
+        "sourceCountry": "FSM"
+      },
+      "ownerPolityId": "micronesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-316-micronesian",
+      "match": {
+        "sourceCountry": "MHL"
+      },
+      "ownerPolityId": "micronesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-317-micronesian",
+      "match": {
+        "sourceCountry": "PLW"
+      },
+      "ownerPolityId": "micronesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-318-micronesian",
+      "match": {
+        "sourceCountry": "KIR"
+      },
+      "ownerPolityId": "micronesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-319-micronesian",
+      "match": {
+        "sourceCountry": "NRU"
+      },
+      "ownerPolityId": "micronesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-320-polynesian",
+      "match": {
+        "sourceCountry": "WSM"
+      },
+      "ownerPolityId": "polynesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-321-polynesian",
+      "match": {
+        "sourceCountry": "ASM"
+      },
+      "ownerPolityId": "polynesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-322-polynesian",
+      "match": {
+        "sourceCountry": "COK"
+      },
+      "ownerPolityId": "polynesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-323-polynesian",
+      "match": {
+        "sourceCountry": "NIU"
+      },
+      "ownerPolityId": "polynesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-324-polynesian",
+      "match": {
+        "sourceCountry": "PYF"
+      },
+      "ownerPolityId": "polynesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-325-polynesian",
+      "match": {
+        "sourceCountry": "WLF"
+      },
+      "ownerPolityId": "polynesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-326-polynesian",
+      "match": {
+        "sourceCountry": "TUV"
+      },
+      "ownerPolityId": "polynesian",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-327-tonga",
+      "match": {
+        "sourceCountry": "TON"
+      },
+      "ownerPolityId": "tonga",
+      "reason": "Gameplay approximation: sourceCountry is a modern geography proxy; authored assignment intentionally simplifies circa-1700 authority and is not an exact historical border."
+    },
+    {
+      "id": "world-328-hawaiian",
+      "match": {
+        "sourceCountry": "USA",
+        "bbox": [
+          -161,
+          18,
+          -154,
+          23
+        ]
+      },
+      "ownerPolityId": "hawaiian",
+      "reason": "Gameplay approximation: rectangular centroid selector gives a readable regional division on fixed canonical atoms; not a surveyed historical border."
+    },
+    {
+      "id": "world-fallback-null",
+      "match": {},
+      "ownerPolityId": null,
+      "reason": "Unfinished or remote territory remains null; no forced universal state."
+    }
+  ],
+  "relationships": {
+    "version": 1,
+    "relations": [
+      {
+        "type": "colonial_dependency",
+        "from": "angola_portuguese",
+        "to": "por_monarchy",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "atlantic_english",
+        "to": "eng_stuart",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "atlantic_portuguese",
+        "to": "por_monarchy",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "brazil_portuguese",
+        "to": "por_monarchy",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "cape_voc",
+        "to": "nld_republic",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "cayenne",
+        "to": "fra_bourbon",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "ceylon_voc",
+        "to": "nld_republic",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "danish_caribbean",
+        "to": "den_norway",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "dutch_caribbean",
+        "to": "nld_republic",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "dutch_guiana",
+        "to": "nld_republic",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "english_america",
+        "to": "eng_stuart",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "english_caribbean",
+        "to": "eng_stuart",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "french_caribbean",
+        "to": "fra_bourbon",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "java_voc",
+        "to": "nld_republic",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "louisiana",
+        "to": "fra_bourbon",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "macao_portuguese",
+        "to": "por_monarchy",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "mozambique_portuguese",
+        "to": "por_monarchy",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "new_france",
+        "to": "fra_bourbon",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "new_mexico",
+        "to": "new_spain",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "new_spain",
+        "to": "spa_monarchy",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "peru",
+        "to": "spa_monarchy",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "philippines_spanish",
+        "to": "spa_monarchy",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "spanish_caribbean",
+        "to": "spa_monarchy",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "colonial_dependency",
+        "from": "spice_voc",
+        "to": "nld_republic",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "personal_union",
+        "from": "eng_stuart",
+        "to": "sco_stuart",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "personal_union",
+        "from": "saxony",
+        "to": "plc",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "subject_of",
+        "from": "algiers",
+        "to": "ottoman",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "subject_of",
+        "from": "courland",
+        "to": "plc",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "subject_of",
+        "from": "egypt_ottoman",
+        "to": "ottoman",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "subject_of",
+        "from": "hejaz",
+        "to": "ottoman",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "subject_of",
+        "from": "milan",
+        "to": "spa_monarchy",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "subject_of",
+        "from": "naples_sicily",
+        "to": "spa_monarchy",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "subject_of",
+        "from": "rajput",
+        "to": "mughal",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "subject_of",
+        "from": "spanish_netherlands",
+        "to": "spa_monarchy",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "subject_of",
+        "from": "transylvania",
+        "to": "habsburg",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "subject_of",
+        "from": "tripoli",
+        "to": "ottoman",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "subject_of",
+        "from": "tunis",
+        "to": "ottoman",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "tributary_of",
+        "from": "crimean_khanate",
+        "to": "ottoman",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "tributary_of",
+        "from": "moldavia",
+        "to": "ottoman",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "tributary_of",
+        "from": "ryukyu",
+        "to": "qing",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      },
+      {
+        "type": "tributary_of",
+        "from": "wallachia",
+        "to": "ottoman",
+        "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "territoryId": "gb:FRA:29444166B33792924009837",
+      "ownerPolityId": "fra_bourbon",
+      "reason": "Gameplay approximation: preserve the authored Paris strategic anchor on an existing canonical atom; no claim of exact municipal or historical borders."
+    },
+    {
+      "territoryId": "gb:NLD:6326949B30737301574950",
+      "ownerPolityId": "nld_republic",
+      "reason": "Gameplay approximation: preserve the authored Amsterdam strategic anchor on an existing canonical atom; no claim of exact municipal or historical borders."
+    },
+    {
+      "territoryId": "gb:AUT:14549572B24691553772644",
+      "ownerPolityId": "habsburg",
+      "reason": "Gameplay approximation: preserve the authored Vienna strategic anchor on an existing canonical atom; no claim of exact municipal or historical borders."
+    },
+    {
+      "territoryId": "gb:RUS:50074027B23372442110557",
+      "ownerPolityId": "rus_tsardom",
+      "reason": "Gameplay approximation: preserve the authored Moscow strategic anchor on an existing canonical atom; no claim of exact municipal or historical borders."
+    },
+    {
+      "territoryId": "gb:CHN:17275852B41788529093737",
+      "ownerPolityId": "qing",
+      "reason": "Gameplay approximation: preserve the authored Beijing strategic anchor on an existing canonical atom; no claim of exact municipal or historical borders."
+    },
+    {
+      "territoryId": "gb:JPN:22064153B4211596098450",
+      "ownerPolityId": "tokugawa",
+      "reason": "Gameplay approximation: preserve the authored Edo strategic anchor on an existing canonical atom; no claim of exact municipal or historical borders."
+    },
+    {
+      "territoryId": "residual:ITA:ITA-5461",
+      "ownerPolityId": "venice",
+      "reason": "Gameplay approximation: preserve the authored Venice strategic anchor on an existing canonical atom; no claim of exact municipal or historical borders."
+    },
+    {
+      "territoryId": "gb:ITA:23120603B86473916475875",
+      "ownerPolityId": "papal",
+      "reason": "Gameplay approximation: preserve the authored Rome strategic anchor on an existing canonical atom; no claim of exact municipal or historical borders."
+    }
+  ]
+}

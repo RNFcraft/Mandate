@@ -7,16 +7,20 @@ import { TerritoryLOD } from './lod.js';
 import { unpackTopology } from './topology.js';
 import kernel from '../../shared/simulation.cjs';
 import {gameControls} from '../game/controls.js';
+import {gameplayPreview} from './gameplay-preview.js';
 
 try {
   const params = new URLSearchParams(location.search);
+  if(params.get('mapPreview')==='gameplay') {
+    await gameplayPreview();
+  } else {
   const scenarioId = params.get('scenario') || 'modern';
   const [topology, geography, manifest] = await Promise.all(['/data/adm2/derived.topo.json', '/data/adm2/hierarchy.json', '/data/adm2/manifest.json'].map(async url => {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Map data: ${response.status}`);
     const data=await response.json();return url.endsWith('.topo.json')?unpackTopology(data):data;
   }));
-  const initial=await loadScenario(scenarioId,{population:params.get('editor')!=='1',politicalPreview:params.get('politicalPreview')==='1'});
+  const initial=await loadScenario(scenarioId,{population:params.get('editor')!=='1',politicalPreview:params.get('politicalPreview')||false});
   const simulation=params.get('editor')==='1'?null:new kernel.Simulation(initial,geography);
   const model = new MapModel(geography,initial,{simulation});
   const geometry = name => feature(topology, topology.objects[name]).features.map(prepare);
@@ -42,7 +46,7 @@ try {
   if(simulation){window.mandateSimulation=simulation;window.mandateGameControls=gameControls(simulation,geography);}
   if(simulation){
     window.inspectPoliticalTerritory=id=>({...simulation.territoryPoliticalState(id),population:simulation.populationSummary(id).total});
-    if(params.get('politicalDebug')==='1'||params.get('politicalPreview')==='1'){
+    if(params.get('politicalDebug')==='1'||params.get('politicalPreview')){
       const output=document.createElement('output');output.id='political-inspect';
       output.textContent=initial.politicalPreview?'Political PREVIEW (not published)':initial.politicalGeography?.status==='published'?'Published political geography':'Historical geography is draft; current ownership is DEV TEST DATA';
       document.body.append(output);
@@ -55,6 +59,7 @@ try {
   if (params.get('editor') === '1') {
     const { ScenarioEditor } = await import('../editor/editor.js');
     window.mandateEditor = new ScenarioEditor(map);
+  }
   }
 } catch (error) {
   console.error(error);

@@ -38,9 +38,10 @@ async function handle(req, res, pathname) {
   const id = match[1];
   if (req.method === 'GET') {
     const h=await hierarchy(),input=await read(id),query=new URL(req.url,'http://localhost').searchParams;
-    if(query.get('politicalPreview')==='1'){
+    if(query.has('politicalPreview')){
+      const dataset=query.get('politicalPreview');if(!['1','mandate-world-v1'].includes(dataset)){reply(res,400,{error:'Unknown political preview dataset'});return;}
       if(id!=='1700'){reply(res,400,{error:'Political preview targets scenario 1700 only'});return;}
-      const folder=path.resolve(__dirname,'../data/generated/political-geography/1700');
+      const folder=path.resolve(__dirname,'../data/generated/political-geography/1700',dataset==='mandate-world-v1'?'mandate-world-v1':'.');
       const [asset,polities,polityRelations]=await Promise.all(['political-geography.json','polities.json','polity-relations.json'].map(async name=>parseStrictJson(await fs.readFile(path.join(folder,name)))));
       Object.assign(input,{politicalGeography:{...asset,status:'published'},polities,polityRelations,politicalPreview:true});
     }
@@ -88,7 +89,7 @@ async function handle(req, res, pathname) {
       }
     }catch(error){if(error.code!=='ENOENT')throw error;}
     // Population is an independent authored asset, never supplied by the editor.
-    for(const asset of ['population.json','population.meta.json','population-composition.json','polities.json','polity-relations.json','political-geography.json','political-geography-overrides.json'])try{await fs.copyFile(path.join(folder,asset),path.join(stage,asset));}catch(error){if(error.code!=='ENOENT')throw error;}
+    for(const asset of ['population.json','population.meta.json','population-composition.json','polities.json','polity-relations.json','political-geography.json','political-geography-overrides.json','political-geography-authoring.json'])try{await fs.copyFile(path.join(folder,asset),path.join(stage,asset));}catch(error){if(error.code!=='ENOENT')throw error;}
     for (const [name, value] of Object.entries(data)) if (['scenario', 'countries', 'ownership', 'controllers'].includes(name)) await fs.writeFile(path.join(stage, `${name}.json`), JSON.stringify(value, null, 2));
     try { await fs.rename(folder, backup); backedUp = true; } catch (error) { if (error.code !== 'ENOENT') throw error; }
     try { await fs.rename(stage, folder); published = true; } catch (error) { if (backedUp) await fs.rename(backup, folder); throw error; }

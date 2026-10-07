@@ -75,7 +75,10 @@ function assignPoliticalGeography({features,hierarchy,baseline,polities,relation
     const overlaps=new Map();
     for(const part of query(bounds(f.geometry))){const overlap=area(intersection(f.geometry,part.geometry));if(!Number.isFinite(overlap)||overlap<0)fail(`invalid overlap area ${f.id}`);if(overlap>0)overlaps.set(part.id,(overlaps.get(part.id)||0)+overlap);}
     const ranked=[...overlaps].sort((a,b)=>b[1]-a[1]||compare(a[0],b[0]));
-    if(ranked.some(([,value])=>value>areaKm2*(1+1e-7)+1e-6))fail(`overlap exceeds canonical area ${f.id}`);
+    // Canonical area transforms ring vertices after planar clipping. Added or
+    // removed collinear vertices can cause sub-ppm area differences; this is
+    // not extra land. Allow one ppm, retaining the existing [0,1] audit clamp.
+    if(ranked.some(([,value])=>value>areaKm2*(1+1e-6)+1e-6))fail(`overlap exceeds canonical area ${f.id}`);
     const winner=ranked[0],runner=ranked[1],share=winner?Math.min(1,winner[1]/areaKm2):0,secondShare=runner?Math.min(1,runner[1]/areaKm2):0;
     const owner=winner?.[0]??null;if(owner!==null)owners[f.id]=owner;
     rows.push({territoryId:f.id,areaKm2,...(populationById.get(f.id)||{population:0,urban:0,rural:0}),winningPolityId:owner,winningOverlapPct:100*share,secondPolityId:runner?.[0]??null,secondOverlapPct:100*secondShare,confidence:!winner?'UNASSIGNED':share>=limits.high?'HIGH':share>=limits.medium?'MEDIUM':'LOW',ambiguous:!!winner&&(share<limits.medium||secondShare>=limits.runnerAmbiguity),ownerPolityId:owner,controllerPolityId:owner,overridden:false});
