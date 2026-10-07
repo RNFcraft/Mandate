@@ -483,6 +483,14 @@ It is better to establish the correct gameplay geography now than migrate all la
 17. WebGL/vector rendering is preferred for the full world map rather than an SVG-only global renderer.
 18. Shared topology/arcs should be retained where practical.
 19. Map v2 becomes the next high-priority technical milestone before deeper economy work.
+20. Gameplay provinces are generated from the atomic adjacency graph using weighted seeds plus connected graph growth, not simple centroid clustering.
+21. Target scale is around 12,000 land provinces, with roughly 10,000–15,000 accepted during tuning.
+22. Generation includes an automatic repair/cleanup phase followed by limited manual or semi-automatic correction.
+23. Tiny islands do not automatically become standalone gameplay provinces; archipelago MultiPolygon provinces are allowed.
+24. Final neighboring province polygons must use shared canonical boundary arcs.
+25. Gameplay province ownership becomes the primary political ownership authority; atomic ownership is derived where needed.
+26. States/regions are built after provinces, usually from roughly 5–20 neighboring gameplay provinces.
+27. Final province IDs, mappings, adjacency and topology are frozen only after visual and structural validation.
 
 ---
 
@@ -490,11 +498,10 @@ It is better to establish the correct gameplay geography now than migrate all la
 
 Not yet fixed:
 
-- exact number of gameplay provinces;
-- exact province-generation algorithm;
-- whether final province layout is fully procedural-authoring, semi-automatic, or manually cleaned;
+- exact final gameplay province count inside the agreed ~10k–15k working range;
+- exact numeric coefficients for province-size weighting and compactness;
 - exact state/region count;
-- exact natural-boundary weighting;
+- exact natural-boundary weighting once river/mountain data is integrated;
 - exact LOD thresholds;
 - exact renderer library/engine;
 - exact line widths and map styling;
@@ -505,6 +512,320 @@ Not yet fixed:
 These should be decided during implementation and visual review.
 
 ---
+
+
+## 22. Gameplay province generation — settled approach
+
+The base gameplay map should be authored automatically from the existing atomic mesh and then cleaned/frozen.
+
+Target scale:
+
+- roughly HoI4-like gameplay readability;
+- target around **12,000 land gameplay provinces worldwide**;
+- acceptable working range roughly **10,000–15,000** while tuning;
+- the final count is determined by visual/geographic quality rather than by hitting one exact number.
+
+The generation pipeline is:
+
+```text
+atomic topology
+→ atomic adjacency graph
+→ density / scale weighting
+→ seed placement
+→ connected region growth
+→ cleanup / repair
+→ shared-boundary topology rebuild
+→ topological simplification
+→ visual + structural validation
+→ manual / semi-automatic cleanup of bad cases
+→ stable IDs
+→ freeze
+```
+
+### 22.1 Atomic adjacency graph
+
+Every atomic cell becomes a graph node.
+
+Normal graph edges exist only where two atoms share a real land boundary.
+
+Each node carries at least:
+
+- atomic ID;
+- area;
+- population;
+- population density;
+- centroid;
+- coastline / island status;
+- current geometry/topology references;
+- future optional terrain / natural-boundary attributes.
+
+This graph is used for province construction.
+
+### 22.2 Province-size weighting
+
+Province size is intentionally non-uniform.
+
+Dense, strategically important geography should produce smaller provinces.
+
+Sparse geography should produce much larger provinces.
+
+The first implementation should use a compact weighting model based mainly on:
+
+- population;
+- population density;
+- land area;
+- coastline / island context;
+- compactness of the growing province.
+
+Natural barriers such as rivers and mountains may later be added as boundary-cost modifiers, but they are not required for the first usable generation pass.
+
+The practical result should be:
+
+```text
+Europe / India / dense China / Japan
+→ many smaller provinces
+
+Siberia / Sahara / interior Canada / Australia
+→ fewer much larger provinces
+```
+
+### 22.3 Seed placement
+
+Generation starts from province seeds.
+
+Seeds should be distributed with weighted farthest-point / spacing logic rather than random placement.
+
+Dense regions receive more seeds.
+
+Sparse regions receive fewer seeds.
+
+Important settlements may be preferred as seed anchors where settlement data is available, but the algorithm must still work without requiring settlement seeds everywhere.
+
+### 22.4 Connected graph growth
+
+After seed placement, provinces grow across the atomic adjacency graph.
+
+An atom may be assigned only through adjacency to its growing province.
+
+The growth cost should prefer:
+
+1. reaching the target local province scale;
+2. compact shapes;
+3. short/shared borders;
+4. avoiding long thin corridors;
+5. avoiding tiny enclaves or detached fragments;
+6. respecting coastline/island structure.
+
+This guarantees that normal mainland gameplay provinces are connected by construction.
+
+The generator should not simply group atoms by nearest centroid.
+
+### 22.5 Cleanup and repair pass
+
+The first graph partition is not considered final.
+
+A repair pass must detect and fix:
+
+- provinces below minimum useful size;
+- one-atom slivers;
+- narrow spikes;
+- long thin corridors;
+- isolated fragments;
+- accidental holes;
+- excessive numbers of polygon components;
+- suspiciously tiny borders;
+- pathological compactness;
+- topology errors.
+
+Bad atoms are reassigned to the most suitable neighboring province.
+
+This pass may run repeatedly until structural checks pass.
+
+### 22.6 Islands and archipelagos
+
+A tiny island does **not** automatically become a gameplay province.
+
+Island handling uses separate rules:
+
+- large islands may contain multiple normal provinces;
+- medium islands may become one province;
+- nearby small islands may be grouped into one archipelago province;
+- a gameplay province may therefore be a MultiPolygon;
+- microscopic islets may remain geographic geometry without becoming independent clickable gameplay units;
+- tiny islets may disappear at distant LOD while remaining in canonical geography.
+
+For island grouping, a separate maritime-grouping relation may be used.
+
+This relation is only for province membership and must not be confused with normal land adjacency or army movement.
+
+The goal is to eliminate the current "spray of tiny clickable dots" problem.
+
+### 22.7 Province geometry is rebuilt after membership
+
+Atomic membership remains the high-resolution data basis.
+
+The player-facing province polygon is generated after grouping:
+
+```text
+member atomic cells
+→ union
+→ shared province boundaries
+→ topology repair
+→ topological simplification / smoothing
+→ final vector geometry
+```
+
+Neighboring provinces must share the **same canonical boundary arc**.
+
+Two independently simplified copies of the same border are not allowed.
+
+This prevents:
+
+- cracks;
+- overlaps;
+- double borders;
+- mismatched vertices;
+- visible gaps.
+
+### 22.8 Internal borders vs coastlines
+
+Internal province borders may be cleaned and simplified relatively strongly for readability.
+
+Coastlines must be treated more conservatively so islands and shorelines remain recognizable.
+
+Simplification must be topology-preserving.
+
+The gameplay boundary does not need to reproduce every tiny bend inherited from modern administrative source polygons.
+
+### 22.9 Atomic geometry remains underneath
+
+The cleaned gameplay province geometry does not replace the atomic substrate.
+
+Atomic membership remains authoritative for high-resolution data aggregation.
+
+Examples:
+
+```text
+population:
+atomic cohorts → province aggregate
+
+resource geology:
+atomic intersections → province aggregate
+
+area:
+atomic area → province aggregate
+```
+
+This means visual cleanup of province borders does not destroy the original HYDE/population/resource work.
+
+### 22.10 Authority of the geographic layers
+
+After migration, gameplay authority should be:
+
+```text
+ATOMIC CELL
+internal spatial/data substrate
+population allocation
+geology
+precise source geometry
+provenance
+
+GAMEPLAY PROVINCE
+primary playable spatial unit
+owner / controller
+war and movement
+infrastructure
+settlements
+enterprises
+resource exploitation
+province-facing population
+local construction
+
+STATE / REGION
+administrative/economic grouping
+regional statistics
+tax / policy aggregation
+large programs and projects
+```
+
+Gameplay political ownership should ultimately live on the **gameplay province**.
+
+Atomic ownership should not remain an independent competing gameplay authority; where needed it is derived from the parent province.
+
+### 22.11 States / regions
+
+States / regions are generated only after gameplay provinces are stable.
+
+They use a second adjacency graph whose nodes are gameplay provinces.
+
+Initial guideline:
+
+- usually around **5–20 neighboring provinces per state/region**;
+- size may vary substantially by geography;
+- states must remain contiguous except where island geography reasonably requires MultiPolygon grouping;
+- exact global state count is not a target by itself.
+
+States are a larger administrative/economic layer, not the minimum military or ownership unit.
+
+### 22.12 Automatic validation
+
+The generator should produce a machine-readable QA report.
+
+At minimum validate:
+
+- every atomic cell belongs to exactly one gameplay province;
+- no mainland province has disconnected components;
+- no invalid polygon rings;
+- no overlaps between gameplay provinces;
+- no gaps produced by internal boundaries;
+- shared borders resolve to shared topology;
+- adjacency is symmetric;
+- minimum/maximum scale outliers are reported;
+- extreme compactness outliers are reported;
+- microscopic standalone island provinces are reported;
+- total province count is within the intended working range.
+
+### 22.13 Manual / semi-automatic cleanup
+
+The map is not expected to become final from one completely automatic pass.
+
+The intended authoring workflow is:
+
+```text
+generate
+→ inspect
+→ flag bad provinces
+→ reassign one or more atomic cells
+→ rebuild local topology
+→ validate again
+```
+
+Only exceptions and ugly cases should require manual intervention.
+
+The entire world should not be hand-drawn.
+
+### 22.14 Stable IDs and freeze
+
+During generation, temporary province IDs may change.
+
+After visual and structural approval:
+
+- assign stable permanent gameplay province IDs;
+- assign stable state/region IDs;
+- save the atom → province mapping;
+- save province → state mapping;
+- save adjacency;
+- save canonical final vector topology;
+- freeze Map v2 geography.
+
+After freeze, campaigns and scenarios use the same province geometry and IDs.
+
+Political ownership, resources, population and history may change.
+
+The underlying gameplay province layout does not.
+
+---
+
 
 ## Short summary
 
