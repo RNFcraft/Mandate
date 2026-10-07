@@ -977,7 +977,15 @@ document.querySelectorAll('.module-subnav[data-module="laws"] button[data-law-fi
    ========================================================= */
 (() => {
   const rootState = window.MandatePrototypeState = window.MandatePrototypeState || {};
-  const saved = (()=>{try{return JSON.parse(localStorage.getItem('mandatePrototypeV11Party')||'null')}catch{return null}})();
+
+  // Prototype mode: every page launch starts a completely new game.
+  // Clear only Mandate prototype saves; do not touch unrelated browser storage.
+  try {
+    localStorage.removeItem('mandatePrototypeV11Party');
+    localStorage.removeItem('mandate-functional-prototype-v12');
+  } catch {}
+
+  const saved = null;
   const defaults = {
     name:'Либеральная партия', short:'ЛП', slogan:'Свобода, закон, развитие', color:'#527c9d',
     leader:'Элиас Варен', leaderPopularity:63, status:'правящая коалиция',
