@@ -1,5 +1,17 @@
 # Mandate — Map v2: Gameplay Provinces, Regions & Vector Rendering
 
+> Geography tuning, 2026-10-07: the accepted independent partition now targets
+> 5,000 provinces. Bounded target mass, anchored partial relaxation and safe
+> shared-arc cleanup make sparse regions coarser. Canonical land, atomic overlay
+> and simulation authority remain unchanged. See
+> [tuning report](../docs/map-v2-geography-tuning.md). Freeze awaits visual review.
+
+> Architecture update, 2026-10-07: player-facing province geometry is generated
+> independently inside a dissolved canonical land mask (first target ~7,000).
+> Atomic cells supply data through fractional spatial overlay, not visible
+> boundaries. This supersedes the atomic-union/aggregation geometry described
+> below. Ownership/save migration and the final freeze remain deferred.
+
 > Status: high-priority roadmap item  
 > Scope: replace the current tiny gameplay-territory experience with a larger HoI4-like province layer while preserving the existing high-resolution atomic geography underneath  
 > Priority: do this before continuing deeper economy implementation
@@ -83,7 +95,10 @@ They become mostly invisible technical geography.
 
 The smallest normal player-facing territory should become a **gameplay province**.
 
-A gameplay province is made from multiple adjacent atomic territories.
+A gameplay province is generated independently of atomic boundaries inside a
+connected land component. Atomic territories may intersect several provinces;
+overlap fractions transfer their data afterward. Small islands may share an
+archipelago province ID without a land connection.
 
 Provinces should be:
 
@@ -353,7 +368,8 @@ Existing data should be preserved and aggregated into gameplay provinces.
 
 ```text
 atomic population
-→ sum into gameplay province
+→ spatial overlap fractions + deterministic per-atom largest remainder
+→ gameplay province population (exact total conservation)
 ```
 
 ### Resources
@@ -374,8 +390,11 @@ Temporary atomic ownership can be aggregated or migrated.
 ### Area
 
 ```text
-atomic area
-→ province area
+independent province geometry
+→ gameplay province area
+
+atomic intersection area
+→ fractional data-transfer weights
 ```
 
 The atomic mesh remains the high-resolution source of truth where useful.

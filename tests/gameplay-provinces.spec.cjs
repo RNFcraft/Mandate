@@ -27,12 +27,12 @@ test('point contacts are not land adjacency; maritime grouping stays separate',(
   const result=partition(input,{...DEFAULTS,target:1});expect(result.provinces).toHaveLength(1);expect(result.maritime).toHaveLength(1);
   const out=produce(topology,input,result);expect(out.provinces[0].landComponents).toBe(2);expect(out.provinces[0].adjacency).toEqual([]);
 });
-test('real generated artifact passes structural QA and preserves population',()=>{
+test('current independent artifact supersedes atomic-union preview and preserves population',()=>{
   const qa=JSON.parse(fs.readFileSync('client/data/map-v2/qa.json')),provinces=JSON.parse(fs.readFileSync('client/data/map-v2/provinces.json'));
-  expect(qa.provinceCount).toBeGreaterThanOrEqual(10000);expect(qa.provinceCount).toBeLessThanOrEqual(15000);expect(qa.atomCount).toBe(52262);
-  expect(qa.unassignedAtoms+qa.duplicateAtoms).toBe(0);expect(qa.disconnectedMainlandProvinces).toEqual([]);expect(qa.sharedBorderErrors).toEqual([]);expect(qa.invalidPolygons).toEqual([]);expect(qa.overlapValidation.verified).toBe(true);expect(qa.overlapErrors).toBe(0);
+  expect(qa.provinceCount).toBeGreaterThanOrEqual(4500);expect(qa.provinceCount).toBeLessThanOrEqual(5500);expect(qa.atomCount).toBe(52262);
+  expect(qa.structuralFailures).toEqual([]);expect(qa.populationConservationDifference).toBe(0);
   expect(provinces.reduce((s,p)=>s+p.population,0)).toBe(591714189);
-  expect(qa.simplifiedInvalidPolygons).toEqual([]);expect(qa.simplification.segmentIntersections).toBe(0);
+  expect(qa.segmentIntersections).toBe(0);
 });
 test('shared simplification retains exact exterior and a single common internal boundary',()=>{
   const boundary=Array.from({length:21},(_,i)=>[1+(i%2)*.002,i/20]);

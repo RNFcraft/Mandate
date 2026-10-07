@@ -1,5 +1,11 @@
 # Map v2: first gameplay-province generation pass
 
+**Superseded.** The atomic-union geometry below was rejected visually. The
+current Map v2 default uses [independent geometry](map-v2-independent-preview.md)
+with the [~5,000-province tuning pass](map-v2-geography-tuning.md).
+The old generator remains a debug implementation and now writes to
+`client/data/map-v2-legacy` by default.
+
 This is a separate, tunable preview. Atomic IDs, scenario ownership, saves,
 population and the published geography remain authoritative and unchanged.
 `preview:*` IDs are temporary and can change with inputs or configuration.

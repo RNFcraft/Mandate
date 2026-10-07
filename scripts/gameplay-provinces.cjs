@@ -1,4 +1,5 @@
-// Map v2 preview only. Never writes scenario authority or the atomic substrate.
+// SUPERSEDED: atomic-union experiment, retained for legacy/debug tests only.
+// Player-facing geometry now comes from generate-gameplay-map.cjs.
 const fs = require('node:fs/promises');
 const crypto = require('node:crypto');
 const {feature, mergeArcs} = require('topojson-client');
@@ -87,11 +88,12 @@ function simplifyShared(topology,config){
   const geometries=topology.objects.provinces.geometries;
   geometries.forEach(g=>visit(g.arcs,n=>owners[n].add(g.id)));
   const before=arcs.getPointCount(),baseline=api.findSegmentIntersections(arcs).length;
-  if(config.internalRetain===1)return {verticesBefore:before,verticesAfter:before,segmentIntersections:baseline,applied:false};
+  if(config.internalRetain===1&&!config.simplificationTolerance)return {verticesBefore:before,verticesAfter:before,segmentIntersections:baseline,applied:false};
   api.simplifyPaths(arcs,{method:'weighted_visvalingam',spherical:true});
   const data=arcs.getVertexData();let offset=0;
   data.nn.forEach((n,i)=>{if(owners[i].size===1)for(let j=offset;j<offset+n;j++)data.zz[j]=Infinity;offset+=n;});
-  arcs.setRetainedPct(config.internalRetain);
+  if(config.simplificationTolerance)arcs.setRetainedInterval(config.simplificationTolerance);
+  else arcs.setRetainedPct(config.internalRetain);
   const shapes=geometries.flatMap(g=>g.type==='Polygon'?[g.arcs]:g.arcs).map(rings=>rings.map(r=>mapshaper.geom.getPlanarPathArea(r,arcs)<0?r.slice().reverse().map(n=>~n):r));
   api.keepEveryPolygon(arcs,[{geometry_type:'polygon',shapes}]);
   api.postSimplifyRepair(arcs);
@@ -133,7 +135,7 @@ function produce(topology,input,result,config=DEFAULTS){
 }
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 async function main(){
-  const args=process.argv.slice(2);if(args.includes('--help')){console.log('node scripts/gameplay-provinces.cjs [--target 12000] [--config config.json] [--out directory] [--qa]\nOutputs client/data/map-v2/{mapping,provinces,atoms,maritime,qa,provinces.topo}.json. --qa regenerates and validates the same inputs.');return;}
+  const args=process.argv.slice(2);if(args.includes('--help')){console.log('SUPERSEDED atomic-union debug generator. Use scripts/generate-gameplay-map.cjs for Map v2.\nnode scripts/gameplay-provinces.cjs [--target 12000] [--config config.json] [--out directory] [--qa]\nDefault output: client/data/map-v2-legacy. --qa regenerates legacy data.');return;}
   const value=name=>args.includes(name)?args[args.indexOf(name)+1]:undefined;
   const config={...DEFAULTS,...(value('--config')?JSON.parse(await fs.readFile(value('--config'),'utf8')):{})};if(value('--target'))config.target=Number(value('--target'));if(!Number.isInteger(config.target)||config.target<1)throw new Error('target must be a positive integer');
   if(!(config.internalRetain>0&&config.internalRetain<=1))throw new Error('internalRetain must be in (0, 1]');
@@ -144,7 +146,7 @@ async function main(){
   const certificate=JSON.parse(await fs.readFile('data/processed/canonical/invariants.json','utf8'));const verified=certificate.topologySha256===sha(bytes);
   out.qa.overlapErrors=verified&&out.qa.simplification.segmentIntersections===0?certificate.overlapFaceCount:null;out.qa.overlapValidation={method:'SHA256-matched canonical independent intersection + mosaic certificate; exact shared-arc union, fixed exterior, shared simplification with polygon preservation and independent segment intersection scan',verified};
   out.qa.provenance={source,population:pop,topologySha256:sha(bytes),populationSha256:sha(pbytes),mappingSha256:sha(JSON.stringify(out.mapping)),config};
-  const dir=value('--out')||'client/data/map-v2';await fs.mkdir(dir,{recursive:true});
+  const dir=value('--out')||'client/data/map-v2-legacy';await fs.mkdir(dir,{recursive:true});
   for(const [name,data]of Object.entries({mapping:out.mapping,provinces:out.provinces,qa:out.qa,maritime:result.maritime,atoms:input.atoms.map(({geometry,weight,mass,...a})=>({...a,adjacency:a.adjacency.map(e=>({id:input.atoms[e.id].id,borderKm:e.borderKm}))})), 'provinces.topo':packTopology(out.topology)}))await fs.writeFile(`${dir}/${name}.json`,JSON.stringify(data));
   console.log(JSON.stringify({provinces:out.qa.provinceCount,atoms:out.qa.atomCount,unassigned:out.qa.unassignedAtoms,duplicates:out.qa.duplicateAtoms,disconnected:out.qa.disconnectedMainlandProvinces.length,invalid:out.qa.invalidPolygons.length,sharedBorderErrors:out.qa.sharedBorderErrors.length,overlapErrors:out.qa.overlapErrors,tinyIslands:out.qa.standaloneTinyIslandProvinces.length,repairs:out.qa.repairs}));
   if(out.qa.unassignedAtoms||out.qa.duplicateAtoms||out.qa.disconnectedMainlandProvinces.length||out.qa.invalidPolygons.length||out.qa.simplifiedInvalidPolygons.length||out.qa.sharedBorderErrors.length||!verified||out.qa.overlapErrors!==0)process.exitCode=1;
