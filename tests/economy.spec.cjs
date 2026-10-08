@@ -5,6 +5,66 @@ const {makeSave,validateSave}=require('../shared/save.cjs');
 const {validateEconomyScenario,validateEconomyState,initializeEconomy,prepareEconomyMonth}=require('../shared/economy.cjs');
 const fixture=require('./fixtures/economy.cjs');
 const clone=structuredClone;
+// Compile a test-only reference using the previous global clearing scan.
+async function clearingImplementation(legacy){
+  const filename=path.resolve('shared/economy.cjs'),Module=require('node:module');
+  let source=await fs.readFile(filename,'utf8');
+  const indexed='const bucket=offersByMarket.get(order.marketId)?.get(order.goodId);if(!bucket)continue;';
+  const start=source.indexOf(indexed),end=source.indexOf('      const quantity=Math.min(remaining,o.remaining,o.stock.quantity);',start);
+  expect(start).toBeGreaterThan(0);expect(end).toBeGreaterThan(start);
+  if(legacy)source=source.slice(0,start)+'for(const o of offers){ visits++; if(o.marketId!==order.marketId||o.goodId!==order.goodId||o.seller===order.buyer||!remaining)continue;\n'+source.slice(end);
+  else source=source.replace('const o=bucket.offers[offerIndex];','const o=bucket.offers[offerIndex]; visits++;');
+  const compiled=new Module(filename,module);compiled.filename=filename;compiled.paths=module.paths;
+  compiled._compile('let visits=0;\n'+source+'\nmodule.exports.visits=()=>visits;',filename);return compiled.exports;
+}
+
+test('indexed clearing matches the old scan across markets, goods, self trades and exhausted sellers',async()=>{
+  const input=processing(),e=input.economy,hierarchy=clone(fixture.hierarchy);
+  e.rules.foodPerPersonDenominator=20;
+  e.recipes.push({id:'loop',inputs:[{goodId:'food',quantity:1}],output:{goodId:'food',quantity:1},workersPerBatch:1},{id:'grain-farm',inputs:[],output:{goodId:'grain',quantity:2},workersPerBatch:1});
+  e.markets.push({...clone(e.markets[0]),id:'market-second',provinceIds:['province:00002']});
+  e.households.push({...clone(e.households[0]),id:'household-second',provinceId:'province:00002'});
+  for(let market=2;market<12;market++){
+    const provinceId='province:'+String(market+1).padStart(5,'0');
+    hierarchy.territories.push({...clone(hierarchy.territories[0]),id:provinceId});
+    e.markets.push({...clone(e.markets[0]),id:'market-'+market,provinceIds:[provinceId]});
+    e.households.push({...clone(e.households[0]),id:'household-'+market,provinceId});
+  }
+  input.population.cohorts=e.households.map((h,i)=>({...clone(input.population.cohorts[0]),id:'pop-'+i,territoryId:h.provinceId}));
+  e.enterprises=[];
+  for(let market=0;market<12;market++)for(let i=0;i<24;i++){
+    const recipeId=i%3===0?'loop':i%3===1?'farm':'grain-farm';
+    e.enterprises.push({id:`enterprise-${market}-${String(i).padStart(2,'0')}`,provinceId:e.households[market].provinceId,ownerRef:{kind:'household',id:e.households[market].id},recipeId,capacityBatches:10,wagePerWorkerMinor:0,cashMinor:1000,inventories:[{goodId:'food',quantity:i%4,bookValueMinor:(i%4)*7},{goodId:'grain',quantity:i%5,bookValueMinor:(i%5)*3}]});
+  }
+  const indexed=await clearingImplementation(false),legacy=await clearingImplementation(true);
+  let state=initializeEconomy(e,hierarchy);
+  for(let m=1;m<=12;m++){
+    const period={year:1700,month:m},expected=legacy.prepareEconomyMonth(state,input.population,hierarchy,period);
+    const actual=indexed.prepareEconomyMonth(state,input.population,hierarchy,period);expect(actual).toEqual(expected);
+    const permuted=clone(state);for(const key of ['goods','recipes','markets','households','enterprises'])permuted[key].reverse();
+    for(const row of permuted.enterprises)row.inventories.reverse();
+    expect(indexed.prepareEconomyMonth(permuted,input.population,hierarchy,period)).toEqual(expected);state=actual.state;
+  }
+  expect(indexed.visits()).toBeLessThan(legacy.visits());
+  expect(state.stats.monthsProcessed).toBe(12);
+});
+
+test('economy saves require population and synchronized monthly counters before installation',()=>{
+  const s=engine();s.step(365);const valid=s.snapshot();
+  expect(valid.systems.population.stats.monthsProcessed).toBe(12);expect(valid.systems.economy.stats.monthsProcessed).toBe(12);
+  expect(()=>validateSave(makeSave(valid),fixture.hierarchy)).not.toThrow();
+  const target=engine();target.load(valid);const before=target.serialize();
+  const missing=clone(valid);delete missing.systems.population;
+  const mismatch=clone(valid);mismatch.systems.population.stats.monthsProcessed=11;
+  const clockMismatch=clone(valid);clockMismatch.systems.economy.stats.monthsProcessed=11;clockMismatch.systems.population.stats.monthsProcessed=11;
+  const invalidPopulation=clone(valid);invalidPopulation.systems.population.stats.monthsProcessed=-1;
+  for(const bad of [missing,mismatch,clockMismatch,invalidPopulation]){
+    expect(()=>validateGameState(bad,fixture.hierarchy)).toThrow();expect(()=>validateSave(makeSave(bad),fixture.hierarchy)).toThrow();
+    expect(()=>target.load(bad)).toThrow();expect(target.serialize()).toBe(before);
+  }
+  const old=clone(valid);delete old.systems.economy;delete old.systems.population;
+  expect(()=>target.load(old)).not.toThrow();expect(target.economySummary()).toBeNull();
+});
 const engine=(scenario=fixture.scenario)=>new Simulation(clone(scenario),fixture.hierarchy,{seed:123});
 const month=s=>{const next=s.clock.date.month===12?{year:s.clock.date.year+1,month:1,day:1}:{year:s.clock.date.year,month:s.clock.date.month+1,day:1};const {ordinal}=require('../shared/simulation.cjs');s.step(ordinal(next)-ordinal(s.clock.date));return s.economySummary();};
 function processing(){

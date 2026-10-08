@@ -45,9 +45,11 @@ function validateGameState(state,hierarchy){
   if(state.systems.tickProbe.ticks!==state.clock.tick||!uint(state.systems.tickProbe.lastRandom))throw new Error('Invalid tick probe');
   if(Object.hasOwn(state.systems,'population'))population.validatePopulationState(state.systems.population,hierarchy);
   if(Object.hasOwn(state.systems,'economy')){
+    if(!Object.hasOwn(state.systems,'population'))throw Error('Economy: population is required');
     economy.validateEconomyState(state.systems.economy,hierarchy);
     const stats=state.systems.economy.stats,months=(state.clock.date.year-state.game.scenario.year)*12+state.clock.date.month-1;
     if(stats.monthsProcessed!==months)throw Error('Economy: inconsistent calendar');
+    if(state.systems.population.stats.monthsProcessed!==stats.monthsProcessed)throw Error('Economy: inconsistent population calendar');
     if(months){const month=state.clock.date.month===1?12:state.clock.date.month-1,year=state.clock.date.year-(state.clock.date.month===1?1:0);if(stats.lastCompletedPeriod.year!==year||stats.lastCompletedPeriod.month!==month)throw Error('Economy: inconsistent completed period');}
   }
   if(Object.hasOwn(state.systems,'polityRelations'))politicalGeography.validateRelations(state.systems.polityRelations,state.countries.map(c=>({id:c.id,name:c.name,shortName:c.shortName,type:c.polityType||c.governmentType,color:c.color})));

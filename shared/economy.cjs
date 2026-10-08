@@ -140,12 +140,21 @@ function prepareEconomyMonth(state,population,hierarchy,period){
     for(const input of r.inputs){const g=m.goods.find(g=>g.goodId===input.goodId),target=mul(e.capacityBatches,input.quantity),quantity=Math.min(Math.max(0,target-stocks.get(e.id).get(input.goodId).quantity),divide(budget,g.priceMinor));budget=subtract(budget,mul(quantity,g.priceMinor));g.stats.inputDemand=add(g.stats.inputDemand,quantity);orders.push({marketId:m.id,goodId:input.goodId,kind:1,buyer:e,quantity});}
   }
   const offers=next.enterprises.map(e=>({seller:e,marketId:marketAt.get(e.provinceId).id,goodId:recipes.get(e.recipeId).output.goodId,stock:stocks.get(e.id).get(recipes.get(e.recipeId).output.goodId),remaining:stocks.get(e.id).get(recipes.get(e.recipeId).output.goodId).quantity}));
-  for(const o of offers){const g=marketAt.get(o.seller.provinceId).goods.find(g=>g.goodId===o.goodId);g.stats.supply=add(g.stats.supply,o.stock.quantity);}
+  const offersByMarket=new Map();
+  for(const o of offers){
+    let goods=offersByMarket.get(o.marketId);if(!goods)offersByMarket.set(o.marketId,goods=new Map());
+    let bucket=goods.get(o.goodId);if(!bucket)goods.set(o.goodId,bucket={offers:[],start:0});
+    bucket.offers.push(o);
+    const g=marketAt.get(o.seller.provinceId).goods.find(g=>g.goodId===o.goodId);g.stats.supply=add(g.stats.supply,o.stock.quantity);
+  }
   orders.sort((a,b)=>compare(a.marketId,b.marketId)||compare(a.goodId,b.goodId)||a.kind-b.kind||compare(a.buyer.id,b.buyer.id));
   for(const order of orders){
     const market=marketAt.get(order.buyer.provinceId),g=market.goods.find(g=>g.goodId===order.goodId);let remaining=order.quantity;
-    for(const o of offers){
-      if(o.marketId!==order.marketId||o.goodId!==order.goodId||o.seller===order.buyer||!remaining)continue;
+    const bucket=offersByMarket.get(order.marketId)?.get(order.goodId);if(!bucket)continue;
+    while(bucket.start<bucket.offers.length&&!bucket.offers[bucket.start].remaining)bucket.start++;
+    for(let offerIndex=bucket.start;offerIndex<bucket.offers.length&&remaining;offerIndex++){
+      const o=bucket.offers[offerIndex];
+      if(o.seller===order.buyer)continue;
       const quantity=Math.min(remaining,o.remaining,o.stock.quantity);if(!quantity)continue;
       const amount=mul(quantity,g.priceMinor),book=take(o.stock,quantity);transfer(order.buyer,o.seller,amount);remaining-=quantity;o.remaining-=quantity;g.stats.purchased=add(g.stats.purchased,quantity);o.seller.stats.revenue=add(o.seller.stats.revenue,amount);o.seller.stats.cogs=add(o.seller.stats.cogs,book);
       if(order.kind===0){const h=order.buyer;h.stats.purchased=add(h.stats.purchased,quantity);h.stats.spending=add(h.stats.spending,amount);h.stats.unmetNeed-=quantity;h.stats.rationedDemand-=quantity;const b=balance.get(order.goodId);b.householdConsumed=add(b.householdConsumed,quantity);}
