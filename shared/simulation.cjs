@@ -1,6 +1,7 @@
 // Portable deterministic kernel. No DOM, rendering, filesystem or wall clock.
 const {validateScenario,migrateLegacy}=require('./scenario.cjs');
 const population=require('./population.cjs');
+const economy=require('./economy.cjs');
 const politicalGeography=require('./political-geography.cjs');
 const SPEEDS=Object.freeze([1,5,20,100]);
 const STATE_VERSION=2;
@@ -43,6 +44,12 @@ function validateGameState(state,hierarchy){
   fields(state.systems.tickProbe,['ticks','lastRandom']);
   if(state.systems.tickProbe.ticks!==state.clock.tick||!uint(state.systems.tickProbe.lastRandom))throw new Error('Invalid tick probe');
   if(Object.hasOwn(state.systems,'population'))population.validatePopulationState(state.systems.population,hierarchy);
+  if(Object.hasOwn(state.systems,'economy')){
+    economy.validateEconomyState(state.systems.economy,hierarchy);
+    const stats=state.systems.economy.stats,months=(state.clock.date.year-state.game.scenario.year)*12+state.clock.date.month-1;
+    if(stats.monthsProcessed!==months)throw Error('Economy: inconsistent calendar');
+    if(months){const month=state.clock.date.month===1?12:state.clock.date.month-1,year=state.clock.date.year-(state.clock.date.month===1?1:0);if(stats.lastCompletedPeriod.year!==year||stats.lastCompletedPeriod.month!==month)throw Error('Economy: inconsistent completed period');}
+  }
   if(Object.hasOwn(state.systems,'polityRelations'))politicalGeography.validateRelations(state.systems.polityRelations,state.countries.map(c=>({id:c.id,name:c.name,shortName:c.shortName,type:c.polityType||c.governmentType,color:c.color})));
   return state;
 }
@@ -51,6 +58,7 @@ function initializeGameState(scenario,hierarchy,seed=1){
   const data=migrateLegacy(politicalGeography.initializePoliticalScenario(scenario,hierarchy),hierarchy);
   const state={version:STATE_VERSION,geography:hierarchy.id,game:{scenario:structuredClone(data.scenario)},clock:{tick:0,date:{year:data.scenario.year,month:1,day:1},paused:true,speed:1},rng:{seed,state:seed||0x6d2b79f5},countries:structuredClone(data.countries),ownership:structuredClone(data.ownership),controllers:structuredClone(data.controllers||{}),systems:{tickProbe:{ticks:0,lastRandom:0}}};
   state.systems.population=population.initializePopulation(scenario.population,hierarchy);
+  if(Object.hasOwn(scenario,'economy'))state.systems.economy=economy.initializeEconomy(scenario.economy,hierarchy);
   if(scenario.politicalGeography?.status==='published')state.systems.polityRelations={version:1,relations:politicalGeography.validateRelations(scenario.polityRelations,scenario.polities)};
   validateGameState(state,hierarchy);return state;
 }
@@ -60,7 +68,6 @@ function readOnlyMap(get){
 function freeze(value){if(value&&typeof value==='object'){for(const child of Object.values(value))freeze(child);Object.freeze(value);}return value;}
 // Trusted system order is explicit. This probe has no gameplay consequences.
 const DAILY_SYSTEMS=Object.freeze([state=>{state.rng.state=nextRandom(state.rng.state);state.systems.tickProbe.ticks++;state.systems.tickProbe.lastRandom=state.rng.state;}]);
-const MONTHLY_SYSTEMS=Object.freeze([state=>population.advancePopulationMonth(state.systems.population)]);
 class Simulation {
   #state;#hierarchy;#owners;#countries;#listeners=new Set();
   constructor(scenario,hierarchy,{seed=1}={}){
@@ -84,9 +91,10 @@ class Simulation {
   snapshot(){return structuredClone(this.#state);}
   serialize(){return JSON.stringify(this.#state);}
   populationSummary(territoryId){return population.summarizePopulation(this.#state.systems.population,territoryId);}
+  economySummary(){return economy.summarizeEconomy(this.#state.systems.economy);}
   territoryPoliticalState(territoryId){return politicalGeography.territoryPoliticalState(this.#state,territoryId);}
   load(state){
-    validateGameState(state,this.#hierarchy);const next=structuredClone(state);this.#install(next);
+    validateGameState(state,this.#hierarchy);const next=structuredClone(state);if(next.systems.economy)economy.canonicalize(next.systems.economy);this.#install(next);
     this.#emit('stateChanged',{kind:'loaded',ownershipIds:null});this.#emit('gameLoaded',{clock:this.clock});
   }
   start(){return this.submit({type:'ResumeSimulation'});}
@@ -96,11 +104,20 @@ class Simulation {
     if(!Number.isInteger(count)||count<1||count>1000||ordinal(this.#state.clock.date)+count>ordinal({year:9999,month:12,day:31}))throw new Error('Invalid step count or calendar limit');
     // Only small clock/system fields change per tick; never clone/serialize the world.
     for(let i=0;i<count;i++){
-      const date=nextDay(this.#state.clock.date);let update;
+      const date=nextDay(this.#state.clock.date);let update,economyUpdate;
       // Monthly work is staged before committing this day's clock/RNG.
-      if(date.day===1)for(const system of MONTHLY_SYSTEMS)update=system(this.#state);
+      if(date.day===1){
+        if(this.#state.systems.economy){
+          const preparedEconomy=economy.prepareEconomyMonth(this.#state.systems.economy,this.#state.systems.population,this.#hierarchy,{year:this.#state.clock.date.year,month:this.#state.clock.date.month});
+          const preparedPopulation=population.preparePopulationMonth(this.#state.systems.population,this.#hierarchy);
+          // Both preparations succeed before any authority, clock, RNG or event changes.
+          if(preparedPopulation){this.#state.systems.population=preparedPopulation.state;update=preparedPopulation.update;}
+          this.#state.systems.economy=preparedEconomy.state;economyUpdate=preparedEconomy.update;
+        }else update=population.advancePopulationMonth(this.#state.systems.population);
+      }
       for(const system of DAILY_SYSTEMS)system(this.#state);this.#state.clock.tick++;this.#state.clock.date=date;
       if(update)this.#emit('populationUpdated',{date:Object.freeze({...date}),...update});
+      if(economyUpdate)this.#emit('economyUpdated',{date:Object.freeze({...date}),...economyUpdate});
     }
     this.#emit('timeAdvanced',{steps:count,clock:this.clock});this.#emit('stateChanged',{kind:'time',ownershipIds:[]});
   }

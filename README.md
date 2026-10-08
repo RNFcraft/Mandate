@@ -11,7 +11,7 @@ npm start
 Обычный сценарий 1700: `/?scenario=1700`; по умолчанию `modern`.
 Сборка создаёт шаблоны только при отсутствии; сохранённые сценарии не сбрасываются.
 `server.js` с llama.cpp для карты не запускается и не изменён.
-Map v2 заморожена: 5 001 gameplay provinces, `mandate-provinces-v1`. Обычный 1700 использует опубликованный [Mandate World](docs/mandate-world-1700.md): 167 polities и province-based ownership. Исторические границы упрощены; states/regions и экономика не реализованы. [Runtime, freeze и миграция](docs/map-v2-runtime.md).
+Map v2 заморожена: 5 001 gameplay provinces, `mandate-provinces-v1`. Обычный 1700 использует опубликованный [Mandate World](docs/mandate-world-1700.md): 167 polities и province-based ownership. Исторические границы упрощены; states/regions не реализованы. Economy Core v1 работает на synthetic fixtures; мировой economic dataset пока отсутствует. [Runtime, freeze и миграция](docs/map-v2-runtime.md).
 
 ## Canonical atomic mesh: offline source / explicit debug
 
@@ -118,7 +118,7 @@ GameState v2 содержит `game.scenario` (метаданные происх
 нулевой seed получает фиксированное ненулевое начальное состояние.
 System pipeline включает детерминированные ticks и monthly population updates. `tickProbe`:
 счётчик ticks и последний PRNG sample, без игровых последствий.
-`systems` допускает дальнейшие JSON-расширения; экономика и states/regions не реализованы.
+`systems` допускает дальнейшие JSON-расширения; optional Economy Core v1 хранится в `systems.economy`. States/regions не реализованы.
 
 API `Simulation`: `start`, `pause`, `setSpeed`, `step`, `submit`, `subscribe`,
 `snapshot`, `serialize`, `load`. Команды проверяются до применения; отказ не
@@ -352,3 +352,64 @@ commands and baseline-preservation workflow are documented in
 Political Geography 1700 v1 foundation, historical source requirements,
 preview/publication commands and runtime authority are documented in
 [docs/political-geography.md](docs/political-geography.md).
+
+## Economy Core v1
+
+Optional `economy.json` is an independent authored scenario asset, loaded with
+`/api/scenarios/<id>?population=1`. The DEV editor preserves its exact bytes.
+Production `1700` and `modern` have no synthetic economy installed. Runtime
+authority is `GameState.systems.economy` (schema v1); GameState/save v2 and
+province scenario v4 remain unchanged. Saves contain definitions, coverage,
+balances, owned inventories, rounding remainders and last-month statistics;
+load never reconstructs economy from the current scenario asset.
+
+`shared/economy.cjs` implements local production, wages, household food demand,
+funded purchases, future input orders, integer prices, COGS and profit payout.
+The synthetic fixture uses food in integer kg and integer minor accounting
+units per kg; its accounting unit is not a world currency and its input-free
+farm is not the final agricultural/resource model. Recipes can consume real
+owned material inputs. Labor is population times a participation ratio, shared
+by enterprises in the same province; no demographic ages or skills are inferred.
+
+Markets have independent IDs and explicit province coverage. Each covered
+province has one aggregate household account; uncovered provinces create no
+markets. Derived lookups are not serialized. Enterprises retain physical stocks;
+markets record offers and results, not duplicate warehouses. Multi-province
+coverage shares clearing and prices, with no internal transport costs modeled.
+Political ownership does not choose or alter market coverage.
+
+On a month boundary the closing month uses opening population and prices:
+labor/capacity/input/cash limits -> wages and production -> household needs
+and affordable demand -> input orders for the next month -> clearing ->
+COGS/profit -> next-month prices -> owner payout -> prepare demographics ->
+validate both -> atomic commit -> separate population/economy events. Failed
+preparation leaves that day's population, economy, clock, RNG and events unchanged.
+The population-only path retains its existing allocation and event behavior.
+
+Clearing priority is ASCII market/good ID, households before enterprises,
+then ASCII buyer/seller ID. Budgets are fixed before clearing; current sale
+revenue does not fund additional same-month orders. Only output stocks are
+offered, self-trades are excluded, and newly bought inputs do not restart
+production. Prices respond to affordable orders, not unfunded essential need;
+statistics distinguish unaffordability from rationed demand. Price adjustment
+uses basis points, a signed fractional remainder and configured bounds.
+
+Inputs transfer book value into outputs along with wages. Sold inventory is
+charged proportionally to COGS; unsold inventory keeps its remaining cost.
+Profit is revenue minus COGS, without charging wages or input purchases twice.
+Payout is bounded by positive profit, configured payout Bps and cash above one
+full-capacity payroll reserve; owners are household accounts within the market.
+Reserve protects payouts, not a credit facility or bankruptcy mechanism.
+Cash/quantities/book values are safe integers with exact BigInt intermediates;
+consumption fractions carry remainders. No authoritative floating-point values,
+wall clock, extra RNG calls or external accounting authority are used.
+
+`tests/fixtures/economy.cjs` supplies the small synthetic economy.
+`tests/economy.spec.cjs` checks repeated cycles, cash/goods conservation,
+owned inputs, capacity/labor/budget constraints, inventory accounting, local
+prices, remainders, calendar boundaries, corruption/overflow atomicity,
+save continuation, optional API loading and a normal browser smoke.
+
+Resources, real currencies/FX, trade/logistics, investment, credit, taxation,
+famine, detailed consumption baskets, recycling and economy UI remain outside
+this implementation. Weekly/quarterly/yearly systems have not been stubbed in.

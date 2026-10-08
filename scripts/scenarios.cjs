@@ -3,6 +3,7 @@ const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 const { TAG, validateScenario, migrateLegacy } = require('../shared/scenario.cjs');
 const {emptyPopulation,validatePopulationScenario}=require('../shared/population.cjs');
+const {validateEconomyScenario}=require('../shared/economy.cjs');
 const {initializePoliticalScenario}=require('../shared/political-geography.cjs');
 const {parseStrictJson}=require('./strict-json.cjs');
 const root = path.resolve(__dirname, '../scenarios');
@@ -55,7 +56,10 @@ async function handle(req, res, pathname) {
     try{population=await json(path.join(root,id,'population.json'));}
     catch(error){if(error.code==='ENOENT')population=emptyPopulation();else if(error instanceof SyntaxError){reply(res,400,{error:'Population: malformed population.json'});return;}else throw error;}
     try{validatePopulationScenario(population,h);}catch(error){reply(res,400,{error:error.message});return;}
-    reply(res,200,{...data,population});return;
+    let economy;
+    try{economy=parseStrictJson(await fs.readFile(path.join(root,id,'economy.json'),'utf8'));validateEconomyScenario(economy,h);}
+    catch(error){if(error.code!=='ENOENT'){reply(res,400,{error:error instanceof SyntaxError?'Economy: malformed economy.json':error.message});return;}}
+    reply(res,200,{...data,population,...(economy!==undefined?{economy}:{})});return;
   }
   if (req.method !== 'PUT') { reply(res, 405, { error: 'Метод не поддерживается' }); return; }
   if (process.env.MANDATE_DEV_EDITOR === '0') { reply(res, 403, { error: 'DEV-сохранение отключено' }); return; }
@@ -94,7 +98,7 @@ async function handle(req, res, pathname) {
       }
     }catch(error){if(error.code!=='ENOENT')throw error;}
     // Population is an independent authored asset, never supplied by the editor.
-    for(const asset of ['population.json','population.meta.json','population-composition.json','polities.json','polity-relations.json','political-geography.json','political-geography-overrides.json','political-geography-authoring.json'])try{await fs.copyFile(path.join(folder,asset),path.join(stage,asset));}catch(error){if(error.code!=='ENOENT')throw error;}
+    for(const asset of ['economy.json','population.json','population.meta.json','population-composition.json','polities.json','polity-relations.json','political-geography.json','political-geography-overrides.json','political-geography-authoring.json'])try{await fs.copyFile(path.join(folder,asset),path.join(stage,asset));}catch(error){if(error.code!=='ENOENT')throw error;}
     for (const [name, value] of Object.entries(data)) if (['scenario', 'countries', 'ownership', 'controllers'].includes(name)) await fs.writeFile(path.join(stage, `${name}.json`), JSON.stringify(value, null, 2));
     try { await fs.rename(folder, backup); backedUp = true; } catch (error) { if (error.code !== 'ENOENT') throw error; }
     try { await fs.rename(stage, folder); published = true; } catch (error) { if (backedUp) await fs.rename(backup, folder); throw error; }

@@ -45,7 +45,7 @@ function initializePopulation(data=emptyPopulation(),hierarchy){
   validatePopulationScenario(data,hierarchy);
   return {...structuredClone(data),cohorts:data.cohorts.map(c=>({...c,birthRateBps:c.birthRateBps??0,deathRateBps:c.deathRateBps??0,birthRemainder:0,deathRemainder:0})),stats:{monthsProcessed:0,births:0,deaths:0}};
 }
-function advancePopulationMonth(state){
+function preparePopulationMonth(state,hierarchy){
   if(!state)return null;
   // Stage numeric results only; overflow cannot partially modify cohorts or stats.
   const changes=[];let births=0n,deaths=0n,total=0n;
@@ -55,8 +55,20 @@ function advancePopulationMonth(state){
     changes.push({count,birthRemainder:Number(b%120000n),deathRemainder:Number(d%120000n)});
   }
   number(total);const stats={monthsProcessed:number(BigInt(state.stats.monthsProcessed)+1n),births:number(BigInt(state.stats.births)+births),deaths:number(BigInt(state.stats.deaths)+deaths)};
-  for(let i=0;i<changes.length;i++)Object.assign(state.cohorts[i],changes[i]);state.stats=stats;
-  return {births:number(births),deaths:number(deaths),netChange:Number(births-deaths)};
+  const prepared={changes,stats,update:{births:number(births),deaths:number(deaths),netChange:Number(births-deaths)}};
+  if(hierarchy){
+    prepared.state={...state,cohorts:state.cohorts.map((c,i)=>({...c,...changes[i]})),stats};
+    validatePopulationState(prepared.state,hierarchy);
+  }
+  return prepared;
+}
+function commitPopulationMonth(state,prepared){
+  if(!prepared)return null;
+  for(let i=0;i<prepared.changes.length;i++)Object.assign(state.cohorts[i],prepared.changes[i]);state.stats=prepared.stats;
+  return prepared.update;
+}
+function advancePopulationMonth(state){
+  return commitPopulationMonth(state,preparePopulationMonth(state));
 }
 function summarizePopulation(state,territoryId){
   const result={total:0,urban:0,rural:0,literacyBps:0,byCulture:{},byReligion:{},byStratum:{}};let weighted=0n,unknown=false;
@@ -69,4 +81,4 @@ function summarizePopulation(state,territoryId){
   }
   if(result.total)result.literacyBps=unknown?null:Number(weighted/BigInt(result.total));return result;
 }
-module.exports={DENOMINATOR,emptyPopulation,validatePopulationScenario,initializePopulation,validatePopulationState,advancePopulationMonth,summarizePopulation};
+module.exports={DENOMINATOR,emptyPopulation,validatePopulationScenario,initializePopulation,validatePopulationState,preparePopulationMonth,commitPopulationMonth,advancePopulationMonth,summarizePopulation};
