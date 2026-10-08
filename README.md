@@ -413,3 +413,30 @@ save continuation, optional API loading and a normal browser smoke.
 Resources, real currencies/FX, trade/logistics, investment, credit, taxation,
 famine, detailed consumption baskets, recycling and economy UI remain outside
 this implementation. Weekly/quarterly/yearly systems have not been stubbed in.
+
+### Economy Visuals v1 demo
+
+Run `node scripts/economy-visual-demo.cjs`, then `npm start`, and open
+`http://127.0.0.1:3000/?scenario=economy-visual-demo&economyDemo=1`.
+The command creates an ignored, separate synthetic scenario from the economy
+test fixture. It does not modify 1700/modern or the frozen map. Its named visual
+types all use explicitly synthetic input-free food recipes; these are not
+implementations of mining, forestry or manufacturing. No houses or historical
+settlements are inferred from aggregate household accounts.
+
+The Canvas layer shows activity markers at zoom 3–12 and sprites at zoom 12–64;
+below zoom 3 it draws nothing. Click a sprite or a group marker for actual
+EconomyState statistics; grouped records have individual selection buttons.
+Use **Economic objects: Show / Hide** to toggle presentation without changing
+the simulation. Run one month or save/load with the existing game controls.
+Presentation mappings live separately in `economy-visuals.json`, never GameState.
+Unknown types and failed image loads use neutral markers.
+
+Placement uses deterministic interior scanlines of the projected province path,
+including holes and islands, then spaced interior anchors. Crowded objects are
+grouped on screen rather than moved outside their province. Images are cached;
+viewport and hit-test grids bound rendering, capped at 120 visible items.
+Very small provinces or dense groups may therefore remain markers at close zoom.
+Existing sprite originals are served directly from `sprites/`; the three
+JPEG house sources have `.jpg` public URLs. Opaque source backgrounds remain
+opaque; no source artwork or pixel proportions are altered.

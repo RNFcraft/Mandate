@@ -1,0 +1,6 @@
+.economy-control,#economy-info{position:absolute;right:12px;z-index:3;padding:8px 10px;border:1px solid #61747a;background:#203640ed;color:#e4e6df;font:12px/1.4 system-ui,sans-serif}
+.economy-control{top:12px}#economy-info{top:60px;width:300px;max-width:calc(100vw - 48px);max-height:calc(100vh - 170px);overflow:auto}
+.economy-control[hidden],#economy-info[hidden]{display:none}
+.economy-control button,#economy-info button{font:inherit;color:inherit;background:#304953;border:1px solid #61747a;padding:4px 6px;cursor:pointer}
+#economy-info>button{float:right}#economy-info dl{display:grid;grid-template-columns:1fr 1.4fr;gap:6px;margin:12px 0 0}#economy-info dd{margin:0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.economy-group{display:flex;flex-wrap:wrap;gap:4px;margin-top:12px}

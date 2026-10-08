@@ -135,7 +135,7 @@ export class WorldMap {
     canvas.addEventListener('pointerup',e=>{
       if(!this.drag || e.pointerId!==this.drag.id)return;
       if(this.drag.painting){this.editorGesture('end');this.drag=null;canvas.releasePointerCapture(e.pointerId);this.invalidate();return;}
-      if(!this.drag.moved){this.selectedId=this.hit(e.clientX,e.clientY);canvas.dispatchEvent(new CustomEvent('regionselect',{detail:{regionId:this.selectedId}}));}
+      if(!this.drag.moved&&!this.objectSelect?.(e.clientX,e.clientY)){this.selectedId=this.hit(e.clientX,e.clientY);canvas.dispatchEvent(new CustomEvent('regionselect',{detail:{regionId:this.selectedId}}));}
       this.drag=null;canvas.classList.remove('dragging');canvas.releasePointerCapture(e.pointerId);
       this.hoveredId=this.hit(e.clientX,e.clientY);this.invalidate();
     });

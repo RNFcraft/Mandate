@@ -1,0 +1,17 @@
+{
+  "sprites": {
+    "farm": "/sprites/farm_sprite.png",
+    "mill": "/sprites/mill_sprite.png",
+    "manufacture": "/sprites/manifacture_sprite.png",
+    "mine": "/sprites/mine_sprite.png",
+    "wood": "/sprites/wood_sprite.png",
+    "market": "/sprites/market_sprite.png"
+  },
+  "recipes": { "farm": "farm" },
+  "settlements": {
+    "house": "/sprites/Home1700s.jpg",
+    "houseAlternative": "/sprites/home1700s2.jpg",
+    "houseAlternative2": "/sprites/home1700s3.jpg",
+    "wealthyHouse": "/sprites/rish-house.png"
+  }
+}
