@@ -11,7 +11,7 @@ npm start
 Обычный сценарий 1700: `/?scenario=1700`; по умолчанию `modern`.
 Сборка создаёт шаблоны только при отсутствии; сохранённые сценарии не сбрасываются.
 `server.js` с llama.cpp для карты не запускается и не изменён.
-Map v2 заморожена: 5 001 gameplay provinces, `mandate-provinces-v1`. Полная историческая раскраска 1700 остаётся DEV-работой; states/regions и экономика не реализованы. [Runtime, freeze и миграция](docs/map-v2-runtime.md).
+Map v2 заморожена: 5 001 gameplay provinces, `mandate-provinces-v1`. Обычный 1700 использует опубликованный [Mandate World](docs/mandate-world-1700.md): 167 polities и province-based ownership. Исторические границы упрощены; states/regions и экономика не реализованы. [Runtime, freeze и миграция](docs/map-v2-runtime.md).
 
 ## Canonical atomic mesh: offline source / explicit debug
 

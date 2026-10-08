@@ -1,0 +1,83 @@
+{
+  "datasetId": "mandate-world-v1",
+  "description": "Mandate World 1700 is a gameplay-oriented, historically recognizable starting scenario. Borders and political entities are intentionally simplified.",
+  "canonicalTerritories": 5001,
+  "assignedTerritories": 4946,
+  "assignedTerritoryPct": 98.9002199560088,
+  "assignedPopulation": 591713514,
+  "assignedPopulationPct": 99.99988592465543,
+  "assignedAreaKm2": 134439224.95599112,
+  "assignedAreaPct": 91.62949218354507,
+  "relevantInhabitedLandDefinition": "Canonical territory with frozen baseline population > 0",
+  "assignedInhabitedAreaPct": 99.99136137448008,
+  "unassignedPopulation": 675,
+  "unassignedAreaKm2": 12281248.717150368,
+  "unassignedTerritories": 55,
+  "polityCount": 167,
+  "activePolityCount": 160,
+  "relationshipCounts": {
+    "colonial_dependency": 24,
+    "personal_union": 2,
+    "subject_of": 11,
+    "tributary_of": 4
+  },
+  "ownerControllerDifferences": 0,
+  "gameplayOverrides": 5,
+  "politicalSharedArcs": 2245,
+  "disconnectedPolities": 57,
+  "tinyPolities": 19,
+  "isolatedNeighborWarnings": 17,
+  "sourceCountryArtifactWarnings": 0,
+  "majorPolityPopulationWarnings": [
+    {
+      "polityId": "english_america",
+      "name": "English Atlantic Colonies",
+      "type": "colonial_administration",
+      "territories": 12,
+      "areaKm2": 677993.9062833907,
+      "population": 344106,
+      "urban": 10820,
+      "rural": 333286
+    },
+    {
+      "polityId": "new_france",
+      "name": "New France",
+      "type": "colonial_administration",
+      "territories": 17,
+      "areaKm2": 814623.3648478662,
+      "population": 88954,
+      "urban": 3304,
+      "rural": 85650
+    },
+    {
+      "polityId": "oman",
+      "name": "Imamate of Oman",
+      "type": "imamate",
+      "territories": 6,
+      "areaKm2": 294027.0260662151,
+      "population": 241158,
+      "urban": 3351,
+      "rural": 237807
+    }
+  ],
+  "published": true,
+  "geography": "mandate-provinces-v1",
+  "totalPopulation": 591714189,
+  "ambiguousProvinces": 1050,
+  "explicitProvinceOverrides": 5,
+  "capitalFailures": 0,
+  "suspiciousIsolatedProvinces": 2,
+  "relationshipValidation": "valid",
+  "inactivePolities": [
+    "brunei",
+    "danish_caribbean",
+    "dutch_caribbean",
+    "macao_portuguese",
+    "maldives",
+    "malta_order",
+    "ragusa"
+  ],
+  "assignedCapitalCount": 160,
+  "relevantInhabitedDefinition": "Frozen gameplay provinces with runtime population > 0",
+  "atomicSourceCountryArtifactWarnings": 198
+}

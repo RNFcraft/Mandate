@@ -17,7 +17,7 @@ The accepted **5,001 provinces** are frozen as `mandate-provinces-v1`, geometry 
 
 Both active tracked scenarios, `1700` and `modern`, use scenario v4 and province-keyed ownership, controllers and capitals. Maximum positive overlap area chooses owner and effective controller independently; ties use ASCII IDs. Capitals select greatest overlap with an owned province or are cleared with QA. Replacement folders are prepared before publication; reruns are idempotent. Historical backups and atomic authoring inputs remain unchanged.
 
-1700 preserves DEV assignments: 339 owned provinces, 288 ambiguous owner/controller QA rows. Modern has 4,989 owned provinces and 3,270 ambiguous QA rows. Neither has missing-overlap province fallback. Multiple contributing candidates are reported as ambiguous even when deterministic area selection resolves them; this is not a structural failure or historical accuracy claim.
+The initial freeze preserved DEV assignments in 1700 (339 owned provinces, 288 migration QA rows). Subsequently, [Mandate World 1700](mandate-world-1700.md) published 4,946 owned provinces, 167 registered polities and 160 owned province capitals. Modern has 4,989 owned provinces and 3,270 ambiguous QA rows. Neither has missing-overlap province fallback. Multiple contributing candidates are reported as ambiguous even when deterministic area selection resolves them; this is not a structural failure or historical accuracy claim.
 
 Population projects each original cohort independently with `allocationFraction` and largest remainder; equal remainders use ASCII province IDs. Only matching province and full demographic identity can merge. Culture, religion, stratum, settlement, literacy and rates remain correlated. All 64,495 original cohorts are checked; output has 9,113 cohorts. Exact totals: **591,714,189 people; urban 46,409,598; rural 545,304,591; difference zero**. The atomic HYDE baseline remains immutable. `population-migration-qa.json` and `population.meta.json` record conservation and provenance.
 
@@ -51,7 +51,7 @@ CI uses Node 24, locked `npm ci` and Chromium. It checks tracked runtime, simula
 
 Tests produce `test-results/map-v2-normal-world-dpr2.png` and `map-v2-network.json`; preview visual tours remain in test-results. Geometry conservation is proved by the decoded digest; screenshots supplement it.
 
-Economy, states/regions and complete historical 1700 composition/ownership are outside this pass. Preserved RU/US DEV ownership and neutral remainder are a known authoring limitation, not a freeze/runtime blocker.
+Economy, states/regions and complete historical population composition remain outside this pass. Current 1700 uses Mandate World authored political ownership; the original RU/US freeze fixture has been replaced without changing frozen geography or population.
 
 ## Integration validation, 2026-10-08
 
@@ -60,3 +60,5 @@ Actual local runs: frozen `--qa` passed with 5,001 provinces, overlap zero and n
 Actual `npm start` on port 3000 and separate startup without ignored GIS/ADM2 data passed. Scenario 1700 reports province authority, 5,001 territories and the exact conserved population. DPR2 Canvas is 2,880×1,800 at a 1,440×900 viewport; normal network has no atomic chunks or political worker endpoint. Gameplay preview also reports 5,001 provinces; both pages have no browser errors. The normal world screenshot was inspected after batching same-owner fills to eliminate antialias seams.
 
 Allocation exception details: 27 of the 138 uncovered atoms contain people; their combined 19,986 people remain allocated. Greatest positive-population fallback distance is 200.686371 km (7 people); the overall 1,676.881799 km maximum belongs to a zero-population atom. Scenario ambiguous QA rows represent 144 distinct provinces in 1700 and 1,635 in modern, reported separately for ownership and control.
+
+Subsequent Mandate World publication on 2026-10-08: normal 1700 uses 167 registered polities, 4,946 owned provinces and 160 valid owned capitals; targeted tests passed 35/35 and full suite 212/212 (8.7 minutes). Frozen artifacts and population assets remain unchanged. See mandate-world-1700.md for political QA and 32 inspected normal runtime screenshots.

@@ -1,0 +1,295 @@
+{
+  "version": 1,
+  "geography": "mandate-provinces-v1",
+  "description": "Province-level gameplay corrections and capital anchors over existing Mandate World; no geometry changes. Other capitals are deterministic owned gameplay seats, not exact historical claims.",
+  "provinceOverrides": [
+    {
+      "provinceId": "province:00001",
+      "ownerPolityId": "timor_polities",
+      "reason": "Timor continuity: remove the detached Mataram province caused by the modern Indonesian sourceCountry proxy; retain the existing Timor polity across the frozen island."
+    },
+    {
+      "provinceId": "province:02312",
+      "ownerPolityId": "tibet",
+      "reason": "Himalayan frontier: remove the isolated Mughal province north of its land-connected territory; adopt the substantial Tibetan overlap candidate and retain the existing simplified mountain polity."
+    },
+    {
+      "provinceId": "province:03840",
+      "ownerPolityId": "peru",
+      "reason": "Fill the inhabited Panama authoring omission using the existing Spanish Peru/Colombia gameplay bloc; no new polity or modern-border claim."
+    },
+    {
+      "provinceId": "province:03842",
+      "ownerPolityId": "peru",
+      "reason": "Complete the inhabited Panama corridor with the existing Spanish Peru/Colombia gameplay bloc; no geometric change."
+    },
+    {
+      "provinceId": "province:01735",
+      "ownerPolityId": "circassian",
+      "reason": "Coarse-province coastal Caucasus continuity: joins the authored Anapa fragment to the existing Circassian mainland through its only intervening province. Dominant Russian proxy overlap (81.2%) is deliberately superseded; Circassian candidate share is 18.8%. Gameplay correction, not a precise historical border."
+    }
+  ],
+  "capitalAnchors": [
+    {
+      "polityId": "fra_bourbon",
+      "name": "Paris",
+      "point": [
+        2.35,
+        48.86
+      ],
+      "reason": "Authored gameplay capital anchor near Paris; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "nld_republic",
+      "name": "Amsterdam",
+      "point": [
+        4.9,
+        52.37
+      ],
+      "reason": "Authored gameplay capital anchor near Amsterdam; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "habsburg",
+      "name": "Vienna",
+      "point": [
+        16.37,
+        48.21
+      ],
+      "reason": "Authored gameplay capital anchor near Vienna; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "rus_tsardom",
+      "name": "Moscow",
+      "point": [
+        37.62,
+        55.75
+      ],
+      "reason": "Authored gameplay capital anchor near Moscow; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "qing",
+      "name": "Beijing",
+      "point": [
+        116.4,
+        39.9
+      ],
+      "reason": "Authored gameplay capital anchor near Beijing; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "tokugawa",
+      "name": "Edo",
+      "point": [
+        139.69,
+        35.68
+      ],
+      "reason": "Authored gameplay capital anchor near Edo; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "venice",
+      "name": "Venice",
+      "point": [
+        12.34,
+        45.44
+      ],
+      "reason": "Authored gameplay capital anchor near Venice; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "papal",
+      "name": "Rome",
+      "point": [
+        12.5,
+        41.9
+      ],
+      "reason": "Authored gameplay capital anchor near Rome; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "eng_stuart",
+      "name": "London",
+      "point": [
+        -0.13,
+        51.51
+      ],
+      "reason": "Authored gameplay capital anchor near London; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "spa_monarchy",
+      "name": "Madrid",
+      "point": [
+        -3.7,
+        40.42
+      ],
+      "reason": "Authored gameplay capital anchor near Madrid; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "por_monarchy",
+      "name": "Lisbon",
+      "point": [
+        -9.14,
+        38.72
+      ],
+      "reason": "Authored gameplay capital anchor near Lisbon; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "swe_monarchy",
+      "name": "Stockholm",
+      "point": [
+        18.07,
+        59.33
+      ],
+      "reason": "Authored gameplay capital anchor near Stockholm; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "den_norway",
+      "name": "Copenhagen",
+      "point": [
+        12.57,
+        55.68
+      ],
+      "reason": "Authored gameplay capital anchor near Copenhagen; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "plc",
+      "name": "Warsaw",
+      "point": [
+        21.01,
+        52.23
+      ],
+      "reason": "Authored gameplay capital anchor near Warsaw; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "brandenburg_prussia",
+      "name": "Berlin",
+      "point": [
+        13.4,
+        52.52
+      ],
+      "reason": "Authored gameplay capital anchor near Berlin; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "savoy",
+      "name": "Turin",
+      "point": [
+        7.68,
+        45.07
+      ],
+      "reason": "Authored gameplay capital anchor near Turin; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "ottoman",
+      "name": "Constantinople",
+      "point": [
+        28.98,
+        41.01
+      ],
+      "reason": "Authored gameplay capital anchor near Constantinople; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "safavid",
+      "name": "Isfahan",
+      "point": [
+        51.68,
+        32.65
+      ],
+      "reason": "Authored gameplay capital anchor near Isfahan; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "mughal",
+      "name": "Delhi",
+      "point": [
+        77.2,
+        28.61
+      ],
+      "reason": "Authored gameplay capital anchor near Delhi; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "joseon",
+      "name": "Hanseong",
+      "point": [
+        126.98,
+        37.57
+      ],
+      "reason": "Authored gameplay capital anchor near Hanseong; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "siam",
+      "name": "Ayutthaya",
+      "point": [
+        100.56,
+        14.35
+      ],
+      "reason": "Authored gameplay capital anchor near Ayutthaya; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "new_spain",
+      "name": "Mexico City",
+      "point": [
+        -99.13,
+        19.43
+      ],
+      "reason": "Authored gameplay capital anchor near Mexico City; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "peru",
+      "name": "Lima",
+      "point": [
+        -77.04,
+        -12.05
+      ],
+      "reason": "Authored gameplay capital anchor near Lima; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "new_france",
+      "name": "Quebec",
+      "point": [
+        -71.21,
+        46.81
+      ],
+      "reason": "Authored gameplay capital anchor near Quebec; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "english_america",
+      "name": "Boston",
+      "point": [
+        -71.06,
+        42.36
+      ],
+      "reason": "Authored gameplay capital anchor near Boston; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "brazil_portuguese",
+      "name": "Salvador",
+      "point": [
+        -38.5,
+        -12.97
+      ],
+      "reason": "Authored gameplay capital anchor near Salvador; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "morocco",
+      "name": "Meknes",
+      "point": [
+        -5.55,
+        33.9
+      ],
+      "reason": "Authored gameplay capital anchor near Meknes; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "ethiopia",
+      "name": "Gondar",
+      "point": [
+        37.47,
+        12.6
+      ],
+      "reason": "Authored gameplay capital anchor near Gondar; approximate city location, adapted to the frozen province scale."
+    },
+    {
+      "polityId": "oman",
+      "name": "Nizwa",
+      "point": [
+        57.53,
+        22.93
+      ],
+      "reason": "Authored gameplay capital anchor near Nizwa; approximate city location, adapted to the frozen province scale."
+    }
+  ]
+}

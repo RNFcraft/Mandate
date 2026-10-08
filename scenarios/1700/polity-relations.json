@@ -1,1 +1,251 @@
-{"version":1,"relations":[]}
+{
+  "version": 1,
+  "relations": [
+    {
+      "type": "colonial_dependency",
+      "from": "angola_portuguese",
+      "to": "por_monarchy",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "atlantic_english",
+      "to": "eng_stuart",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "atlantic_portuguese",
+      "to": "por_monarchy",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "brazil_portuguese",
+      "to": "por_monarchy",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "cape_voc",
+      "to": "nld_republic",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "cayenne",
+      "to": "fra_bourbon",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "ceylon_voc",
+      "to": "nld_republic",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "danish_caribbean",
+      "to": "den_norway",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "dutch_caribbean",
+      "to": "nld_republic",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "dutch_guiana",
+      "to": "nld_republic",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "english_america",
+      "to": "eng_stuart",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "english_caribbean",
+      "to": "eng_stuart",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "french_caribbean",
+      "to": "fra_bourbon",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "java_voc",
+      "to": "nld_republic",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "louisiana",
+      "to": "fra_bourbon",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "macao_portuguese",
+      "to": "por_monarchy",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "mozambique_portuguese",
+      "to": "por_monarchy",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "new_france",
+      "to": "fra_bourbon",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "new_mexico",
+      "to": "new_spain",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "new_spain",
+      "to": "spa_monarchy",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "peru",
+      "to": "spa_monarchy",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "philippines_spanish",
+      "to": "spa_monarchy",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "spanish_caribbean",
+      "to": "spa_monarchy",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "colonial_dependency",
+      "from": "spice_voc",
+      "to": "nld_republic",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "personal_union",
+      "from": "eng_stuart",
+      "to": "sco_stuart",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "personal_union",
+      "from": "plc",
+      "to": "saxony",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "subject_of",
+      "from": "algiers",
+      "to": "ottoman",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "subject_of",
+      "from": "courland",
+      "to": "plc",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "subject_of",
+      "from": "egypt_ottoman",
+      "to": "ottoman",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "subject_of",
+      "from": "hejaz",
+      "to": "ottoman",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "subject_of",
+      "from": "milan",
+      "to": "spa_monarchy",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "subject_of",
+      "from": "naples_sicily",
+      "to": "spa_monarchy",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "subject_of",
+      "from": "rajput",
+      "to": "mughal",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "subject_of",
+      "from": "spanish_netherlands",
+      "to": "spa_monarchy",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "subject_of",
+      "from": "transylvania",
+      "to": "habsburg",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "subject_of",
+      "from": "tripoli",
+      "to": "ottoman",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "subject_of",
+      "from": "tunis",
+      "to": "ottoman",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "tributary_of",
+      "from": "crimean_khanate",
+      "to": "ottoman",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "tributary_of",
+      "from": "moldavia",
+      "to": "ottoman",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "tributary_of",
+      "from": "ryukyu",
+      "to": "qing",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    },
+    {
+      "type": "tributary_of",
+      "from": "wallachia",
+      "to": "ottoman",
+      "reason": "Authored initial-state simplification for gameplay; no legal or diplomacy mechanics."
+    }
+  ]
+}

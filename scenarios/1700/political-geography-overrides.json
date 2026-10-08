@@ -1,1 +1,53 @@
-{"version":1,"overrides":[]}
+{
+  "version": 1,
+  "overrides": [
+    {
+      "territoryId": "gb:FRA:29444166B33792924009837",
+      "ownerPolityId": "fra_bourbon",
+      "reason": "Gameplay approximation: preserve the authored Paris strategic anchor on an existing canonical atom; no claim of exact municipal or historical borders.",
+      "source": "Mandate World 1700: authored gameplay decision; no historical boundary claim"
+    },
+    {
+      "territoryId": "gb:NLD:6326949B30737301574950",
+      "ownerPolityId": "nld_republic",
+      "reason": "Gameplay approximation: preserve the authored Amsterdam strategic anchor on an existing canonical atom; no claim of exact municipal or historical borders.",
+      "source": "Mandate World 1700: authored gameplay decision; no historical boundary claim"
+    },
+    {
+      "territoryId": "gb:AUT:14549572B24691553772644",
+      "ownerPolityId": "habsburg",
+      "reason": "Gameplay approximation: preserve the authored Vienna strategic anchor on an existing canonical atom; no claim of exact municipal or historical borders.",
+      "source": "Mandate World 1700: authored gameplay decision; no historical boundary claim"
+    },
+    {
+      "territoryId": "gb:RUS:50074027B23372442110557",
+      "ownerPolityId": "rus_tsardom",
+      "reason": "Gameplay approximation: preserve the authored Moscow strategic anchor on an existing canonical atom; no claim of exact municipal or historical borders.",
+      "source": "Mandate World 1700: authored gameplay decision; no historical boundary claim"
+    },
+    {
+      "territoryId": "gb:CHN:17275852B41788529093737",
+      "ownerPolityId": "qing",
+      "reason": "Gameplay approximation: preserve the authored Beijing strategic anchor on an existing canonical atom; no claim of exact municipal or historical borders.",
+      "source": "Mandate World 1700: authored gameplay decision; no historical boundary claim"
+    },
+    {
+      "territoryId": "gb:JPN:22064153B4211596098450",
+      "ownerPolityId": "tokugawa",
+      "reason": "Gameplay approximation: preserve the authored Edo strategic anchor on an existing canonical atom; no claim of exact municipal or historical borders.",
+      "source": "Mandate World 1700: authored gameplay decision; no historical boundary claim"
+    },
+    {
+      "territoryId": "residual:ITA:ITA-5461",
+      "ownerPolityId": "venice",
+      "reason": "Gameplay approximation: preserve the authored Venice strategic anchor on an existing canonical atom; no claim of exact municipal or historical borders.",
+      "source": "Mandate World 1700: authored gameplay decision; no historical boundary claim"
+    },
+    {
+      "territoryId": "gb:ITA:23120603B86473916475875",
+      "ownerPolityId": "papal",
+      "reason": "Gameplay approximation: preserve the authored Rome strategic anchor on an existing canonical atom; no claim of exact municipal or historical borders.",
+      "source": "Mandate World 1700: authored gameplay decision; no historical boundary claim"
+    }
+  ]
+}

@@ -43,7 +43,9 @@ async function handle(req, res, pathname) {
       const dataset=query.get('politicalPreview');if(!['1','mandate-world-v1'].includes(dataset)){reply(res,400,{error:'Unknown political preview dataset'});return;}
       if(id!=='1700'){reply(res,400,{error:'Political preview targets scenario 1700 only'});return;}
       const folder=path.resolve(__dirname,'../data/generated/political-geography/1700',dataset==='mandate-world-v1'?'mandate-world-v1':'.');
-      const [asset,polities,polityRelations]=await Promise.all(['political-geography.json','polities.json','polity-relations.json'].map(async name=>parseStrictJson(await fs.readFile(path.join(folder,name)))));
+      let assetFile='political-geography.json';
+      if(!atomicDebug&&dataset==='mandate-world-v1'){try{await fs.access(path.join(folder,'province-political-geography.json'));assetFile='province-political-geography.json';}catch(e){if(e.code!=='ENOENT')throw e;}}
+      const [asset,polities,polityRelations]=await Promise.all([assetFile,'polities.json','polity-relations.json'].map(async name=>parseStrictJson(await fs.readFile(path.join(folder,name)))));
       const compiled=atomicDebug?asset:await require('./province-publication.cjs').compilePoliticalAsset(asset);
       Object.assign(input,{politicalGeography:{...compiled,status:'published'},polities,polityRelations,politicalPreview:true});
     }

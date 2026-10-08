@@ -1,1 +1,1505 @@
-[{"id":"RU","name":"Российская империя","shortName":"РИ","color":"#ffd500","governmentType":"absolute_monarchy","capitalRegionId":"province:02605"},{"id":"US","name":"Соединённые штаты Америки","shortName":"США","color":"#0040ff","governmentType":"absolute_monarchy","capitalRegionId":"province:03916"}]
+[
+  {
+    "id": "aceh",
+    "name": "Sultanate of Aceh",
+    "shortName": "Sultanate of Aceh",
+    "color": "#6ce9df",
+    "capitalRegionId": "province:00091",
+    "governmentType": "sultanate",
+    "polityType": "sultanate"
+  },
+  {
+    "id": "afghan_frontier",
+    "name": "Afghan Frontier Principalities",
+    "shortName": "Afghan Frontier Principalities",
+    "color": "#84c50a",
+    "capitalRegionId": "province:02403",
+    "governmentType": "frontier",
+    "polityType": "frontier"
+  },
+  {
+    "id": "ainu",
+    "name": "Ainu Lands",
+    "shortName": "Ainu Lands",
+    "color": "#5406d4",
+    "capitalRegionId": "province:04957",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "akan",
+    "name": "Akan States",
+    "shortName": "Akan States",
+    "color": "#98b4b7",
+    "capitalRegionId": "province:00287",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "algiers",
+    "name": "Regency of Algiers",
+    "shortName": "Regency of Algiers",
+    "color": "#f82ff4",
+    "capitalRegionId": "province:01203",
+    "governmentType": "regency",
+    "polityType": "regency"
+  },
+  {
+    "id": "amazon_regions",
+    "name": "Amazonian Confederations",
+    "shortName": "Amazonian Confederations",
+    "color": "#0a10f8",
+    "capitalRegionId": "province:04160",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "angola_portuguese",
+    "name": "Portuguese Angola Holdings",
+    "shortName": "Portuguese Angola Holdings",
+    "color": "#2586c1",
+    "capitalRegionId": "province:00205",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "arabian_tribes",
+    "name": "Arabian Tribal Confederations",
+    "shortName": "Arabian Tribal Confederations",
+    "color": "#9a7e71",
+    "capitalRegionId": "province:01947",
+    "governmentType": "tribal_confederation",
+    "polityType": "tribal_confederation"
+  },
+  {
+    "id": "arakan",
+    "name": "Kingdom of Arakan",
+    "shortName": "Arakan",
+    "color": "#aa1836",
+    "capitalRegionId": "province:02818",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "arctic_america",
+    "name": "Arctic Indigenous Lands",
+    "shortName": "Arctic Indigenous Lands",
+    "color": "#e28224",
+    "capitalRegionId": "province:03634",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "assam",
+    "name": "Ahom Kingdom",
+    "shortName": "Ahom Kingdom",
+    "color": "#dcae23",
+    "capitalRegionId": "province:02891",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "atlantic_english",
+    "name": "English Atlantic Island Holdings",
+    "shortName": "English Atlantic Island Holdings",
+    "color": "#29b4ca",
+    "capitalRegionId": "province:04976",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "atlantic_portuguese",
+    "name": "Portuguese Atlantic Islands",
+    "shortName": "Portuguese Atlantic Islands",
+    "color": "#e081df",
+    "capitalRegionId": "province:04980",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "australia_north",
+    "name": "Northern Australian Confederations",
+    "shortName": "Northern Australian Confederations",
+    "color": "#02f6d1",
+    "capitalRegionId": "province:04702",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "australia_southeast",
+    "name": "Southeastern Australian Confederations",
+    "shortName": "Southeastern Australian Confederations",
+    "color": "#fb9836",
+    "capitalRegionId": "province:04721",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "australia_west",
+    "name": "Western Australian Confederations",
+    "shortName": "Western Australian Confederations",
+    "color": "#3a2721",
+    "capitalRegionId": "province:04661",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "bavaria",
+    "name": "Electorate of Bavaria",
+    "shortName": "Electorate of Bavaria",
+    "color": "#9abc86",
+    "capitalRegionId": "province:01305",
+    "governmentType": "electorate",
+    "polityType": "electorate"
+  },
+  {
+    "id": "benin_kingdom",
+    "name": "Kingdom of Benin",
+    "shortName": "Benin",
+    "color": "#9ae3b6",
+    "capitalRegionId": "province:00315",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "bhutan",
+    "name": "Bhutan",
+    "shortName": "Bhutan",
+    "color": "#4395ea",
+    "capitalRegionId": "province:02313",
+    "governmentType": "religious_polity",
+    "polityType": "religious_polity"
+  },
+  {
+    "id": "borneo_regions",
+    "name": "Borneo River Confederations",
+    "shortName": "Borneo River Confederations",
+    "color": "#7cfa04",
+    "capitalRegionId": "province:00067",
+    "governmentType": "decentralized_region",
+    "polityType": "decentralized_region"
+  },
+  {
+    "id": "brandenburg_prussia",
+    "name": "Brandenburg-Prussia",
+    "shortName": "Brandenburg-Prussia",
+    "color": "#096f44",
+    "capitalRegionId": "province:01405",
+    "governmentType": "electorate",
+    "polityType": "electorate"
+  },
+  {
+    "id": "brazil_portuguese",
+    "name": "Portuguese Brazil",
+    "shortName": "Portuguese Brazil",
+    "color": "#b68814",
+    "capitalRegionId": "province:04158",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "brunei",
+    "name": "Sultanate of Brunei",
+    "shortName": "Sultanate of Brunei",
+    "color": "#5ae762",
+    "capitalRegionId": null,
+    "governmentType": "sultanate",
+    "polityType": "sultanate"
+  },
+  {
+    "id": "bukhara",
+    "name": "Khanate of Bukhara",
+    "shortName": "Khanate of Bukhara",
+    "color": "#4fd650",
+    "capitalRegionId": "province:02431",
+    "governmentType": "khanate",
+    "polityType": "khanate"
+  },
+  {
+    "id": "burma",
+    "name": "Restored Toungoo Burma",
+    "shortName": "Restored Toungoo Burma",
+    "color": "#122705",
+    "capitalRegionId": "province:02812",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "cambodia",
+    "name": "Kingdom of Cambodia",
+    "shortName": "Cambodia",
+    "color": "#5632bb",
+    "capitalRegionId": "province:02775",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "cameroon_regions",
+    "name": "Cameroon Highlands and Coastal Polities",
+    "shortName": "Cameroon Highlands and Coastal Polities",
+    "color": "#a184c5",
+    "capitalRegionId": "province:00317",
+    "governmentType": "decentralized_region",
+    "polityType": "decentralized_region"
+  },
+  {
+    "id": "cape_voc",
+    "name": "Dutch Cape Settlement",
+    "shortName": "Dutch Cape Settlement",
+    "color": "#878ffa",
+    "capitalRegionId": "province:00152",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "cayenne",
+    "name": "French Cayenne Holdings",
+    "shortName": "French Cayenne Holdings",
+    "color": "#624383",
+    "capitalRegionId": "province:04295",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "ceylon_voc",
+    "name": "Dutch Ceylon Holdings",
+    "shortName": "Dutch Ceylon Holdings",
+    "color": "#322220",
+    "capitalRegionId": "province:04899",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "champa",
+    "name": "Champa Principalities",
+    "shortName": "Champa Principalities",
+    "color": "#6627b2",
+    "capitalRegionId": "province:02784",
+    "governmentType": "principality",
+    "polityType": "principality"
+  },
+  {
+    "id": "circassian",
+    "name": "Circassian Confederations",
+    "shortName": "Circassian Confederations",
+    "color": "#1f1638",
+    "capitalRegionId": "province:01735",
+    "governmentType": "tribal_confederation",
+    "polityType": "tribal_confederation"
+  },
+  {
+    "id": "comoros",
+    "name": "Comorian Sultanates",
+    "shortName": "Comorian Sultanates",
+    "color": "#37c0d9",
+    "capitalRegionId": "province:04978",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "congo_forests",
+    "name": "Congo Forest Communities",
+    "shortName": "Congo Forest Communities",
+    "color": "#2ba881",
+    "capitalRegionId": "province:00744",
+    "governmentType": "decentralized_region",
+    "polityType": "decentralized_region"
+  },
+  {
+    "id": "courland",
+    "name": "Duchy of Courland",
+    "shortName": "Duchy of Courland",
+    "color": "#92480a",
+    "capitalRegionId": "province:01786",
+    "governmentType": "duchy",
+    "polityType": "duchy"
+  },
+  {
+    "id": "crimean_khanate",
+    "name": "Crimean Khanate",
+    "shortName": "Crimean Khanate",
+    "color": "#116a0e",
+    "capitalRegionId": "province:01728",
+    "governmentType": "khanate",
+    "polityType": "khanate"
+  },
+  {
+    "id": "dahomey",
+    "name": "Dahomey and Coastal States",
+    "shortName": "Dahomey and Coastal States",
+    "color": "#34f284",
+    "capitalRegionId": "province:00296",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "danish_caribbean",
+    "name": "Danish Caribbean Holdings",
+    "shortName": "Danish Caribbean Holdings",
+    "color": "#e0a9a2",
+    "capitalRegionId": null,
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "darfur",
+    "name": "Sultanate of Darfur",
+    "shortName": "Sultanate of Darfur",
+    "color": "#30cb2e",
+    "capitalRegionId": "province:00892",
+    "governmentType": "sultanate",
+    "polityType": "sultanate"
+  },
+  {
+    "id": "den_norway",
+    "name": "Denmark-Norway",
+    "shortName": "Denmark-Norway",
+    "color": "#259763",
+    "capitalRegionId": "province:04438",
+    "governmentType": "monarchy",
+    "polityType": "monarchy"
+  },
+  {
+    "id": "dutch_caribbean",
+    "name": "Dutch Caribbean Holdings",
+    "shortName": "Dutch Caribbean Holdings",
+    "color": "#3c7273",
+    "capitalRegionId": null,
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "dutch_guiana",
+    "name": "Dutch Guiana",
+    "shortName": "Dutch Guiana",
+    "color": "#3d0632",
+    "capitalRegionId": "province:04289",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "dzungar",
+    "name": "Dzungar Khanate",
+    "shortName": "Dzungar Khanate",
+    "color": "#15233d",
+    "capitalRegionId": "province:02503",
+    "governmentType": "khanate",
+    "polityType": "khanate"
+  },
+  {
+    "id": "east_african_regions",
+    "name": "East African Highland Confederations",
+    "shortName": "East African Highland Confederations",
+    "color": "#98125c",
+    "capitalRegionId": "province:00795",
+    "governmentType": "decentralized_region",
+    "polityType": "decentralized_region"
+  },
+  {
+    "id": "egypt_ottoman",
+    "name": "Ottoman Egypt",
+    "shortName": "Ottoman Egypt",
+    "color": "#6d0062",
+    "capitalRegionId": "province:01537",
+    "governmentType": "dependency",
+    "polityType": "dependency"
+  },
+  {
+    "id": "emilian_duchies",
+    "name": "Emilian Duchies",
+    "shortName": "Emilian Duchies",
+    "color": "#d63119",
+    "capitalRegionId": "province:01307",
+    "governmentType": "duchy",
+    "polityType": "duchy"
+  },
+  {
+    "id": "eng_stuart",
+    "name": "Kingdom of England and Ireland",
+    "shortName": "England and Ireland",
+    "color": "#a8434a",
+    "capitalRegionId": "province:04456",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "english_america",
+    "name": "English Atlantic Colonies",
+    "shortName": "English Atlantic Colonies",
+    "color": "#cc4900",
+    "capitalRegionId": "province:04312",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "english_caribbean",
+    "name": "English Caribbean Colonies",
+    "shortName": "English Caribbean Colonies",
+    "color": "#2b17d1",
+    "capitalRegionId": "province:04972",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "equatorial_forests",
+    "name": "Equatorial Forest Confederations",
+    "shortName": "Equatorial Forest Confederations",
+    "color": "#752e7b",
+    "capitalRegionId": "province:00318",
+    "governmentType": "decentralized_region",
+    "polityType": "decentralized_region"
+  },
+  {
+    "id": "ethiopia",
+    "name": "Ethiopian Empire",
+    "shortName": "Ethiopian Empire",
+    "color": "#abca12",
+    "capitalRegionId": "province:00977",
+    "governmentType": "empire",
+    "polityType": "empire"
+  },
+  {
+    "id": "fra_bourbon",
+    "name": "Kingdom of France",
+    "shortName": "France",
+    "color": "#3659ad",
+    "capitalRegionId": "province:01266",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "french_caribbean",
+    "name": "French Caribbean Colonies",
+    "shortName": "French Caribbean Colonies",
+    "color": "#070d4e",
+    "capitalRegionId": "province:04488",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "futa",
+    "name": "Futa Highland Confederations",
+    "shortName": "Futa Highland Confederations",
+    "color": "#c75ed6",
+    "capitalRegionId": "province:00367",
+    "governmentType": "tribal_confederation",
+    "polityType": "tribal_confederation"
+  },
+  {
+    "id": "genoa",
+    "name": "Republic of Genoa",
+    "shortName": "Genoa",
+    "color": "#7509f3",
+    "capitalRegionId": "province:04369",
+    "governmentType": "republic",
+    "polityType": "republic"
+  },
+  {
+    "id": "georgian_kingdoms",
+    "name": "Georgian Kingdoms",
+    "shortName": "Georgian Kingdoms",
+    "color": "#87939b",
+    "capitalRegionId": "province:01755",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "great_lakes",
+    "name": "Great Lakes Kingdoms",
+    "shortName": "Great Lakes Kingdoms",
+    "color": "#6ffddf",
+    "capitalRegionId": "province:00738",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "great_plains",
+    "name": "Great Plains Confederations",
+    "shortName": "Great Plains Confederations",
+    "color": "#671c23",
+    "capitalRegionId": "province:04315",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "habsburg",
+    "name": "Habsburg Monarchy",
+    "shortName": "Habsburg Monarchy",
+    "color": "#c6b893",
+    "capitalRegionId": "province:01333",
+    "governmentType": "monarchy",
+    "polityType": "monarchy"
+  },
+  {
+    "id": "hanover",
+    "name": "Electorate of Hanover",
+    "shortName": "Electorate of Hanover",
+    "color": "#a8a7f1",
+    "capitalRegionId": "province:01381",
+    "governmentType": "electorate",
+    "polityType": "electorate"
+  },
+  {
+    "id": "hausa",
+    "name": "Hausa States",
+    "shortName": "Hausa States",
+    "color": "#086ce3",
+    "capitalRegionId": "province:00306",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "hawaiian",
+    "name": "Hawaiian Chiefdoms",
+    "shortName": "Hawaiian Chiefdoms",
+    "color": "#cacd19",
+    "capitalRegionId": "province:04514",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "hejaz",
+    "name": "Sharifate of Hejaz",
+    "shortName": "Sharifate of Hejaz",
+    "color": "#63be9d",
+    "capitalRegionId": "province:01567",
+    "governmentType": "sharifate",
+    "polityType": "sharifate"
+  },
+  {
+    "id": "igbo_regions",
+    "name": "Igbo Communities",
+    "shortName": "Igbo Communities",
+    "color": "#0a62e8",
+    "capitalRegionId": "province:00316",
+    "governmentType": "decentralized_region",
+    "polityType": "decentralized_region"
+  },
+  {
+    "id": "indian_ocean_frontier",
+    "name": "Indian Ocean Island Frontiers",
+    "shortName": "Indian Ocean Island Frontiers",
+    "color": "#2792ef",
+    "capitalRegionId": "province:04977",
+    "governmentType": "frontier",
+    "polityType": "frontier"
+  },
+  {
+    "id": "iroquois",
+    "name": "Haudenosaunee Confederacy",
+    "shortName": "Haudenosaunee Confederacy",
+    "color": "#4b99e6",
+    "capitalRegionId": "province:03926",
+    "governmentType": "tribal_confederation",
+    "polityType": "tribal_confederation"
+  },
+  {
+    "id": "java_voc",
+    "name": "Dutch Java Holdings",
+    "shortName": "Dutch Java Holdings",
+    "color": "#0e73ba",
+    "capitalRegionId": "province:00053",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "jolof",
+    "name": "Jolof and Senegambian States",
+    "shortName": "Jolof and Senegambian States",
+    "color": "#fa69c9",
+    "capitalRegionId": "province:00379",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "joseon",
+    "name": "Joseon Korea",
+    "shortName": "Joseon Korea",
+    "color": "#657ba8",
+    "capitalRegionId": "province:03520",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "kandy",
+    "name": "Kingdom of Kandy",
+    "shortName": "Kandy",
+    "color": "#e01a52",
+    "capitalRegionId": "province:04905",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "kanem_bornu",
+    "name": "Kanem-Bornu",
+    "shortName": "Kanem-Bornu",
+    "color": "#534fcf",
+    "capitalRegionId": "province:00548",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "kazakh_hordes",
+    "name": "Kazakh Hordes",
+    "shortName": "Kazakh Hordes",
+    "color": "#0c3433",
+    "capitalRegionId": "province:02661",
+    "governmentType": "tribal_confederation",
+    "polityType": "tribal_confederation"
+  },
+  {
+    "id": "khiva",
+    "name": "Khanate of Khiva",
+    "shortName": "Khanate of Khiva",
+    "color": "#d75953",
+    "capitalRegionId": "province:02373",
+    "governmentType": "khanate",
+    "polityType": "khanate"
+  },
+  {
+    "id": "khoisan",
+    "name": "Khoisan Lands",
+    "shortName": "Khoisan Lands",
+    "color": "#205cbb",
+    "capitalRegionId": "province:00169",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "kongo",
+    "name": "Kingdom of Kongo",
+    "shortName": "Kongo",
+    "color": "#7fbc52",
+    "capitalRegionId": "province:00215",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "kyrgyz_frontier",
+    "name": "Kyrgyz Mountain Confederations",
+    "shortName": "Kyrgyz Mountain Confederations",
+    "color": "#a27a75",
+    "capitalRegionId": "province:02477",
+    "governmentType": "tribal_confederation",
+    "polityType": "tribal_confederation"
+  },
+  {
+    "id": "lao_kingdoms",
+    "name": "Lao Kingdoms",
+    "shortName": "Lao Kingdoms",
+    "color": "#806ece",
+    "capitalRegionId": "province:02857",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "louisiana",
+    "name": "French Louisiana Frontier",
+    "shortName": "French Louisiana Frontier",
+    "color": "#527a24",
+    "capitalRegionId": "province:03882",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "luba",
+    "name": "Luba Kingdom",
+    "shortName": "Luba Kingdom",
+    "color": "#eeb0db",
+    "capitalRegionId": "province:00217",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "lunda",
+    "name": "Lunda Confederation",
+    "shortName": "Lunda Confederation",
+    "color": "#691b0f",
+    "capitalRegionId": "province:00186",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "macao_portuguese",
+    "name": "Portuguese Macau",
+    "shortName": "Portuguese Macau",
+    "color": "#07abb7",
+    "capitalRegionId": null,
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "malabar",
+    "name": "Malabar Kingdoms",
+    "shortName": "Malabar Kingdoms",
+    "color": "#eab123",
+    "capitalRegionId": "province:01998",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "malagasy",
+    "name": "Malagasy Kingdoms",
+    "shortName": "Malagasy Kingdoms",
+    "color": "#449431",
+    "capitalRegionId": "province:04860",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "malay_sultanates",
+    "name": "Malay Sultanates",
+    "shortName": "Malay Sultanates",
+    "color": "#535340",
+    "capitalRegionId": "province:02762",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "maldives",
+    "name": "Sultanate of Maldives",
+    "shortName": "Sultanate of Maldives",
+    "color": "#8a9d76",
+    "capitalRegionId": null,
+    "governmentType": "sultanate",
+    "polityType": "sultanate"
+  },
+  {
+    "id": "malta_order",
+    "name": "Order of Malta",
+    "shortName": "Order of Malta",
+    "color": "#569718",
+    "capitalRegionId": null,
+    "governmentType": "military_order",
+    "polityType": "military_order"
+  },
+  {
+    "id": "maori",
+    "name": "Maori Confederations",
+    "shortName": "Maori Confederations",
+    "color": "#d22e5c",
+    "capitalRegionId": "province:04843",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "mapuche",
+    "name": "Mapuche Confederations",
+    "shortName": "Mapuche Confederations",
+    "color": "#353c66",
+    "capitalRegionId": "province:03990",
+    "governmentType": "tribal_confederation",
+    "polityType": "tribal_confederation"
+  },
+  {
+    "id": "maratha",
+    "name": "Maratha Confederation",
+    "shortName": "Maratha Confederation",
+    "color": "#bc2767",
+    "capitalRegionId": "province:02034",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "maravi",
+    "name": "Maravi Confederation",
+    "shortName": "Maravi Confederation",
+    "color": "#6eeb2c",
+    "capitalRegionId": "province:00671",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "mataram",
+    "name": "Mataram Sultanate",
+    "shortName": "Mataram Sultanate",
+    "color": "#f6f394",
+    "capitalRegionId": "province:00058",
+    "governmentType": "sultanate",
+    "polityType": "sultanate"
+  },
+  {
+    "id": "melanesian",
+    "name": "Melanesian Island Confederations",
+    "shortName": "Melanesian Island Confederations",
+    "color": "#dff267",
+    "capitalRegionId": "province:04832",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "micronesian",
+    "name": "Micronesian Island Confederations",
+    "shortName": "Micronesian Island Confederations",
+    "color": "#f10025",
+    "capitalRegionId": "province:04993",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "milan",
+    "name": "Duchy of Milan",
+    "shortName": "Duchy of Milan",
+    "color": "#6ba933",
+    "capitalRegionId": "province:01297",
+    "governmentType": "duchy",
+    "polityType": "duchy"
+  },
+  {
+    "id": "mindanao",
+    "name": "Mindanao Sultanates",
+    "shortName": "Mindanao Sultanates",
+    "color": "#3c8caa",
+    "capitalRegionId": "province:04871",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "moldavia",
+    "name": "Principality of Moldavia",
+    "shortName": "Principality of Moldavia",
+    "color": "#a60239",
+    "capitalRegionId": "province:01718",
+    "governmentType": "principality",
+    "polityType": "principality"
+  },
+  {
+    "id": "morocco",
+    "name": "Sultanate of Morocco",
+    "shortName": "Sultanate of Morocco",
+    "color": "#79ab26",
+    "capitalRegionId": "province:01077",
+    "governmentType": "sultanate",
+    "polityType": "sultanate"
+  },
+  {
+    "id": "mossi",
+    "name": "Mossi Kingdoms",
+    "shortName": "Mossi Kingdoms",
+    "color": "#c74a6e",
+    "capitalRegionId": "province:00431",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "mozambique_portuguese",
+    "name": "Portuguese Mozambique Holdings",
+    "shortName": "Portuguese Mozambique Holdings",
+    "color": "#e4dab5",
+    "capitalRegionId": "province:00677",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "mughal",
+    "name": "Mughal Empire",
+    "shortName": "Mughal Empire",
+    "color": "#258e72",
+    "capitalRegionId": "province:02244",
+    "governmentType": "empire",
+    "polityType": "empire"
+  },
+  {
+    "id": "mysore",
+    "name": "Kingdom of Mysore",
+    "shortName": "Mysore",
+    "color": "#86a151",
+    "capitalRegionId": "province:02113",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "naples_sicily",
+    "name": "Kingdoms of Naples and Sicily",
+    "shortName": "Kingdoms of Naples and Sicily",
+    "color": "#12ca64",
+    "capitalRegionId": "province:01234",
+    "governmentType": "monarchy",
+    "polityType": "monarchy"
+  },
+  {
+    "id": "nepal_hills",
+    "name": "Nepal Hill Kingdoms",
+    "shortName": "Nepal Hill Kingdoms",
+    "color": "#396b3e",
+    "capitalRegionId": "province:02299",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "new_france",
+    "name": "New France",
+    "shortName": "New France",
+    "color": "#7d3154",
+    "capitalRegionId": "province:04314",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "new_mexico",
+    "name": "Spanish Northern Frontier",
+    "shortName": "Spanish Northern Frontier",
+    "color": "#c9fe99",
+    "capitalRegionId": "province:03747",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "new_spain",
+    "name": "Viceroyalty of New Spain",
+    "shortName": "New Spain",
+    "color": "#7af171",
+    "capitalRegionId": "province:03848",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "nguyen",
+    "name": "Nguyen Southern Vietnam",
+    "shortName": "Nguyen Southern Vietnam",
+    "color": "#e56698",
+    "capitalRegionId": "province:02778",
+    "governmentType": "lordship",
+    "polityType": "lordship"
+  },
+  {
+    "id": "nilotic_regions",
+    "name": "Nilotic River Confederations",
+    "shortName": "Nilotic River Confederations",
+    "color": "#27c75d",
+    "capitalRegionId": "province:00888",
+    "governmentType": "decentralized_region",
+    "polityType": "decentralized_region"
+  },
+  {
+    "id": "nld_republic",
+    "name": "Dutch Republic",
+    "shortName": "Dutch Republic",
+    "color": "#d27b35",
+    "capitalRegionId": "province:01376",
+    "governmentType": "republic",
+    "polityType": "republic"
+  },
+  {
+    "id": "north_german_states",
+    "name": "North German Imperial States",
+    "shortName": "North German Imperial States",
+    "color": "#890015",
+    "capitalRegionId": "province:01385",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "northeast_siberian",
+    "name": "Northeastern Siberian Communities",
+    "shortName": "Northeastern Siberian Communities",
+    "color": "#d7d899",
+    "capitalRegionId": "province:03597",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "northern_woodlands",
+    "name": "Northern Woodland Confederations",
+    "shortName": "Northern Woodland Confederations",
+    "color": "#941942",
+    "capitalRegionId": "province:03929",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "oman",
+    "name": "Imamate of Oman",
+    "shortName": "Imamate of Oman",
+    "color": "#37480a",
+    "capitalRegionId": "province:01928",
+    "governmentType": "imamate",
+    "polityType": "imamate"
+  },
+  {
+    "id": "ottoman",
+    "name": "Ottoman Empire",
+    "shortName": "Ottoman Empire",
+    "color": "#a53538",
+    "capitalRegionId": "province:01530",
+    "governmentType": "empire",
+    "polityType": "empire"
+  },
+  {
+    "id": "oyo",
+    "name": "Oyo Empire",
+    "shortName": "Oyo Empire",
+    "color": "#807bfc",
+    "capitalRegionId": "province:00297",
+    "governmentType": "empire",
+    "polityType": "empire"
+  },
+  {
+    "id": "pacific_america",
+    "name": "Pacific Coast Indigenous Polities",
+    "shortName": "Pacific Coast Indigenous Polities",
+    "color": "#804f4e",
+    "capitalRegionId": "province:03667",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "pampas_regions",
+    "name": "Pampas and Patagonian Confederations",
+    "shortName": "Pampas and Patagonian Confederations",
+    "color": "#de21a6",
+    "capitalRegionId": "province:04023",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "papal",
+    "name": "Papal States",
+    "shortName": "Papal States",
+    "color": "#fc1260",
+    "capitalRegionId": "province:01221",
+    "governmentType": "ecclesiastical_state",
+    "polityType": "ecclesiastical_state"
+  },
+  {
+    "id": "papuan",
+    "name": "Papuan Communities",
+    "shortName": "Papuan Communities",
+    "color": "#9484c8",
+    "capitalRegionId": "province:00049",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "peru",
+    "name": "Viceroyalty of Peru",
+    "shortName": "Peru",
+    "color": "#e021f4",
+    "capitalRegionId": "province:03798",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "philippines_spanish",
+    "name": "Spanish Philippines",
+    "shortName": "Spanish Philippines",
+    "color": "#4b8153",
+    "capitalRegionId": "province:04876",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "plc",
+    "name": "Polish-Lithuanian Commonwealth",
+    "shortName": "Polish-Lithuanian Commonwealth",
+    "color": "#b15c80",
+    "capitalRegionId": "province:01427",
+    "governmentType": "commonwealth",
+    "polityType": "commonwealth"
+  },
+  {
+    "id": "polynesian",
+    "name": "Polynesian Island Confederations",
+    "shortName": "Polynesian Island Confederations",
+    "color": "#85e3b6",
+    "capitalRegionId": "province:04985",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "por_monarchy",
+    "name": "Kingdom of Portugal",
+    "shortName": "Portugal",
+    "color": "#287650",
+    "capitalRegionId": "province:01082",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "qing",
+    "name": "Qing Empire",
+    "shortName": "Qing Empire",
+    "color": "#dfb951",
+    "capitalRegionId": "province:03354",
+    "governmentType": "empire",
+    "polityType": "empire"
+  },
+  {
+    "id": "ragusa",
+    "name": "Republic of Ragusa",
+    "shortName": "Ragusa",
+    "color": "#33d2e9",
+    "capitalRegionId": null,
+    "governmentType": "republic",
+    "polityType": "republic"
+  },
+  {
+    "id": "rajput",
+    "name": "Rajput Principalities",
+    "shortName": "Rajput Principalities",
+    "color": "#c89471",
+    "capitalRegionId": "province:02104",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "rhenish_states",
+    "name": "Rhenish Imperial States",
+    "shortName": "Rhenish Imperial States",
+    "color": "#3f59c9",
+    "capitalRegionId": "province:01361",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "rozwi",
+    "name": "Rozwi Empire",
+    "shortName": "Rozwi Empire",
+    "color": "#56fff7",
+    "capitalRegionId": "province:00655",
+    "governmentType": "empire",
+    "polityType": "empire"
+  },
+  {
+    "id": "rus_tsardom",
+    "name": "Russian Tsardom",
+    "shortName": "Russian Tsardom",
+    "color": "#37664d",
+    "capitalRegionId": "province:01846",
+    "governmentType": "tsardom",
+    "polityType": "tsardom"
+  },
+  {
+    "id": "ryukyu",
+    "name": "Ryukyu Kingdom",
+    "shortName": "Ryukyu Kingdom",
+    "color": "#248113",
+    "capitalRegionId": "province:04958",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "safavid",
+    "name": "Safavid Persia",
+    "shortName": "Safavid Persia",
+    "color": "#8050a1",
+    "capitalRegionId": "province:02353",
+    "governmentType": "empire",
+    "polityType": "empire"
+  },
+  {
+    "id": "saharan_confederations",
+    "name": "Saharan Confederations",
+    "shortName": "Saharan Confederations",
+    "color": "#4be116",
+    "capitalRegionId": "province:00389",
+    "governmentType": "tribal_confederation",
+    "polityType": "tribal_confederation"
+  },
+  {
+    "id": "sahel_states",
+    "name": "Sahelian Principalities",
+    "shortName": "Sahelian Principalities",
+    "color": "#f5431e",
+    "capitalRegionId": "province:00466",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "savoy",
+    "name": "Duchy of Savoy",
+    "shortName": "Duchy of Savoy",
+    "color": "#c77089",
+    "capitalRegionId": "province:01278",
+    "governmentType": "duchy",
+    "polityType": "duchy"
+  },
+  {
+    "id": "saxony",
+    "name": "Electorate of Saxony",
+    "shortName": "Electorate of Saxony",
+    "color": "#5b81cc",
+    "capitalRegionId": "province:01404",
+    "governmentType": "electorate",
+    "polityType": "electorate"
+  },
+  {
+    "id": "sco_stuart",
+    "name": "Kingdom of Scotland",
+    "shortName": "Scotland",
+    "color": "#3f57a3",
+    "capitalRegionId": "province:04468",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "sennar",
+    "name": "Sultanate of Sennar",
+    "shortName": "Sultanate of Sennar",
+    "color": "#8b2150",
+    "capitalRegionId": "province:00908",
+    "governmentType": "sultanate",
+    "polityType": "sultanate"
+  },
+  {
+    "id": "siam",
+    "name": "Kingdom of Ayutthaya",
+    "shortName": "Ayutthaya",
+    "color": "#024b11",
+    "capitalRegionId": "province:02794",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "somali_sultanates",
+    "name": "Somali Sultanates",
+    "shortName": "Somali Sultanates",
+    "color": "#3fb64b",
+    "capitalRegionId": "province:00948",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "southeast_america",
+    "name": "Southeastern Indigenous Confederations",
+    "shortName": "Southeastern Indigenous Confederations",
+    "color": "#11ae17",
+    "capitalRegionId": "province:03924",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "southern_bantu",
+    "name": "Southern African Chiefdoms",
+    "shortName": "Southern African Chiefdoms",
+    "color": "#f32be4",
+    "capitalRegionId": "province:00606",
+    "governmentType": "decentralized_region",
+    "polityType": "decentralized_region"
+  },
+  {
+    "id": "spa_monarchy",
+    "name": "Spanish Monarchy",
+    "shortName": "Spanish Monarchy",
+    "color": "#dbac38",
+    "capitalRegionId": "province:01117",
+    "governmentType": "monarchy",
+    "polityType": "monarchy"
+  },
+  {
+    "id": "spanish_caribbean",
+    "name": "Spanish Caribbean",
+    "shortName": "Spanish Caribbean",
+    "color": "#34ec7f",
+    "capitalRegionId": "province:04492",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "spanish_netherlands",
+    "name": "Spanish Netherlands",
+    "shortName": "Spanish Netherlands",
+    "color": "#49820f",
+    "capitalRegionId": "province:01354",
+    "governmentType": "dependency",
+    "polityType": "dependency"
+  },
+  {
+    "id": "spice_voc",
+    "name": "Dutch Spice Island Holdings",
+    "shortName": "Dutch Spice Island Holdings",
+    "color": "#b9569f",
+    "capitalRegionId": "province:00147",
+    "governmentType": "colonial_administration",
+    "polityType": "colonial_administration"
+  },
+  {
+    "id": "sumatra_regions",
+    "name": "Sumatran Principalities",
+    "shortName": "Sumatran Principalities",
+    "color": "#91e821",
+    "capitalRegionId": "province:00090",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "swabian_states",
+    "name": "Swabian Imperial States",
+    "shortName": "Swabian Imperial States",
+    "color": "#3e8eb1",
+    "capitalRegionId": "province:01293",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "swahili_coast",
+    "name": "Swahili Coastal Sultanates",
+    "shortName": "Swahili Coastal Sultanates",
+    "color": "#890050",
+    "capitalRegionId": "province:04366",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "swe_monarchy",
+    "name": "Kingdom of Sweden",
+    "shortName": "Sweden",
+    "color": "#4084b4",
+    "capitalRegionId": "province:01446",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "swiss_cantons",
+    "name": "Swiss Cantons",
+    "shortName": "Swiss Cantons",
+    "color": "#72606d",
+    "capitalRegionId": "province:01301",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "tamil_states",
+    "name": "Tamil Principalities",
+    "shortName": "Tamil Principalities",
+    "color": "#6fe0fe",
+    "capitalRegionId": "province:02107",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "tasmania",
+    "name": "Tasmanian Indigenous Lands",
+    "shortName": "Tasmanian Indigenous Lands",
+    "color": "#08b136",
+    "capitalRegionId": "province:04782",
+    "governmentType": "indigenous_region",
+    "polityType": "indigenous_region"
+  },
+  {
+    "id": "tibet",
+    "name": "Tibetan Polity",
+    "shortName": "Tibetan Polity",
+    "color": "#ec1299",
+    "capitalRegionId": "province:02312",
+    "governmentType": "religious_polity",
+    "polityType": "religious_polity"
+  },
+  {
+    "id": "timor_polities",
+    "name": "Timor Polities",
+    "shortName": "Timor Polities",
+    "color": "#aa2597",
+    "capitalRegionId": "province:00002",
+    "governmentType": "confederation",
+    "polityType": "confederation"
+  },
+  {
+    "id": "tokugawa",
+    "name": "Tokugawa Japan",
+    "shortName": "Tokugawa Japan",
+    "color": "#c3a1bb",
+    "capitalRegionId": "province:04938",
+    "governmentType": "shogunate",
+    "polityType": "shogunate"
+  },
+  {
+    "id": "tonga",
+    "name": "Tongan Polity",
+    "shortName": "Tongan Polity",
+    "color": "#d67aad",
+    "capitalRegionId": "province:04983",
+    "governmentType": "kingdom",
+    "polityType": "kingdom"
+  },
+  {
+    "id": "transylvania",
+    "name": "Principality of Transylvania",
+    "shortName": "Principality of Transylvania",
+    "color": "#9eb89c",
+    "capitalRegionId": "province:01685",
+    "governmentType": "principality",
+    "polityType": "principality"
+  },
+  {
+    "id": "trinh",
+    "name": "Trinh Northern Vietnam",
+    "shortName": "Trinh Northern Vietnam",
+    "color": "#09a19c",
+    "capitalRegionId": "province:02865",
+    "governmentType": "lordship",
+    "polityType": "lordship"
+  },
+  {
+    "id": "tripoli",
+    "name": "Regency of Tripoli",
+    "shortName": "Regency of Tripoli",
+    "color": "#8d5d94",
+    "capitalRegionId": "province:01216",
+    "governmentType": "regency",
+    "polityType": "regency"
+  },
+  {
+    "id": "tunis",
+    "name": "Regency of Tunis",
+    "shortName": "Regency of Tunis",
+    "color": "#c82880",
+    "capitalRegionId": "province:01220",
+    "governmentType": "regency",
+    "polityType": "regency"
+  },
+  {
+    "id": "tuscany",
+    "name": "Grand Duchy of Tuscany",
+    "shortName": "Grand Duchy of Tuscany",
+    "color": "#1aae04",
+    "capitalRegionId": "province:01222",
+    "governmentType": "grand_duchy",
+    "polityType": "grand_duchy"
+  },
+  {
+    "id": "upper_guinea",
+    "name": "Upper Guinea Forest Communities",
+    "shortName": "Upper Guinea Forest Communities",
+    "color": "#e0f64a",
+    "capitalRegionId": "province:00261",
+    "governmentType": "decentralized_region",
+    "polityType": "decentralized_region"
+  },
+  {
+    "id": "venice",
+    "name": "Republic of Venice",
+    "shortName": "Venice",
+    "color": "#83486a",
+    "capitalRegionId": "province:01311",
+    "governmentType": "republic",
+    "polityType": "republic"
+  },
+  {
+    "id": "wallachia",
+    "name": "Principality of Wallachia",
+    "shortName": "Principality of Wallachia",
+    "color": "#7fde15",
+    "capitalRegionId": "province:01690",
+    "governmentType": "principality",
+    "polityType": "principality"
+  },
+  {
+    "id": "yemen",
+    "name": "Yemeni Imamate",
+    "shortName": "Yemeni Imamate",
+    "color": "#4401e7",
+    "capitalRegionId": "province:01007",
+    "governmentType": "imamate",
+    "polityType": "imamate"
+  },
+  {
+    "id": "zambezi_regions",
+    "name": "Zambezi and Mozambique Polities",
+    "shortName": "Zambezi and Mozambique Polities",
+    "color": "#c976c0",
+    "capitalRegionId": "province:00611",
+    "governmentType": "decentralized_region",
+    "polityType": "decentralized_region"
+  }
+]

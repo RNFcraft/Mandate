@@ -12,8 +12,10 @@ async function publishWorld(result,config,folder){
   folder=local(folder);const parent=path.dirname(folder),stage=path.join(parent,`.world-stage-${randomUUID()}`),backup=path.join(parent,`.world-backup-${randomUUID()}`);let backed=false,published=false;
   try{
     await fs.cp(folder,stage,{recursive:true,errorOnExist:true,force:false});
-    const files={'polities.json':config.polities.slice().sort((a,b)=>compare(a.id,b.id)),'polity-relations.json':{version:1,relations:validateRelations(config.relationships,config.polities)},'political-geography.json':{...result.asset,status:'published'},'political-geography-overrides.json':{version:1,overrides:result.asset.provenance.manualOverrides}};
+    const files={'polities.json':config.polities.slice().sort((a,b)=>compare(a.id,b.id)),'polity-relations.json':{version:1,relations:validateRelations(config.relationships,config.polities)},'political-geography.json':{...result.asset,status:'published'},'political-geography-overrides.json':{version:1,overrides:result.asset.provenance.manualOverrides},...(result.runtime?Object.fromEntries(Object.entries(result.runtime).map(([key,value])=>[key+'.json',value])):{})};
+    if(result.provinceSummary)files['political-province-qa.json']={...result.provinceSummary,published:true};
     for(const [name,value]of Object.entries(files)){const file=await fs.open(path.join(stage,name),'w');try{await file.writeFile(json(value));await file.sync();}finally{await file.close();}}
+    if(result.runtime){const hierarchy=JSON.parse(await fs.readFile(path.join(ROOT,'client/data/map-v2/hierarchy.json')));require('../shared/scenario.cjs').validateScenario(result.runtime,new Set(hierarchy.territories.map(t=>t.id)));validatePoliticalGeography(files['political-geography.json'],files['polities.json'],files['polity-relations.json'],hierarchy);for(const name of ['population.json','population.meta.json','population-composition.json'])if(hash(await fs.readFile(path.join(folder,name)))!==hash(await fs.readFile(path.join(stage,name))))throw Error('Staged population assets changed');}
     await fs.rename(folder,backup);backed=true;try{await fs.rename(stage,folder);published=true;}catch(e){await fs.rename(backup,folder);backed=false;throw e;}
   }finally{
     for(const target of [stage,...(published&&backed?[backup]:[])]){if(path.dirname(target)!==parent||!/^\.world-(stage|backup)-/.test(path.basename(target)))throw Error('Unsafe world stage cleanup');await fs.rm(target,{recursive:true,force:true});}
@@ -25,7 +27,8 @@ async function generateWorld(options={},context){
   if(!auditDir.startsWith(path.join(ROOT,'data/generated')+path.sep)&&!auditDir.startsWith(path.join(ROOT,'tmp')+path.sep))throw Error('World audit must be ignored output');
   if(authoringFile.startsWith(auditDir+path.sep)||auditDir===scenarioDir||auditDir.startsWith(scenarioDir+path.sep))throw Error('Audit cannot overwrite authored assets');
   if(options.publish&&authoringFile!==path.join(scenarioDir,'political-geography-authoring.json'))throw Error('Publication requires scenario-local authoring');
-  const protectedFiles=context?.protectedFiles||FROZEN.map(file=>path.join(ROOT,file)),before=Object.fromEntries(await Promise.all(protectedFiles.map(async file=>[file,hash(await fs.readFile(file))])));
+  const protectedFiles=context?.protectedFiles||[...FROZEN,...(await fs.readdir(path.join(ROOT,'client/data/map-v2'))).map(name=>'client/data/map-v2/'+name),'data/population/baselines/1700/population.json'].map(file=>path.join(ROOT,file)),before=Object.fromEntries(await Promise.all(protectedFiles.map(async file=>[file,hash(await fs.readFile(file))])));
+  if(!context)before[path.join(scenarioDir,'province-political-authoring.json')]=hash(await fs.readFile(path.join(scenarioDir,'province-political-authoring.json')));
   const authoredBytes=await fs.readFile(authoringFile),config=parseStrictJson(authoredBytes),geography=context?.geography||await require('./import-population-1700.cjs').loadGeography();
   const topology=context?.topology||JSON.parse(await fs.readFile(path.join(ROOT,'data/processed/canonical/atomic.topo.json')));
   const baselineBytes=context?Buffer.from(json(context.baseline)):await fs.readFile(path.join(ROOT,'data/population/baselines/1700/population.json')),baseline=context?.baseline||JSON.parse(baselineBytes);
@@ -38,8 +41,11 @@ async function generateWorld(options={},context){
   await verify();
   const output={'summary.json':audit.summary,'polity-summary.json':audit.politySummary,'largest-polities.json':audit.largestPolities,'unassigned-territories.json':audit.unassignedTerritories,'border-adjacencies.json':audit.borderAdjacencies,'tiny-polities.json':audit.tinyPolities,'disconnected-polities.json':audit.disconnectedPolities,'isolated-territories.json':audit.isolatedTerritories,'source-country-artifacts.json':audit.sourceCountryArtifacts,'manual-overrides.json':result.overrides,'territory-assignments.json':result.rows,'rule-usage.json':{used:result.rulesUsed,unused:result.rulesUnused},'political-geography.json':result.asset,'polities.json':config.polities.slice().sort((a,b)=>compare(a.id,b.id)),'polity-relations.json':{version:1,relations:validateRelations(config.relationships,config.polities)},'frozen-hashes.json':Object.fromEntries(Object.entries(before).map(([file,sha])=>[path.relative(ROOT,file).replaceAll('\\','/'),{beforeSha256:sha,afterSha256:sha,unchanged:true}]))};
   const serialized=Object.entries(output).map(([name,value])=>[name,json(value)]);await fs.mkdir(auditDir,{recursive:true});for(const [name,bytes]of serialized)await fs.writeFile(path.join(auditDir,name),bytes);
-  await verify();if(options.publish)await publishWorld(context?result:{...result,asset:await require('./province-publication.cjs').compilePoliticalAsset(result.asset)},config,scenarioDir);
-  return {result,audit,mode:options.publish?'published':'preview'};
+  let province;
+  if(!context){province=await require('./mandate-world-provinces.cjs').compileWorld(result,config,scenarioDir);province.summary.atomicSourceCountryArtifactWarnings=audit.summary.sourceCountryArtifactWarnings;for(const [name,value]of Object.entries(province.outputs))await fs.writeFile(path.join(auditDir,name),json(value));}
+  await verify();
+  if(options.publish){if(province&&(province.summary.assignedPopulationPct<=95||province.summary.assignedInhabitedAreaPct<=90||province.summary.capitalFailures))throw Error('Province political coverage/capital validation failed');await publishWorld(context?result:{...result,asset:province.asset,runtime:province.runtime,provinceSummary:province.summary},config,scenarioDir);await verify();}
+  return {result,audit,province,mode:options.publish?'published':'preview'};
 }
 module.exports={generateWorld,publishWorld,argsOf,FROZEN};
-if(require.main===module)generateWorld(argsOf(process.argv.slice(2))).then(({audit,mode})=>console.log(json({mode,...audit.summary}))).catch(e=>{console.error(e.message);process.exitCode=1;});
+if(require.main===module)generateWorld(argsOf(process.argv.slice(2))).then(({audit,province,mode})=>console.log(json({mode,...(province?.summary||audit.summary)}))).catch(e=>{console.error(e.message);process.exitCode=1;});

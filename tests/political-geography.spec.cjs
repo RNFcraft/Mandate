@@ -130,9 +130,15 @@ test('real mesh preview is explicit, debug click queries runtime, and frozen fil
   test.setTimeout(120000);
   const files=['data/processed/canonical/atomic.topo.json','client/data/map-v2/hierarchy.json','scenarios/1700/population.json','scenarios/1700/population.meta.json','scenarios/1700/ownership.json','scenarios/1700/countries.json'];
   const hashes=async()=>Promise.all(files.map(async file=>crypto.createHash('sha256').update(await fs.readFile(file)).digest('hex'))),before=await hashes();
-  const result=await generatePoliticalGeography();expect(result.audit.summary.assignedTerritories).toBe(0);expect(result.audit.summary.unassignedPopulation).toBe(591714189);
-  const preview=await(await request.get('/api/scenarios/1700?politicalPreview=1')).json();expect(preview.politicalPreview).toBe(true);expect(Object.values(preview.ownership).every(value=>value===null)).toBe(true);
+  const result=await generatePoliticalGeography();const authored=JSON.parse(await fs.readFile('scenarios/1700/political-geography-overrides.json'));expect(result.audit.summary.assignedTerritories).toBe(authored.overrides.length);expect(result.audit.summary.unassignedPopulation).toBeGreaterThan(0);
+  const preview=await(await request.get('/api/scenarios/1700?politicalPreview=1')).json();expect(preview.politicalPreview).toBe(true);expect(Object.values(preview.ownership).some(value=>value!==null)).toBe(true);expect(Object.values(preview.ownership).some(value=>value===null)).toBe(true);
   await page.goto('/?scenario=1700&politicalPreview=1');await page.waitForFunction(()=>window.inspectPoliticalTerritory);await expect(page.locator('#political-inspect')).toContainText('PREVIEW');
-  const row=await page.evaluate(()=>{const id=mandateMap.model.geography?.territories?.[0]?.id||[...mandateSimulation.ownership.keys()][0];mandateMap.canvas.dispatchEvent(new CustomEvent('regionselect',{detail:{regionId:id}}));return inspectPoliticalTerritory(id);});
+  const row=await page.evaluate(()=>{const id=[...mandateSimulation.ownership].find(([,owner])=>owner===null)[0];mandateMap.canvas.dispatchEvent(new CustomEvent('regionselect',{detail:{regionId:id}}));return inspectPoliticalTerritory(id);});
   expect(row.ownerPolityId).toBeNull();expect(row.controllerPolityId).toBeNull();expect(Number.isSafeInteger(row.population)).toBe(true);await expect(page.locator('#political-inspect')).toHaveText(JSON.stringify(row));expect(await hashes()).toEqual(before);
+});
+
+test('published initialization preserves an owned province capital and clears foreign or unknown capitals',()=>{
+  const input=scenario(),id=features[0].id;input.countries=polities.map(p=>({...p,capitalRegionId:id}));
+  const out=politics.initializePoliticalScenario(input,hierarchy);expect(out.countries.find(c=>c.id==='alpha').capitalRegionId).toBe(id);expect(out.countries.find(c=>c.id==='beta').capitalRegionId).toBeNull();
+  input.countries[0].capitalRegionId='province:99999';expect(politics.initializePoliticalScenario(input,hierarchy).countries[0].capitalRegionId).toBeNull();
 });

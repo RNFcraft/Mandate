@@ -63,7 +63,9 @@ function initializePoliticalScenario(data,hierarchy){
   const asset=validatePoliticalGeography(data.politicalGeography,polities,relations,hierarchy);
   if(asset.status!=='published')return data; // Draft/preview never silently replace DEV fallback.
   if(data.scenario.year!==1700||data.scenario.geography!==asset.geography)fail('scenario target mismatch');
-  const countries=polities.slice().sort((a,b)=>compare(a.id,b.id)).map(p=>({id:p.id,name:p.name,shortName:p.shortName,color:p.color,capitalRegionId:null,governmentType:p.type,polityType:p.type}));
+  const previous=new Map((data.countries||[]).map(c=>[c.id,c]));
+  const territories=new Set(hierarchy.territories.map(t=>t.id));
+  const countries=polities.slice().sort((a,b)=>compare(a.id,b.id)).map(p=>{const capital=previous.get(p.id)?.capitalRegionId;return {id:p.id,name:p.name,shortName:p.shortName,color:p.color,capitalRegionId:territories.has(capital)&&asset.owners[capital]===p.id?capital:null,governmentType:p.type,polityType:p.type};});
   const ownership=Object.fromEntries(hierarchy.territories.slice().sort((a,b)=>compare(a.id,b.id)).map(t=>[t.id,asset.owners[t.id]??null]));
   const controllers=Object.fromEntries(Object.entries(asset.controllers).sort((a,b)=>compare(a[0],b[0])));
   return {...data,countries,ownership,controllers};

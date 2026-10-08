@@ -1,1 +1,7 @@
-{"id":"1700","name":"1700 тест","year":1700,"version":4,"geography":"mandate-provinces-v1"}
+{
+  "id": "1700",
+  "name": "Mandate World 1700",
+  "year": 1700,
+  "version": 4,
+  "geography": "mandate-provinces-v1"
+}

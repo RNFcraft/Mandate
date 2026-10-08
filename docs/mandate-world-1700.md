@@ -1,175 +1,75 @@
-# Mandate World 1700 v1
+# Mandate World 1700 on frozen Map v2
 
-"Mandate World 1700 is a gameplay-oriented, historically recognizable starting
-scenario. Borders and political entities are intentionally simplified."
+Normal http://127.0.0.1:3000/?scenario=1700 loads the published Mandate World scenario. No politicalPreview parameter is needed. This is a gameplay-oriented, historically recognizable starting setup with intentionally simplified borders and entities. No historical-basemaps polygons or assignments are inputs.
 
-This is an independently authored game dataset. Gameplay and internal consistency
-take priority over exact historical fidelity. No historical-basemaps polygons,
-feature IDs, assignment output or NAME mapping are input to this generator. The
-GPL historical-basemaps preview remains separate, ignored reference/audit data.
+Existing independent atomic authoring is retained: 167 polity IDs and metadata, 329 rules, 41 relationships and eight strategic atomic anchors. Atomic geometry serves offline authoring/provenance only. Runtime authority is mandate-provinces-v1, 5,001 stable province:XXXXX IDs, scenario v4. There are no added administrative states, economy, war or political mechanics.
 
-## Authoring asset
+## Projection and publication
 
-`scenarios/1700/political-geography-authoring.json` is the authored source of truth
-for **167 playable polities**, **329 rules**, **41 initial relationships** and
-**8 strategic-anchor gameplay overrides**. The runtime polity registry remains
-the existing single GameState registry; no political mechanics are added.
+Run node --max-old-space-size=8192 scripts/generate-mandate-world-1700.cjs for preview; add --publish to replace the production scenario. The existing generator/publisher implements validation, complete staged folder, file sync, replacement and rollback. It preserves population, meta and composition bytes. Frozen map artifacts and the atomic population baseline are hash-guarded. No partitioning, mapping, coastline, adjacency or manifest regeneration is involved.
 
-The asset contains version/year/datasetId/description, polity metadata, major IDs,
-rules, relationships and overrides. Polity IDs are explicitly chosen in authored
-data, not inferred by geometry or from modern source prefixes. A polity type is
-metadata, including kingdom, confederation, decentralized_region, indigenous_region,
-frontier and colonial_administration. Major powers have authored presentation colors.
+The shared province projection sums positive atomic overlap area by polity, including unassigned/null candidates. Maximum area wins; ties use ASCII polity ID order. Controllers use existing effective controller projection; all current published controllers equal owners (empty difference map). Province candidates and shares are retained for QA. Ambiguity triggers include runner share >=15% with winner margin <=20%, multiple candidates >=10%, anchor conflicts, all-neighbor isolation and nearby small disconnected fragments. Every explicit correction remains in ambiguity QA even after its structural problem is fixed.
 
-A rule is `{id,match,ownerPolityId,reason}`. Selectors may combine with AND:
-`sourceCountry`, `[west,south,east,north]` bbox, `territoryIds`, `territoryId`.
-sourceCountry matches **hierarchy adm0Id**, including residual atoms; it is a
-modern geographic authoring proxy, never independent historical evidence.
-Bbox membership reuses the existing canonical equal-area centroid helper and
-supports longitude wrap. An atom is not split to fit a rectangle.
+scenarios/1700/province-political-authoring.json contains the data-driven overrides and capital anchors. Each correction has an exact province ID and reason. Current corrections:
 
-Precedence: exact territory > explicit list > bbox+sourceCountry > bbox >
-sourceCountry > fallback. Equal-specificity rules targeting different owners fail,
-including lower-priority conflicts hidden by stronger rules. Duplicate rule IDs,
-unknown polity/territory/country references and malformed selectors fail too.
-There is no iteration-order or current DEV ownership dependence.
+- province:00001 -> timor_polities: Timor continuity: remove the detached Mataram province caused by the modern Indonesian sourceCountry proxy; retain the existing Timor polity across the frozen island.
+- province:01735 -> circassian: Coarse-province coastal Caucasus continuity: joins the authored Anapa fragment to the existing Circassian mainland through its only intervening province. Dominant Russian proxy overlap (81.2%) is deliberately superseded; Circassian candidate share is 18.8%. Gameplay correction, not a precise historical border.
+- province:02312 -> tibet: Himalayan frontier: remove the isolated Mughal province north of its land-connected territory; adopt the substantial Tibetan overlap candidate and retain the existing simplified mountain polity.
+- province:03840 -> peru: Fill the inhabited Panama authoring omission using the existing Spanish Peru/Colombia gameplay bloc; no new polity or modern-border claim.
+- province:03842 -> peru: Complete the inhabited Panama corridor with the existing Spanish Peru/Colombia gameplay bloc; no geometric change.
 
-Overrides require territoryId, ownerPolityId and reason; controllerPolityId and
-source are optional. Missing source receives an explicit **authored gameplay
-decision** marker, not a fabricated citation. Referenced decisions can provide
-their actual source separately. Overrides apply last; duplicate territories fail.
-Eight explicit atoms preserve Paris, Amsterdam, Vienna, Moscow, Beijing, Edo,
-Venice and Rome as strategic anchors. Normal start control equals owner everywhere.
+## Coverage and QA
 
-## Main simplifications
+| Measure | Published result |
+|---|---:|
+| Registered / active polities | 167 / 160 |
+| Assigned / unassigned provinces | 4,946 / 55 |
+| Assigned / unassigned people | 591,713,514 / 675 |
+| Population coverage | 99.999885925% |
+| Assigned / unassigned land km2 | 134,439,224.956 / 12,281,248.717 |
+| All-land coverage | 91.629492184% |
+| Relevant inhabited land coverage | 99.991361374% |
+| Ambiguous provinces | 1,050 |
+| Province corrections | 5 |
+| Disconnected polities | 57 |
+| All-neighbor isolation / suspicious mainland review | 17 / 2 |
+| Owned capitals / validation failures | 160 / 0 |
 
-- HRE is represented by Bavaria, Saxony, Hanover, Brandenburg-Prussia, Rhenish,
-  Swabian and North German blocks; no imperial constitutional mechanics.
-- Italy is reduced to Savoy, Genoa, Milan, Venice, Emilian Duchies, Tuscany,
-  Papal States and Naples/Sicily. Some canonical atoms are much larger than the
-  desired states; these are deliberate whole-atom gameplay approximations.
-- England/Ireland and Scotland remain separate with a personal union. Baltic,
-  Crimean, Transylvanian, Wallachian and Moldavian regions use coarse authored
-  selectors. Russian far northeastern communities are a separate abstraction.
-- Qing is separated from Tibet and Dzungaria. Mughal India has Maratha, Rajput,
-  Mysore, Tamil, Malabar and Ahom regional carve-outs. No claim of exact authority.
-- Central Asia, mainland Southeast Asia, Vietnam and maritime polities are
-  simplified into readable starting blocs. Some port colonies use whole atoms.
-- New Spain, Peru, Portuguese Brazil, New France, English colonies and Caribbean
-  administrations are distinct from their metropoles. Amazonia, the Plains,
-  woodlands, Arctic, Pacific coast, Mapuche and Pampas are indigenous regions.
-- African states coexist with broad forest, Sahel, highland and river entities.
-  Oceania uses broad indigenous confederations, not invented modern nation-states.
-- SourceCountry-only proxy assignments remain visible in audit and are legitimate
-  authoring choices **requiring review**, not assertions that modern borders existed
-  in 1700. Future authoring may refine them without changing the mesh.
+Relevant inhabited land means frozen gameplay provinces with runtime population >0. Antarctica and remote zero-population islands remain null. The 675 unassigned baseline people belong to two Falkland provinces; no demographic or ownership adjustment is made merely to reach 100%. Population is unchanged: total 591,714,189, urban 46,409,598, rural 545,304,591, 9,113 cohorts.
 
-Broad context references are listed in the authoring asset: Oxford's Europe circa
-1700 teaching resource, Smithsonian's Qing dynasty overview and Encyclopaedia
-Iranica's Safavid overview. These identify recognizable powers; no coordinates
-or boundaries were copied from them. Every territorial rule is a gameplay decision.
+Relationships retain existing types and references: 24 colonial_dependency, 2 personal_union, 11 subject_of, 4 tributary_of. No occupation is invented.
 
-## Preview and publication
+The following seven registry entries have no standalone province after projection: brunei, danish_caribbean, dutch_caribbean, macao_portuguese, maldives, malta_order, ragusa. Their metadata and relationships remain intact; capital is null. Assigning an entire large province/archipelago solely to retain a tiny polity would distort this fixed-scale map.
 
-Generate preview only:
+Twenty-nine explicit major city anchors choose the containing owned province, or a nearest-owned centroid fallback when the coastal clean mask excludes the point. Copenhagen and Quebec use this documented fallback. Other active polities receive the largest-population owned gameplay seat, with area and ASCII tie breaks; this is not a precise historical capital claim. Published scenario initialization preserves only existing, owned province capitals.
 
-```powershell
-node --max-old-space-size=8192 scripts/generate-mandate-world-1700.cjs
-```
+Mandatory anchors:
 
-Start the local map with `npm start`, then open:
+| Anchor | Polity | Province |
+|---|---|---|
+| Paris | fra_bourbon | province:01266 |
+| Vienna | habsburg | province:01333 |
+| Amsterdam | nld_republic | province:01376 |
+| Rome | papal | province:01221 |
+| Beijing | qing | province:03354 |
+| Moscow | rus_tsardom | province:01846 |
+| Edo | tokugawa | province:04938 |
+| Venice | venice | province:01311 |
 
-http://127.0.0.1:3000/?scenario=1700&politicalPreview=mandate-world-v1
+Largest by area: Russian Tsardom 15,516,877.746 km2; Qing 7,629,883.187; Peru 6,500,496.156. Largest by population: Mughal 144,639,435; Qing 99,227,800; Tokugawa 25,518,201. Largest by province count: Qing 508; Russia 398; Mughal 286. These are owner aggregates of the unchanged gameplay baseline, not independently researched national population estimates.
 
-This selects only the Mandate World ignored preview snapshots. The existing
-`politicalPreview=1` foundation preview remains supported independently. Only
-allowlisted dataset names are accepted; arbitrary paths are rejected. Existing
-owner colors, shared-arc border stitching, runtime population and game controls
-are reused. The minimal debug output shows the clicked atomic territory's
-owner/controller/population and is positioned above the canvas. No UI redesign.
+Audit output under data/generated/political-geography/1700/mandate-world-v1/ is ignored and regenerated offline. Files with province- prefix include summary, polity-summary, largest-polities, border-adjacencies, ambiguous, isolated, connectivity, tiny-polities, unassigned, overrides, capitals, relationships, assignments and political-geography JSON. Existing atomic audit outputs remain for provenance. The atomic source-country artifact audit exposes 198 proxy cases; zero province source-country warnings reflects the province hierarchy having no ADM fields, not proof of historical accuracy. Published political-province-qa.json provides the tracked summary for a clean checkout.
 
-Production remains the existing draft until explicit publication. The exact
-future command, **not run as part of this task**, is:
+## Visual review and remaining limitations
 
-```powershell
-node --max-old-space-size=8192 scripts/generate-mandate-world-1700.cjs --publish
-```
+scripts/capture-mandate-world-provinces.cjs captures the normal scenario at DPR2, 1600x1000 CSS / 3200x2000 PNG, with browser errors and network requests in screenshots/browser-smoke.json. All 32 views were inspected on 2026-10-08:
 
-Publication validates all rules/references and coverage first, stages a copy of
-the scenario folder, flushes the four political assets, and replaces the folder
-with rollback on normal I/O failure. Population/meta, composition and other assets
-are preserved byte-for-byte. Publication requires scenario-local authoring.
-Runtime ownership/controllers remain the sole authority after initialization;
-loaded saves are not overwritten by static authoring. The editor preserves the
-authoring asset independently of its payload.
+world, europe, hre, italy, balkans, baltic, scandinavia, british_isles, iberia, russia, ukraine_crimea, caucasus, middle_east, india, bengal, china, tibet_dzungaria, japan, central_asia, southeast_asia, indonesia, philippines, north_america, caribbean, mexico, south_america, africa, north_africa, west_africa, horn_africa, southern_africa, oceania.
 
-## Audit and current coverage
+Each PNG is data/generated/political-geography/1700/mandate-world-v1/screenshots/<view>.png. All sixteen requested views are included. The map uses shared province edges for international borders only when owners differ; the existing optional province grid remains a separate thin layer. No atomic political worker requests occur.
 
-Ignored output: `data/generated/political-geography/1700/mandate-world-v1/`.
+Remaining editorial border regions: simplified HRE and Baltic blocks, Caucasus/steppe edge, Himalayan frontier, Borneo micro-holdings, North American colonial/indigenous frontier, broad African proxy blocs and southern South American colonial reach. Existing simplifications are retained rather than inventing a new historical model. Two generic isolate reviews remain: Bangka's island case and an indigenous North American frontier province. Disconnected components include legitimate islands, colonies and separated holdings; the audit does not equate disconnection with an error. Tiny/zero-province polities and two coastal capital fallbacks are explicit scale limitations.
 
-| Metric | Preview result |
-| --- | --- |
-| Active / registered polities | 167 / 167 |
-| Assigned territories | 52,131 / 52,262 = 99.7493% |
-| Assigned population | 591,660,278 / 591,714,189 = 99.9909% |
-| Assigned canonical area | 134,697,584.8055 km² = 91.5923% |
-| Assigned relevant inhabited area | 99.9313% |
-| Unassigned territories / population | 131 / 53,911 |
-| Unassigned area | 12,364,516.6866 km², mostly Antarctica |
-| Owner/controller differences | 0 |
-| Gameplay overrides | 8 |
-| Relationships | colonial_dependency 24, subject_of 11, tributary_of 4, personal_union 2 |
+## Validation
 
-"Relevant inhabited area" means area of a canonical atom with frozen baseline
-population > 0. This is an audit denominator, not a newly invented land mask.
-Coverage is derived from the immutable baseline; no people are reassigned or
-regenerated. Unfinished Panama (49,107 people), San Marino (3,837), Falklands (675)
-and the Siachen proxy (292) remain null alongside remote/uninhabited atoms.
-Leaving these incomplete is explicit; no forced 100% target.
-
-Required audits: summary.json, polity-summary.json, largest-polities.json,
-unassigned-territories.json, border-adjacencies.json, tiny-polities.json,
-disconnected-polities.json. Additional audits: isolated-territories.json,
-source-country-artifacts.json, manual-overrides.json, territory-assignments.json,
-rule-usage.json, frozen-hashes.json and three political preview snapshots.
-
-Connectivity uses only shared arc references already present in canonical topology.
-No geometry, edge positions or topology files are edited. Adjacencies aggregate
-existing arc counts, not newly measured border geometry. Audit warns conservatively:
-
-- 81 polities have more than one land-connected component. Islands, colonies and
-  coastal residual slivers explain many; no automatic deletion or reassignment.
-- 13 tiny cases mean one-or-fewer atoms **or** <10,000 baseline people. Emilian
-  Duchies is one large atom with 944,567 people; this is a mesh-scale limitation,
-  not an assertion that it is geographically tiny. Small/zero-population island
-  polities reflect the frozen baseline and are not "corrected" demographically.
-- 69 atoms differ in owner from all their land neighbors. Three satisfy the large
-  enclave threshold (>=10,000 km² or >=100,000 people): Emilia, a Canadian woodland
-  atom and Cayenne. These are flagged for review.
-- 198 proxy-country cases use only a sourceCountry rule. The audit exposes this
-  modern-shape shortcut rather than treating it as historical evidence.
-- Major-polity population guard flags Portuguese Brazil, English Atlantic Colonies,
-  New France and Oman below the conservative 500,000-person threshold. This is
-  not a historical population estimate or reason to alter the frozen baseline.
-- Components >1,500 km from their main component representative are flagged as
-  isolated-distance candidates. Sea-connected empires may legitimately trigger it.
-
-Synthetic tests cover precedence, lower-priority conflict rejection, deterministic
-bytes, null/decentralized entities, relationships, gameplay overrides, shared arcs,
-frozen files, preview-only behavior and fixture publication rollback. Browser
-validation verifies colors, runtime authority and visible click inspection and
-stores `map-preview.png` in ignored audit output. Run full `npm test`.
-
-Validation on 2026-10-06: full `npm test` passed all 188 tests (8.3 minutes).
-The rendered screenshot was visually inspected; owner/controller/population debug
-is visible. Repeated real generation produced byte-identical contents for all
-16 JSON audit/snapshot outputs. All eight protected SHA-256 hashes matched.
-Production political assets remained unchanged; no production publication ran.
-
-Files for this dataset: `scenarios/1700/political-geography-authoring.json`,
-`scripts/mandate-world-authoring.cjs`, `scripts/mandate-world-audit.cjs`,
-`scripts/generate-mandate-world-1700.cjs`, `tests/mandate-world.spec.cjs`,
-this document, `scripts/scenarios.cjs`, `client/scenarios/store.js`,
-`client/map/main.js`, `client/game/controls.css`, and rebuilt
-`client/map.bundle.js` / `client/map.bundle.js.map`. Existing historical-basemaps
-preview changes are retained separately.
+Repeated actual production publication produced byte-identical hashes for nine political/runtime outputs. Synthetic and real temporary-folder tests check deterministic projection/publication, preservation of frozen map and population assets, rejection before replacement, polity/province/controller references, owned capitals, relationship retention, normal browser registry/colors and absence of atomic requests. Existing political-border mesh tests verify equal-owner edges disappear and ownership changes rebuild borders. Validation on 2026-10-08: targeted Mandate World, political geography and province runtime tests passed 35/35; full npm test passed 212/212 (8.7 minutes), including the actual normal political border mesh comparison. Normal browser smoke passed with 167 registered polities, 5,001 provinces, 160 owned capitals, unchanged population and no page errors or atomic/ADM2 political requests. No commit or push was made.
