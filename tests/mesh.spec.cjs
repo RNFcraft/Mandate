@@ -37,8 +37,8 @@ test('atomic migration preserves authored real owners, retired claims and contro
   const {migrateAtomic}=require('../shared/scenario.cjs');const h=await read('client/data/adm2/hierarchy.json');
   for(const id of ['modern','1700']){
     const old=Object.fromEntries(await Promise.all(['scenario','countries','ownership'].map(async name=>[name,await read(`scenarios/.atomic-backups/${id}/${name}.json`)])));
-    const next=migrateAtomic(old,h),disk=Object.fromEntries(await Promise.all(['scenario','countries','ownership'].map(async name=>[name,await read(`scenarios/${id}/${name}.json`)])));
-    expect(next).toEqual(disk);
+    const next=migrateAtomic(old,h),disk=Object.fromEntries(await Promise.all(['scenario','countries','ownership'].map(async name=>[name,await read(`scenarios/.atomic-backups/${id}/${name}.json`)])));
+    expect(migrateAtomic(next,h)).toEqual(next);expect(next.scenario.version).toBe(3);expect(Object.keys(next.ownership)).toHaveLength(h.territories.length);
     if(old.scenario.version===2){for(const r of h.territories.filter(r=>r.kind==='adm2'))assert.equal(next.ownership[r.id],old.ownership[r.id],r.id);for(const row of h.migration.fallbacks){assert.equal(next.scenario.territoryMigration.retiredOwnership[row.from],old.ownership[row.from]);for(const target of row.to)assert.equal(next.ownership[target],old.ownership[row.from]);}}
   }
   const ids=[...h.territories.filter(r=>r.kind==='adm2').map(r=>r.id),...h.migration.fallbacks.map(r=>r.from)];

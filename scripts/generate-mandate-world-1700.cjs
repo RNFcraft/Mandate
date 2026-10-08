@@ -38,7 +38,7 @@ async function generateWorld(options={},context){
   await verify();
   const output={'summary.json':audit.summary,'polity-summary.json':audit.politySummary,'largest-polities.json':audit.largestPolities,'unassigned-territories.json':audit.unassignedTerritories,'border-adjacencies.json':audit.borderAdjacencies,'tiny-polities.json':audit.tinyPolities,'disconnected-polities.json':audit.disconnectedPolities,'isolated-territories.json':audit.isolatedTerritories,'source-country-artifacts.json':audit.sourceCountryArtifacts,'manual-overrides.json':result.overrides,'territory-assignments.json':result.rows,'rule-usage.json':{used:result.rulesUsed,unused:result.rulesUnused},'political-geography.json':result.asset,'polities.json':config.polities.slice().sort((a,b)=>compare(a.id,b.id)),'polity-relations.json':{version:1,relations:validateRelations(config.relationships,config.polities)},'frozen-hashes.json':Object.fromEntries(Object.entries(before).map(([file,sha])=>[path.relative(ROOT,file).replaceAll('\\','/'),{beforeSha256:sha,afterSha256:sha,unchanged:true}]))};
   const serialized=Object.entries(output).map(([name,value])=>[name,json(value)]);await fs.mkdir(auditDir,{recursive:true});for(const [name,bytes]of serialized)await fs.writeFile(path.join(auditDir,name),bytes);
-  await verify();if(options.publish)await publishWorld(result,config,scenarioDir);
+  await verify();if(options.publish)await publishWorld(context?result:{...result,asset:await require('./province-publication.cjs').compilePoliticalAsset(result.asset)},config,scenarioDir);
   return {result,audit,mode:options.publish?'published':'preview'};
 }
 module.exports={generateWorld,publishWorld,argsOf,FROZEN};

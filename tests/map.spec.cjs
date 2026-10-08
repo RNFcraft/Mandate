@@ -5,8 +5,8 @@ test('world geometry, interaction, resize and ownership', async ({ page }) => {
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('/');
   await page.waitForFunction(() => window.mandateMap?.frames > 0);
-  expect(await page.evaluate(() => ({ countries: mandateMap.model.countries.size, regions: mandateMap.model.adm1.size }))).toEqual({ countries: 258, regions: 4596 });
-  expect(await page.evaluate(()=>mandateMap.model.territories.size)).toBeGreaterThan(49000);
+  expect(await page.evaluate(() => ({ countries: mandateMap.model.countries.size, regions: mandateMap.model.adm1.size }))).toEqual({ countries: 258, regions: 0 });
+  expect(await page.evaluate(()=>mandateMap.model.territories.size)).toBe(5001);
   // Central Pacific must remain ocean, including after spherical projection.
   expect(await page.evaluate(() => {
     const m=mandateMap, x=(m.x+40*m.scale)*m.canvas.width/m.width, y=(m.y+90*m.scale)*m.canvas.height/m.height;
@@ -36,7 +36,7 @@ test('world geometry, interaction, resize and ownership', async ({ page }) => {
   await page.setViewportSize({width:1000,height:700});
   await expect.poll(() => page.evaluate(() => mandateMap.width)).toBe(1000);
   const resized = await page.evaluate(() => ({ center:mandateMap.screenToWorld(innerWidth/2,innerHeight/2), canvas:[mandateMap.canvas.width,mandateMap.canvas.height] }));
-  expect(resized.center[0]).toBeCloseTo(center[0],8);expect(resized.center[1]).toBeCloseTo(center[1],8);expect(resized.canvas).toEqual([500,350]);
+  expect(resized.center[0]).toBeCloseTo(center[0],8);expect(resized.center[1]).toBeCloseTo(center[1],8);expect(resized.canvas).toEqual([1000,700]);
   // Change selection through an actual click on the visible geometry of another region.
   const another = await page.evaluate(first => {
     const m=mandateMap;

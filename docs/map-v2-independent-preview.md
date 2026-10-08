@@ -1,5 +1,8 @@
 # Map v2: independent gameplay geometry
 
+> Historical preview/tuning report. Current authority: [frozen Map v2 runtime](map-v2-runtime.md), 5,001 provinces, mandate-provinces-v1. New preview generations use a separate output folder.
+
+
 **Historical 7,130-province baseline.** The accepted architecture below remains
 in use. Current defaults and the final ~5,000-province tuning results are in
 [map-v2-geography-tuning.md](map-v2-geography-tuning.md). Numbers and the density
@@ -239,5 +242,4 @@ Remaining issues:
 * Nearest-province allocations for absent atomic islands need a geographic
   source-policy review before this becomes authoritative gameplay data.
 
-This is the first independently generated visual pass, not the final Map v2
-layout or freeze. Ownership, saves, states, resources and simulation are deferred.
+This report describes the first independently generated visual pass. Subsequent tuning selected 5,001 provinces and [freeze integration](map-v2-runtime.md) migrated ownership, population, GameState and saves. States/regions and resources remain unimplemented.

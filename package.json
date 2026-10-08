@@ -7,11 +7,15 @@
     "test": "playwright test",
     "build": "node scripts/build-map.cjs",
     "start": "node scripts/serve-map.cjs",
-    "prestart": "npm run build",
+    "prestart": "node scripts/build-client.cjs",
     "build:adm2": "node --max-old-space-size=8192 scripts/build-adm2.cjs",
     "audit:adm2": "node --max-old-space-size=8192 scripts/audit-adm2.cjs",
     "verify:mesh": "node --max-old-space-size=8192 scripts/mesh-invariants.cjs",
-    "migrate:atomic": "node scripts/migrate-atomic-scenarios.cjs"
+    "migrate:atomic": "node scripts/migrate-atomic-scenarios.cjs",
+    "build:client": "node scripts/build-client.cjs",
+    "freeze:provinces": "node scripts/freeze-gameplay-map.cjs",
+    "migrate:provinces": "node scripts/migrate-province-scenarios.cjs",
+    "test:ci": "playwright test --config playwright.ci.config.cjs"
   },
   "keywords": [],
   "author": "",
@@ -30,5 +34,9 @@
   "overrides": {
     "fflate": "^0.8.3",
     "adm-zip": "^0.6.1"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=22"
   }
 }

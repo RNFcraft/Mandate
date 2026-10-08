@@ -4,7 +4,7 @@ function validateScenario(data, regionIds) {
   if (!data || typeof data !== 'object') fail('Некорректный сценарий');
   const meta = data.scenario;
   if (!meta || typeof meta.id !== 'string') fail('Некорректный ID сценария');
-  if (!meta || !TAG.test(meta.id) || !Number.isInteger(meta.year) || meta.year < 1700 || meta.year > 9999 || typeof meta.name !== 'string' || !meta.name.trim() || meta.name.length > 160 || !((meta.version === 1 && meta.geography === 'natural-earth-admin1-v1') || (meta.version === 2 && meta.geography === 'mandate-adm2-v1') || (meta.version===3&&meta.geography==='mandate-atomic-v1'))) fail('Некорректные параметры сценария');
+  if (!meta || !TAG.test(meta.id) || !Number.isInteger(meta.year) || meta.year < 1700 || meta.year > 9999 || typeof meta.name !== 'string' || !meta.name.trim() || meta.name.length > 160 || !((meta.version === 1 && meta.geography === 'natural-earth-admin1-v1') || (meta.version === 2 && meta.geography === 'mandate-adm2-v1') || (meta.version===3&&meta.geography==='mandate-atomic-v1') || (meta.version===4&&meta.geography==='mandate-provinces-v1'))) fail('Некорректные параметры сценария');
   if (!Array.isArray(data.countries)) fail('Ожидается список государств');
   const ids = new Set();
   for (const c of data.countries) {
@@ -25,6 +25,10 @@ function validateScenario(data, regionIds) {
   return data;
 }
 function migrateLegacy(data, hierarchy) {
+  if(hierarchy.id==='mandate-provinces-v1'){
+    if(data.scenario.geography!==hierarchy.id||data.scenario.version!==4)throw Error('Incompatible scenario geography/version; run offline province migration');
+    validateScenario(data,new Set(hierarchy.territories.map(r=>r.id)));return data;
+  }
   if(hierarchy.id==='mandate-atomic-v1')return migrateAtomic(data,hierarchy);
   if(data.scenario.version===2){validateScenario(data,new Set(hierarchy.territories.map(r=>r.id)));return data;}
   validateScenario(data,new Set(hierarchy.adm1.map(r=>r.id)));

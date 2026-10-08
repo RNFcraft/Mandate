@@ -13,7 +13,7 @@ test('ADM2 LOD, lazy loading, bounded cache, global touring and profiling',async
   const errors=[],requests=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
   page.on('request',r=>requests.push(r.url()));
   await page.addInitScript(()=>{window.__lodLongTasks=[];new PerformanceObserver(list=>{for(const entry of list.getEntries())window.__lodLongTasks.push({start:entry.startTime,duration:entry.duration,phase:window.__lodPhase});}).observe({type:'longtask',buffered:true});});
-  await page.goto('/');await page.waitForFunction(()=>window.mandateMap?.politicalFeatures);
+  await page.goto('/?mapDebug=atomic');await page.waitForFunction(()=>window.mandateMap?.politicalFeatures);
   expect(requests.some(url=>url.includes('/chunks/'))).toBe(false);
   expect(await page.evaluate(()=>mandateMap.lod.stats().activeTerritories)).toBe(0);
   expect(requests.some(url=>url.includes('geoBoundariesCGAZ')||url.includes('coarse.topo')||url.includes('detail.topo'))).toBe(false);
@@ -71,12 +71,13 @@ test('hierarchy IDs, original source hash and lossless legacy ownership migratio
   const countries=new Set(hierarchy.adm0.map(r=>r.id)),parents=new Set(hierarchy.adm1.map(r=>r.id));
   expect(hierarchy.territories.every(r=>countries.has(r.adm0Id)&&(!r.adm1Id||parents.has(r.adm1Id)))).toBe(true);
   for(const id of ['modern','1700']){
-    const files=['scenario','countries','ownership'];const before=await Promise.all(files.map(name=>fs.readFile(`scenarios/${id}/${name}.json`,'utf8')));
+    const files=['scenario','countries','ownership'];const before=await Promise.all(files.map(name=>fs.readFile(`scenarios/.atomic-backups/${id}/${name}.json`,'utf8')));
     const legacy=Object.fromEntries(files.map((name,i)=>[name,JSON.parse(before[i])]));const next=migrateLegacy(legacy,hierarchy);
     expect(next.scenario.version).toBe(3);
     if(legacy.scenario.version===1)expect(hierarchy.territories.every(r=>next.ownership[r.id]===(r.adm1Id?legacy.ownership[r.adm1Id]:null))).toBe(true);
+    else if(legacy.scenario.version===2)for(const territory of hierarchy.territories.filter(t=>t.kind==='adm2'))expect(next.ownership[territory.id]).toBe(legacy.ownership[territory.id]);
     else expect(next.ownership).toEqual(legacy.ownership);
-    expect(await Promise.all(files.map(name=>fs.readFile(`scenarios/${id}/${name}.json`,'utf8')))).toEqual(before);
+    expect(await Promise.all(files.map(name=>fs.readFile(`scenarios/.atomic-backups/${id}/${name}.json`,'utf8')))).toEqual(before);
   }
 });
 test('explicit v2 save preserves a v1 disk backup, capital provenance and independent controllers',async({request})=>{
@@ -87,14 +88,14 @@ test('explicit v2 save preserves a v1 disk backup, capital provenance and indepe
   const capital=Object.keys(data.ownership).find(key=>data.ownership[key]===data.countries[0].id);
   data.countries[0].capitalRegionId=capital;data.controllers={[capital]:data.countries[1].id};
   try{
-    expect((await request.put(`/api/scenarios/${id}`,{data})).status()).toBe(200);
+    expect((await request.put(`/api/scenarios/${id}?geography=atomic-debug`,{data})).status()).toBe(200);
     const before={};for(const name of ['scenario','countries','ownership','controllers'])before[name]=await fs.readFile(`${folder}/${name}.json`,'utf8');
-    const migrated=await(await request.get(`/api/scenarios/${id}`)).json();
+    const migrated=await(await request.get(`/api/scenarios/${id}?geography=atomic-debug`)).json();
     expect(migrated.scenario.version).toBe(3);expect(migrated.countries[0].legacyCapitalRegionId).toBe(capital);
     const target=migrated.countries[0].capitalRegionId;expect(migrated.ownership[target]).toBe(data.countries[0].id);expect(migrated.controllers[target]).toBe(data.countries[1].id);
-    expect((await request.put(`/api/scenarios/${id}`,{data:migrated})).status()).toBe(200);
+    expect((await request.put(`/api/scenarios/${id}?geography=atomic-debug`,{data:migrated})).status()).toBe(200);
     for(const name of Object.keys(before))expect(await fs.readFile(`${backup}/${name}.json`,'utf8')).toBe(before[name]);
-    const loaded=await(await request.get(`/api/scenarios/${id}`)).json();expect(JSON.stringify(loaded)).toBe(JSON.stringify(migrated));
+    const loaded=await(await request.get(`/api/scenarios/${id}?geography=atomic-debug`)).json();expect(JSON.stringify(loaded)).toBe(JSON.stringify(migrated));
   }finally{
     if(!/^devlegacy-\d+$/.test(id))throw new Error('Invalid cleanup ID');
     await fs.rm(folder,{recursive:true,force:true});await fs.rm(backup,{recursive:true,force:true});

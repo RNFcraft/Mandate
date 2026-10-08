@@ -43,6 +43,7 @@ function workspaceFolder(folder){const resolved=path.resolve(folder);if(!resolve
 // Two-file publication with rollback on normal I/O failure. Temporary/backup files
 // stay in the destination directory; no scenario folder or raw file is replaced.
 async function publishPopulation(result,folder){
+  if(path.resolve(folder)===path.resolve('scenarios/1700')&&result.population.cohorts.some(c=>!c.territoryId.startsWith('province:')))result=await require('./province-publication.cjs').compilePopulationResult(result);
   folder=workspaceFolder(folder);await fs.mkdir(folder,{recursive:true});const token=randomUUID(),files=[];
   try{
     for(const [name,value]of [['population.json',result.population],['population.meta.json',result.meta]]){
@@ -96,7 +97,7 @@ async function main(argv){
   for(const key of ['total','urban','rural'])rasters[key]=await readAscii(paths[key]);
   validateHydeGrid(rasters.total);
   const scenario=JSON.parse(await fs.readFile(path.join(ROOT,'scenarios/1700/scenario.json'),'utf8'));
-  if(scenario.id!=='1700'||scenario.year!==1700||scenario.geography!=='mandate-atomic-v1')throw Error('Scenario 1700 metadata does not match baseline target');
+  if(scenario.id!=='1700'||scenario.year!==1700||!['mandate-atomic-v1','mandate-provinces-v1'].includes(scenario.geography))throw Error('Scenario 1700 metadata does not match baseline target');
   console.log('SPATIAL: loading exact canonical atomic polygons');const geography=await loadGeography();
   let result;
   try{const spatial=await allocateParallel(rasters,{workers:options.workers,geographyHash:geography.geographyHash,hierarchyHash:geography.hierarchyHash,onProgress:p=>console.log(p.text)});result=createBaseline(rasters,geography.features,geography.hierarchy,{...options,...geography,allocation:spatial.allocation});result.performance=spatial.performance;}

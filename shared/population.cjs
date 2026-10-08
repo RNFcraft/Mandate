@@ -29,7 +29,7 @@ function validate(data,hierarchy,runtime){
     if(!territories.has(c.territoryId))fail('unknown territoryId');
     for(const [field,registry] of [['cultureId','cultures'],['religionId','religions'],['stratumId','strata']])if(!registries[registry].has(c[field]))fail(`unknown ${field}`);
     if(!['rural','urban'].includes(c.settlement))fail('invalid settlement');
-    const tuple=JSON.stringify([c.territoryId,c.cultureId,c.religionId,c.stratumId,c.settlement]);if(tuples.has(tuple))fail('duplicate demographic tuple');tuples.add(tuple);
+    const tuple=JSON.stringify([c.territoryId,c.cultureId,c.religionId,c.stratumId,c.settlement,c.literacyBps,c.birthRateBps??0,c.deathRateBps??0]);if(tuples.has(tuple))fail('duplicate demographic tuple');tuples.add(tuple);
     if(!safe(c.count))fail('invalid count');total+=BigInt(c.count);
     if(c.literacyBps!==null&&!bps(c.literacyBps))fail('invalid literacyBps');
     for(const key of ['birthRateBps','deathRateBps'])if((runtime||Object.hasOwn(c,key))&&!bps(c[key]))fail(`invalid ${key}`);

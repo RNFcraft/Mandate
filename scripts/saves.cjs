@@ -6,7 +6,7 @@ const ROOT=path.resolve(__dirname,'../saves');
 // Up to two baseline cohorts per 52k atoms can exceed the old 16 MiB ceiling.
 const MAX_SAVE_BYTES=64*1024*1024;
 let hierarchyPromise,queue=Promise.resolve();
-const hierarchy=()=>hierarchyPromise||=fs.readFile(path.resolve(__dirname,'../client/data/adm2/hierarchy.json'),'utf8').then(JSON.parse);
+const hierarchy=()=>hierarchyPromise||=fs.readFile(path.resolve(__dirname,'../client/data/map-v2/hierarchy.json'),'utf8').then(JSON.parse);
 function reply(res,status,value){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}).end(JSON.stringify(value));}
 async function noLink(file){try{if((await fs.lstat(file)).isSymbolicLink())throw new Error('Save symlinks are not allowed');}catch(e){if(e.code!=='ENOENT')throw e;}}
 function folderOf(id){if(!validId(id))throw new Error('Invalid save ID');const folder=path.resolve(ROOT,id);if(path.dirname(folder)!==ROOT)throw new Error('Invalid save path');return folder;}

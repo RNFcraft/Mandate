@@ -67,7 +67,7 @@ async function generatePoliticalGeography(options={},testContext){
   // Serialization/validation finishes before any authoritative replacement.
   const serialized=Object.entries(output).map(([name,value])=>[name,json(value)]);
   await fs.mkdir(auditDir,{recursive:true});for(const [name,bytes]of serialized)await fs.writeFile(path.join(auditDir,name),bytes);
-  await checkUnchanged();if(options.publish)await atomicPublish(result.asset,scenarioDir);
+  await checkUnchanged();if(options.publish)await atomicPublish(testContext?result.asset:await require('./province-publication.cjs').compilePoliticalAsset(result.asset),scenarioDir);
   return {...result,auditDir};
 }
 async function main(argv){const options=argsOf(argv);if(options.help){console.log(USAGE);return;}const result=await generatePoliticalGeography(options);console.log(json({mode:options.publish?'published':'preview',...result.audit.summary}));}

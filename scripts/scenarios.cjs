@@ -7,13 +7,14 @@ const {initializePoliticalScenario}=require('../shared/political-geography.cjs')
 const {parseStrictJson}=require('./strict-json.cjs');
 const root = path.resolve(__dirname, '../scenarios');
 const geographyFile = path.resolve(__dirname, '../client/data/geography.json');
-const hierarchyFile = path.resolve(__dirname, '../client/data/adm2/hierarchy.json');
+const hierarchyFile = path.resolve(__dirname, '../client/data/map-v2/hierarchy.json');
 let hierarchyPromise;
-const hierarchy = () => hierarchyPromise ||= json(hierarchyFile);
+const hierarchy = (atomicDebug=false) => atomicDebug?json(path.resolve(__dirname,'../client/data/adm2/hierarchy.json')):(hierarchyPromise ||= json(hierarchyFile));
 let queue = Promise.resolve();
 const json = async file => JSON.parse(await fs.readFile(file, 'utf8'));
-async function read(id) {
-  const folder = path.join(root, id);
+async function read(id,atomicDebug=false) {
+  let folder = path.join(root, id);
+  if(atomicDebug&&(await json(path.join(folder,'scenario.json'))).geography==='mandate-provinces-v1')folder=path.join(root,'.atomic-backups',id);
   const [scenario, countries, ownership] = await Promise.all(['scenario', 'countries', 'ownership'].map(name => json(path.join(folder, `${name}.json`))));
   let controllers;
   try { controllers = await json(path.join(folder, 'controllers.json')); } catch (error) { if (error.code !== 'ENOENT') throw error; }
@@ -37,13 +38,14 @@ async function handle(req, res, pathname) {
   if (!match) { reply(res, 404, { error: 'Неизвестный маршрут' }); return; }
   const id = match[1];
   if (req.method === 'GET') {
-    const h=await hierarchy(),input=await read(id),query=new URL(req.url,'http://localhost').searchParams;
+    const query=new URL(req.url,'http://localhost').searchParams,atomicDebug=query.get('geography')==='atomic-debug',h=await hierarchy(atomicDebug),input=await read(id,atomicDebug);
     if(query.has('politicalPreview')){
       const dataset=query.get('politicalPreview');if(!['1','mandate-world-v1'].includes(dataset)){reply(res,400,{error:'Unknown political preview dataset'});return;}
       if(id!=='1700'){reply(res,400,{error:'Political preview targets scenario 1700 only'});return;}
       const folder=path.resolve(__dirname,'../data/generated/political-geography/1700',dataset==='mandate-world-v1'?'mandate-world-v1':'.');
       const [asset,polities,polityRelations]=await Promise.all(['political-geography.json','polities.json','polity-relations.json'].map(async name=>parseStrictJson(await fs.readFile(path.join(folder,name)))));
-      Object.assign(input,{politicalGeography:{...asset,status:'published'},polities,polityRelations,politicalPreview:true});
+      const compiled=atomicDebug?asset:await require('./province-publication.cjs').compilePoliticalAsset(asset);
+      Object.assign(input,{politicalGeography:{...compiled,status:'published'},polities,polityRelations,politicalPreview:true});
     }
     const data=migrateLegacy(initializePoliticalScenario(input,h),h);
     if(new URL(req.url,'http://localhost').searchParams.get('population')!=='1'){reply(res,200,data);return;}
@@ -66,8 +68,9 @@ async function handle(req, res, pathname) {
   let data;
   try {
     data = JSON.parse(Buffer.concat(chunks).toString('utf8'));
-    const h=await hierarchy();
-    const regions = data.scenario?.version===3?h.territories:data.scenario?.version===2&&h.id==='mandate-atomic-v1'?[...h.territories.filter(r=>r.kind==='adm2'),...h.migration.fallbacks.map(r=>({id:r.from}))]:data.scenario?.version===2?h.territories:(await json(geographyFile)).regions;
+    const atomicDebug=new URL(req.url,'http://localhost').searchParams.get('geography')==='atomic-debug',h=await hierarchy(atomicDebug);
+    if(!atomicDebug&&(data.scenario?.version!==4||data.scenario?.geography!==h.id))throw Error('Incompatible scenario geography/version: expected mandate-provinces-v1');
+    const regions = data.scenario?.version===4||data.scenario?.version===3?h.territories:data.scenario?.version===2&&h.id==='mandate-atomic-v1'?[...h.territories.filter(r=>r.kind==='adm2'),...h.migration.fallbacks.map(r=>({id:r.from}))]:data.scenario?.version===2?h.territories:(await json(geographyFile)).regions;
     validateScenario(data, new Set(regions.map(r => r.id)));
     if (data.scenario.id !== id) throw new Error('ID пути и сценария должны совпадать');
   } catch (error) { reply(res, 400, { error: error.message }); return; }

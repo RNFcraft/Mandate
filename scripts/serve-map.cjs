@@ -4,7 +4,6 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '../client');
 const scenarios = require('./scenarios.cjs');
 const saves = require('./saves.cjs');
-const political = require('./political.cjs');
 const { validateScenario } = require('../shared/scenario.cjs');
 let territoryIds;
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.json': 'application/json', '.css': 'text/css' };
@@ -18,13 +17,14 @@ http.createServer((req, res) => {
     fs.stat(file,(error,stat)=>{if(error||!stat.isFile()){res.writeHead(404,{'Content-Type':'application/json'}).end(JSON.stringify({error:'Run npm run audit:adm2 first'}));return;}res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});fs.createReadStream(file).pipe(res);});return;
   }
   if (pathname === '/api/political' && req.method === 'POST') {
+    if(req.headers['x-mandate-atomic-debug']!=='1'){res.writeHead(403,{'Content-Type':'application/json'}).end(JSON.stringify({error:'Atomic political worker is debug-only'}));return;}
     (async()=>{
       const chunks=[];let size=0;
       for await(const chunk of req){size+=chunk.length;if(size>16*1024*1024)throw new Error('Request too large');chunks.push(chunk);}
       const data=JSON.parse(Buffer.concat(chunks).toString('utf8'));
       if(!territoryIds)territoryIds=new Set(JSON.parse(fs.readFileSync(path.resolve(root,'data/adm2/hierarchy.json'),'utf8')).territories.map(r=>r.id));
       validateScenario(data,territoryIds);
-      const result=await political(data.ownership);
+      const result=await require('./political.cjs')(data.ownership);
       res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'}).end(JSON.stringify(result));
     })().catch(error=>{res.writeHead(400,{'Content-Type':'application/json'}).end(JSON.stringify({error:error.message}));});return;
   }

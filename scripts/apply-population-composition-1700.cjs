@@ -60,11 +60,15 @@ async function generateComposition(options={}){
     points=Object.fromEntries(geography.features.map(f=>[f.id,interior(f.geometry)]));
   }
   const result=composePopulation(baseline,registries,config,hierarchy,{points});
-  const populationBytes=json(result.population),audit={...result.audit,provenance:{baselineSha256,hierarchySha256,rulesSha256:digest(rulesBytes),registrySha256:Object.fromEntries(['cultures','religions','strata'].map((key,i)=>[key,digest(registryBytes[i])])),outputSha256:digest(populationBytes)}};
+  const authoringProvenance={baselineSha256,hierarchySha256,rulesSha256:digest(rulesBytes),registrySha256:Object.fromEntries(['cultures','religions','strata'].map((key,i)=>[key,digest(registryBytes[i])]))};
+  const published=options.publish?await require('./province-publication.cjs').compilePopulationResult({population:result.population,meta:authoringProvenance}):result;
+  const populationBytes=json(published.population),audit={...result.audit,projection:published.projectionQA,provenance:{...authoringProvenance,outputSha256:digest(populationBytes)}};
   // All validation and serialization finish before any publication. Audit I/O
   // failure also prevents scenario replacement; final rename replaces one asset.
-  await atomicWrite(auditFile,json(audit));await atomicWrite(outputFile,populationBytes);
-  return {...result,audit,outputFile,auditFile};
+  await atomicWrite(auditFile,json(audit));
+  if(options.publish)await require('./import-population-1700.cjs').publishPopulation(published,SCENARIO);
+  else await atomicWrite(outputFile,populationBytes);
+  return {...result,population:published.population,audit,outputFile,auditFile};
 }
 async function main(argv){const options=argsOf(argv);if(options.help){console.log(USAGE);return;}const result=await generateComposition(options);console.log(json({output:result.outputFile,audit:result.auditFile,...result.audit}));}
 module.exports={generateComposition,argsOf,atomicWrite,USAGE};

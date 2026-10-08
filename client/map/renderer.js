@@ -1,4 +1,3 @@
-const PIXEL = 2;
 export class WorldMap {
   constructor(canvas, geometry, model) {
     this.canvas = canvas; this.ctx = canvas.getContext('2d');
@@ -27,7 +26,9 @@ export class WorldMap {
     const oldWidth=this.width, oldHeight=this.height;
     const center=oldWidth ? this.screenToWorld(oldWidth/2,oldHeight/2) : [180,90];
     this.width=innerWidth; this.height=innerHeight;
-    this.canvas.width=Math.ceil(this.width/PIXEL); this.canvas.height=Math.ceil(this.height/PIXEL);
+    this.dpr=Math.min(2,window.devicePixelRatio||1);
+    this.canvas.width=Math.ceil(this.width*this.dpr); this.canvas.height=Math.ceil(this.height*this.dpr);
+    this.background=null;
     this.baseScale=Math.min(this.width/360,this.height/180)*0.96;
     this.scale=this.baseScale*this.zoom;
     this.x=this.width/2-center[0]*this.scale; this.y=this.height/2-center[1]*this.scale;
@@ -47,10 +48,10 @@ export class WorldMap {
     requestAnimationFrame(()=>{this.pending=false;this.render();});
   }
   strokeBorders(ctx,paths,level){
-    const styles={adm2:['#475552',.5],adm1:['#394b4b',.8],country:['#31423f',1.2],political:['#202d32',2.2],coastline:['#202d32',1.3]};
+    const styles={province:['#475552',.55],adm2:['#475552',.5],adm1:['#394b4b',.8],country:['#31423f',1.2],political:['#202d32',2.2],coastline:['#202d32',1.3]};
     ctx.lineJoin='round';
     for(const [name,p]of Object.entries(paths||{})){
-      if(level!=='close'&&name==='adm2'||level==='far'&&(name==='adm1'||name==='country'))continue;
+      if(level!=='close'&&name==='adm2'||level==='far'&&(name==='adm1'||name==='country'||name==='province'))continue;
       const [color,width]=styles[name];ctx.strokeStyle=color;ctx.lineWidth=width/this.scale;ctx.stroke(p);
     }
   }
@@ -70,7 +71,7 @@ export class WorldMap {
       const bounds=[...this.screenToWorld(-pad/rx,-pad/ry),...this.screenToWorld(this.width+pad/rx,this.height+pad/ry)];
       const visible=r=>r.bounds[1][0]>=bounds[0]&&r.bounds[0][0]<=bounds[2]&&r.bounds[1][1]>=bounds[1]&&r.bounds[0][1]<=bounds[3];
       for(const r of this.geometry.countries)if(visible(r)){c.fillStyle='#727c78';c.fill(r.path,'evenodd');}
-      if(!this.audit?.enabled)for(const r of this.politicalFeatures||[])if(visible(r)){c.fillStyle=this.model.countries.get(r.owner)?.color||'#727c78';c.fill(r.path,'evenodd');}
+      if(!this.audit?.enabled)for(const r of this.provinceFills||this.politicalFeatures||[])if(visible(r)){c.fillStyle=this.model.countries.get(r.owner)?.color||'#727c78';c.fill(r.path,'evenodd');}
       if(!this.politicalPending)this.strokeBorders(c,this.classifiedBorders,this.lod.level);
       this.background=cache={key,canvas,bounds,scale:this.scale,x:this.x,y:this.y};
     }

@@ -4,7 +4,7 @@ const {allocate,createBaseline}=require('../scripts/population-baseline.cjs');
 const {allocateParallel,chunksOf,mergeChunks,progressOf,defaultWorkers}=require('../scripts/population-parallel.cjs');
 const {argsOf,publishPopulation}=require('../scripts/import-population-1700.cjs');
 const {hierarchy}=require('./fixtures/population.cjs');
-const features=[{id:'gb:A:1',geometry:{type:'Polygon',coordinates:[[[0,0],[1,0],[1,80],[0,80],[0,0]]]}}];
+const features=[{id:'province:00001',geometry:{type:'Polygon',coordinates:[[[0,0],[1,0],[1,80],[0,80],[0,0]]]}}];
 const options={sanity:false,maxAnomalyPct:100,geographyHash:'a'.repeat(64),hierarchyHash:'b'.repeat(64)};
 function inputs(nrows=128){
   return Object.fromEntries(['total','urban','rural'].map((key,k)=>[key,{ncols:1,nrows,x:0,y:0,cellsize:0.5,nodata:-9999,sha256:String(k+1).repeat(64),values:Float64Array.from({length:nrows},(_,i)=>key==='total'?100+i/13:key==='urban'?i%3:90)}]));

@@ -1,15 +1,1 @@
-{
-  "id": "modern",
-  "name": "Natural Earth — современный импорт",
-  "year": 2026,
-  "version": 3,
-  "geography": "mandate-atomic-v1",
-  "territoryMigration": {
-    "from": "natural-earth-admin1-v1",
-    "newNeutralCount": 110,
-    "inferredResidualOwners": {},
-    "retiredOwnership": {},
-    "retiredControllers": {},
-    "effects": []
-  }
-}
+{"id":"modern","name":"Natural Earth — современный импорт","year":2026,"version":4,"geography":"mandate-provinces-v1"}

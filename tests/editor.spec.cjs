@@ -45,10 +45,10 @@ test('DEV scenario authoring, brush, history, ownership borders and disk persist
     // Zoom into Paris and explicitly paint an adjacent polygon so transfer creates a new frontier.
     await page.mouse.move(points[0].x,points[0].y);
     for(let i=0;i<4;i++){await page.mouse.wheel(0,-500);await page.waitForTimeout(50);}
-    await page.waitForFunction(()=>mandateMap.lod.level==='close'&&mandateMap.lod.pending.size===0&&mandateMap.lod.active.length>0);
+    await page.waitForFunction(()=>mandateMap.zoom>=8&&mandateMap.interactive.length===5001);
     points[0]=await page.evaluate(()=>{const m=mandateMap;const x=m.x+182.35*m.scale,y=m.y+41.14*m.scale;return {x,y,id:m.hit(x,y)};});
-    const topo=JSON.parse(await fs.readFile('data/processed/adm2/detail.topo.json','utf8'));
-    const gs=topo.objects.territories.geometries,index=gs.findIndex(g=>g.id===points[0].id),adjacent=neighbors(gs)[index].map(i=>gs[i].id);
+    const topo=require('../scripts/topology-codec.cjs').unpackTopology(JSON.parse(await fs.readFile('client/data/map-v2/provinces.topo.json','utf8')));
+    const gs=topo.objects.provinces.geometries,index=gs.findIndex(g=>g.id===points[0].id),adjacent=neighbors(gs)[index].map(i=>gs[i].id);
     points[1]=await page.evaluate(ids=>{
       const m=mandateMap;
       for(let y=50;y<innerHeight-20;y+=2)for(let x=40;x<innerWidth-310;x+=2){const id=m.hit(x,y);if(ids.includes(id))return {x,y,id};}

@@ -44,7 +44,7 @@ test('audit is opt-in DEV, filters and navigation work without changing ownershi
   expect(await page.locator('#audit-toggle').count()).toBe(0);expect(requests.some(url=>url.includes('adm2-audit'))).toBe(false);
   expect(requests.some(url=>url.endsWith('/editor/audit.js'))).toBe(false);
   expect((await request.get('/api/adm2-audit/records')).status()).toBe(403);
-  await page.goto('/?editor=1&scenario=1700');await page.waitForFunction(()=>window.mandateEditor);
+  await page.goto('/?mapDebug=atomic&editor=1&scenario=1700');await page.waitForFunction(()=>window.mandateEditor);
   expect(requests.some(url=>url.includes('adm2-audit'))).toBe(false);
   expect(requests.some(url=>url.endsWith('/editor/audit.js'))).toBe(false);
   const before=await page.evaluate(()=>JSON.stringify(mandateMap.model.exportScenario()));
@@ -64,7 +64,7 @@ test('audit is opt-in DEV, filters and navigation work without changing ownershi
 });
 test('audit visual tour covers continents, islands, enclave and reserve conflicts',async({page})=>{
   test.setTimeout(120000);
-  await page.goto('/?editor=1&scenario=1700');await page.waitForFunction(()=>window.mandateEditor);
+  await page.goto('/?mapDebug=atomic&editor=1&scenario=1700');await page.waitForFunction(()=>window.mandateEditor);
   await page.locator('#audit-toggle').click();await expect(page.locator('#audit-country')).toBeVisible();
   const cases=[['europe','ROU','unmatched'],['russia-islands','RUS','unmatched'],['usa','USA','ambiguous'],['japan-coast','JPN','unmatched'],['palau','PLW','unmatched'],['andorra','AND','unmatched'],['italy-residual','ITA','residual'],['cyprus','CYP','unmatched'],['norway','NOR','ambiguous'],['enclave','LSO','ambiguous'],['brazil','BRA','ambiguous']];
   const results=[];

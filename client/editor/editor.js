@@ -29,6 +29,10 @@ export class ScenarioEditor {
       <p>ЛКМ / drag: покраска. Zoom ≥ 8×: ADM2; ниже — все дочерние ADM2 выбранного ADM1. ПКМ / средняя кнопка: перенос. Колесо: zoom. Столица на близком масштабе назначается точно.</p>
       <output id="lod-info"></output><output id="region-info"></output><button id="audit-toggle">ADM2 AUDIT</button><div id="audit-panel" hidden></div><output id="status" role="status"></output>`;
     document.body.append(this.panel);
+    if(this.model.hierarchy.id==='mandate-provinces-v1'){
+      this.el('audit-toggle').hidden=true;
+      this.panel.querySelector('p').textContent='ЛКМ / drag: provinces. ПКМ / средняя кнопка: перенос. Колесо: zoom. Atomic audit доступен в отдельном debug режиме.';
+    }
     this.populateMetadata(); this.refreshCountries();
     this.map.editMode = 'territory';
     this.map.editorGesture = (phase, id) => this.gesture(phase, id);

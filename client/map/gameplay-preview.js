@@ -14,8 +14,6 @@ export async function gameplayPreview(){
   const model={revision:1,countries:new Map(provinces.map(p=>[p.id,{color:colors.get(p.id)}]))};
   const land=feature(topology,topology.objects.land).features.map(prepare);
   const map=new WorldMap(document.querySelector('canvas'),{regions,countries:land},model);
-  // Preview-only display resolution; the production renderer stays unchanged.
-  map.resize=()=>{WorldMap.prototype.resize.call(map);const ratio=devicePixelRatio||1;map.canvas.width=Math.ceil(map.width*ratio);map.canvas.height=Math.ceil(map.height*ratio);map.background=null;map.invalidate();};map.resize();
   map.lod={level:'far',update(){const close=map.zoom>=8;if(this.close===close)return;this.close=close;const active=close?regions:regions.filter(r=>{const p=records.get(r.id);return p.areaKm2>=qa.provenance.config.minProvinceArea||p.archipelago;});map.setInteractive(active);if(!active.some(r=>r.id===map.hoveredId))map.hoveredId=null;}};
   map.politicalFeatures=regions.map(r=>({...r,owner:r.id}));
   const borders=new Path2D(path(mesh(topology,object,(a,b)=>a!==b))),coastline=new Path2D(path(mesh(topology,topology.objects.land)));

@@ -47,7 +47,7 @@ test('gameplay browser preview: province hit, statistics, pan and zoom without a
   const qa=JSON.parse(fs.readFileSync('client/data/map-v2/qa.json'));
   await expect(page.locator('#gameplay-inspect')).toContainText(`${qa.provinceCount} provinces`);
   const position=await page.evaluate(()=>{const m=mandateMap;return {x:m.x+182.35*m.scale,y:m.y+41.14*m.scale};});
-  await page.mouse.move(position.x,position.y);await expect.poll(()=>page.evaluate(()=>mandateMap.hoveredId)).toMatch(/^preview:/);
+  await page.mouse.move(position.x,position.y);await expect.poll(()=>page.evaluate(()=>mandateMap.hoveredId)).toMatch(/^province:/);
   await page.mouse.click(position.x,position.y);await expect(page.locator('#gameplay-inspect')).toContainText('Population 1700:');
   const before=await page.evaluate(()=>({selected:mandateMap.selectedId,x:mandateMap.x}));
   await page.mouse.move(700,500);await page.mouse.down();await page.mouse.move(760,500,{steps:5});await page.mouse.up();expect(await page.evaluate(before=>mandateMap.x-before.x,before)).toBeCloseTo(60);

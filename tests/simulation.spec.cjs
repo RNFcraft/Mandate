@@ -5,15 +5,15 @@ const crypto=require('node:crypto');
 const {Simulation,initializeGameState,nextRandom}=require('../shared/simulation.cjs');
 const {makeSave,validateSave,validSaveId}=require('../shared/save.cjs');
 const read=async file=>JSON.parse(await fs.readFile(file,'utf8'));
-const hierarchy={id:'mandate-atomic-v1',adm0:[{id:'A'}],adm1:[{id:'p',adm0Id:'A'}],territories:[{id:'gb:A:1',adm0Id:'A',adm1Id:'p',kind:'adm2'},{id:'residual:A:p',adm0Id:'A',adm1Id:'p',kind:'residual'}]};
-const scenario={scenario:{id:'fixture',name:'Fixture',year:1700,version:3,geography:hierarchy.id},countries:[{id:'A',name:'A',shortName:'A',color:'#778899',capitalRegionId:'gb:A:1',governmentType:'unspecified'}],ownership:{'gb:A:1':'A','residual:A:p':null},controllers:{'residual:A:p':'A'}};
+const hierarchy={id:'mandate-provinces-v1',adm0:[{id:'A'}],adm1:[{id:'p',adm0Id:'A'}],territories:[{id:'province:00001',adm0Id:'A',adm1Id:'p',kind:'adm2'},{id:'province:00002',adm0Id:'A',adm1Id:'p',kind:'residual'}]};
+const scenario={scenario:{id:'fixture',name:'Fixture',year:1700,version:4,geography:hierarchy.id},countries:[{id:'A',name:'A',shortName:'A',color:'#778899',capitalRegionId:'province:00001',governmentType:'unspecified'}],ownership:{'province:00001':'A','province:00002':null},controllers:{'province:00002':'A'}};
 test('scenario initializes isolated GameState, serializable PRNG and Gregorian daily clock',()=>{
   const initial=structuredClone(scenario),engine=new Simulation(initial,hierarchy,{seed:0});
   expect(engine.clock).toEqual({tick:0,date:{year:1700,month:1,day:1},paused:true,speed:1});
   expect(engine.snapshot().ownership).toEqual(scenario.ownership);expect(engine.snapshot().controllers).toEqual(scenario.controllers);
-  initial.ownership['gb:A:1']=null;expect(engine.ownership.get('gb:A:1')).toBe('A');
+  initial.ownership['province:00001']=null;expect(engine.ownership.get('province:00001')).toBe('A');
   expect(engine.ownership.set).toBeUndefined();expect(Object.isFrozen(engine.countries.get('A'))).toBe(true);
-  const copy=engine.snapshot();copy.ownership['gb:A:1']=null;expect(engine.ownership.get('gb:A:1')).toBe('A');
+  const copy=engine.snapshot();copy.ownership['province:00001']=null;expect(engine.ownership.get('province:00001')).toBe('A');
   engine.step(59);expect(engine.clock.date).toEqual({year:1700,month:3,day:1});expect(engine.snapshot().systems.tickProbe.ticks).toBe(59);
   const leap=structuredClone(scenario);leap.scenario.year=2000;const leapEngine=new Simulation(leap,hierarchy);leapEngine.step(59);expect(leapEngine.clock.date).toEqual({year:2000,month:2,day:29});leapEngine.step();expect(leapEngine.clock.date.day).toBe(1);
   const end=structuredClone(scenario);end.scenario.year=9999;const limit=new Simulation(end,hierarchy);limit.step(364);const before=limit.serialize();expect(()=>limit.step()).toThrow();expect(limit.serialize()).toBe(before);
@@ -21,10 +21,10 @@ test('scenario initializes isolated GameState, serializable PRNG and Gregorian d
 });
 test('identical seed and commands are deterministic; rejected commands/load never partially mutate',()=>{
   const a=new Simulation(scenario,hierarchy,{seed:123}),b=new Simulation(scenario,hierarchy,{seed:123}),c=new Simulation(scenario,hierarchy,{seed:321});
-  for(const engine of [a,b,c]){engine.start();engine.setSpeed(20);engine.step(50);engine.submit({type:'SetOwnership',ids:['gb:A:1'],owner:null});engine.pause();engine.step(2);}
+  for(const engine of [a,b,c]){engine.start();engine.setSpeed(20);engine.step(50);engine.submit({type:'SetOwnership',ids:['province:00001'],owner:null});engine.pause();engine.step(2);}
   expect(a.serialize()).toBe(b.serialize());expect(c.snapshot().systems.tickProbe.lastRandom).not.toBe(a.snapshot().systems.tickProbe.lastRandom);
   const before=a.serialize();const notifications=[];a.subscribe(e=>notifications.push(e.type));
-  for(const command of [null,{type:'Unknown'},{type:'SetSimulationSpeed',speed:3},{type:'PauseSimulation',extra:true},{type:'SetOwnership',ids:['gb:A:1','missing'],owner:'A'},{type:'SetOwnership',ids:['gb:A:1'],owner:'missing'},{type:'SetOwnership',ids:['gb:A:1','gb:A:1'],owner:'A'}]){expect(a.submit(command).ok).toBe(false);expect(a.serialize()).toBe(before);}
+  for(const command of [null,{type:'Unknown'},{type:'SetSimulationSpeed',speed:3},{type:'PauseSimulation',extra:true},{type:'SetOwnership',ids:['province:00001','missing'],owner:'A'},{type:'SetOwnership',ids:['province:00001'],owner:'missing'},{type:'SetOwnership',ids:['province:00001','province:00001'],owner:'A'}]){expect(a.submit(command).ok).toBe(false);expect(a.serialize()).toBe(before);}
   expect(notifications).toEqual([]);
   const bad=a.snapshot();bad.geography='other';expect(()=>a.load(bad)).toThrow('Incompatible geography');expect(a.serialize()).toBe(before);
   const invalid=a.snapshot();invalid.clock.date.day++;expect(()=>a.load(invalid)).toThrow('Invalid simulation clock');expect(a.serialize()).toBe(before);
@@ -33,7 +33,7 @@ test('save/load preserves exact state and continuation; simulation has no random
   const a=new Simulation(scenario,hierarchy,{seed:42});a.step(31);a.setSpeed(100);
   const save=makeSave(a.snapshot());validateSave(save,hierarchy);
   const b=new Simulation(scenario,hierarchy);b.load(JSON.parse(JSON.stringify(save)).state);expect(b.serialize()).toBe(a.serialize());a.step(10);b.step(10);expect(b.serialize()).toBe(a.serialize());
-  const bad=structuredClone(save);bad.version=2;expect(()=>validateSave(bad,hierarchy)).toThrow();
+  const bad=structuredClone(save);bad.version=1;expect(()=>validateSave(bad,hierarchy)).toThrow();
   const source=await fs.readFile('shared/simulation.cjs','utf8');expect(source).not.toMatch(/Math\s*\.\s*random\s*\(/);expect(source).not.toMatch(/Date\s*\(|Date\.now|performance\./);
   const clone=global.structuredClone,stringify=JSON.stringify;
   try{global.structuredClone=()=>{throw new Error('Cloning during tick');};JSON.stringify=()=>{throw new Error('Serializing during tick');};a.step(1000);}finally{global.structuredClone=clone;JSON.stringify=stringify;}
@@ -54,7 +54,7 @@ test('real-time driver pauses, batches fixed steps and resets speed/load timing'
 });
 test('runtime save API is atomic, exact, validates geography/paths and preserves original on rejection',async({request})=>{
   const id=`simapi-${Date.now()}`,root=path.resolve('saves'),folder=path.resolve(root,id);
-  const h=await read('client/data/adm2/hierarchy.json');const data=Object.fromEntries(await Promise.all(['scenario','countries','ownership'].map(async name=>[name,await read(`scenarios/1700/${name}.json`)])));
+  const h=await read('client/data/map-v2/hierarchy.json');const data=Object.fromEntries(await Promise.all(['scenario','countries','ownership'].map(async name=>[name,await read(`scenarios/1700/${name}.json`)])));
   const engine=new Simulation(data,h,{seed:19});engine.step(37);const save=makeSave(engine.snapshot());
   try{
     expect((await request.put(`/api/saves/${id}`,{data:save})).status()).toBe(200);
@@ -74,7 +74,7 @@ test('save IDs reject Windows reserved names with the shared client/server valid
 for(const kind of ['malformed','structural','incompatible'])test(`${kind} save does not break listing or valid save loading and remains untouched`,async({request})=>{
   const root=path.resolve('saves'),prefix=`simlist-${kind}-${Date.now()}`,ids=[`${prefix}-valid`,`${prefix}-bad`];
   const folders=ids.map(id=>path.resolve(root,id));
-  const h=await read('client/data/adm2/hierarchy.json'),data=Object.fromEntries(await Promise.all(['scenario','countries','ownership'].map(async name=>[name,await read(`scenarios/1700/${name}.json`)])));
+  const h=await read('client/data/map-v2/hierarchy.json'),data=Object.fromEntries(await Promise.all(['scenario','countries','ownership'].map(async name=>[name,await read(`scenarios/1700/${name}.json`)])));
   const save=makeSave(new Simulation(data,h).snapshot());
   const invalid=structuredClone(save);if(kind==='structural')invalid.state.clock.tick=-1;else invalid.geography='incompatible';
   const bytes=kind==='malformed'?'{broken json':JSON.stringify(invalid);

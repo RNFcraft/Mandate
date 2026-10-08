@@ -3,11 +3,7 @@
 Из папки `game`:
 
 ```sh
-npm install
-npm run build
-npm run build:adm2
-npm run migrate:atomic
-npm run audit:adm2
+npm ci
 npm start
 ```
 
@@ -15,9 +11,9 @@ npm start
 Обычный сценарий 1700: `/?scenario=1700`; по умолчанию `modern`.
 Сборка создаёт шаблоны только при отсутствии; сохранённые сценарии не сбрасываются.
 `server.js` с llama.cpp для карты не запускается и не изменён.
-Историческая география 1700 и игровые системы пока не реализованы.
+Map v2 заморожена: 5 001 gameplay provinces, `mandate-provinces-v1`. Полная историческая раскраска 1700 остаётся DEV-работой; states/regions и экономика не реализованы. [Runtime, freeze и миграция](docs/map-v2-runtime.md).
 
-## Canonical atomic mesh
+## Canonical atomic mesh: offline source / explicit debug
 
 Исходные Natural Earth ADM0/ADM1 в `data/map` и geoBoundaries CGAZ ADM2 в `data/source` остаются неизменными.
 Полная GIS-обработка выполняется только offline. Natural Earth даёт ID, названия, matching и intended coverage, но исходные контуры не рисуются независимо поверх ADM2.
@@ -29,7 +25,7 @@ npm start
 
 Все **49 349** реальных ID `gb:<shapeGroup>:<shapeID>` и их прежние родители сохранены.
 Два микрополигона LCA/MDV, схлопнувшиеся при прежней квантовании, восстановлены из неизменённого GeoJSON.
-В runtime **52 262 atom: 49 349 real ADM2 + 2 913 residual**.
+Во внутреннем offline-источнике **52 262 atom: 49 349 real ADM2 + 2 913 residual**. Обычный runtime использует только 5 001 province.
 
 Residual — оставшаяся непокрытая суша, а не полный ADM1.
 ID: `residual:<adm0>:<adm1>`; без родителя — `residual:<adm0>:unassigned`.
@@ -51,81 +47,27 @@ Snap — **0,000001°**; итоговые общие координаты экс
 До изменения было **924** существенных overlap (918 fallback↔ADM2, 6 ADM2↔ADM2, по прежнему порогу ≥1 км² и ≥1% меньшей площади).
 Новый порог строже: ≥1 км² без ограничения доли; дополнительно требуется ноль перекрытых граней любого размера.
 
-## Один источник видимых границ
+## Карта, границы и управление
 
-`scripts/publish-canonical.cjs` выводит ADM1 и ADM0 через `topojson mergeArcs` групп атомов по `adm1Id` / `adm0Id`.
-`client/data/adm2/derived.topo.json` содержит производную геометрию и `sourceArcIds` физических дуг atom topology.
-Ни одного отдельного Natural Earth stroke в обычной карте нет.
+Обычная карта загружает tracked `client/data/map-v2/provinces.topo.json`, `hierarchy.json`, `manifest.json` и province-сценарий. Общие дуги имеют один набор координат. Политический stroke проходит между соседними provinces с разными owner; одинаковый owner скрывает внутренний stroke на дальнем масштабе. Controller хранится отдельно. Runtime не делает GIS union/clipping и не вызывает `/api/political`.
 
-`shared/borders.cjs` назначает каждой физической дуге один класс с приоритетом:
+Canvas использует CSS viewport и backing store `min(devicePixelRatio, 2)`, без pixelated CSS. Path2D и статический фон кешируются. На zoom <2 внутренние province-линии скрыты; дальше доступны для выделения. ЛКМ выбирает province, drag переносит карту, колесо масштабирует вокруг курсора (1–64×). Все 5 001 province доступны без ADM2 chunks.
 
-1. coastline — один сосед;
-2. political — разные юридические owner;
-3. country — разные ADM0 при одном owner;
-4. adm1 — разные ADM1;
-5. adm2 — остальные внутренние границы.
+`window.mandateMap.model.setOwner(provinceId, countryId)` и `setColor` изменяют состояние через Simulation. Canvas `regionselect` содержит `detail.regionId` с province ID. DEV `/?editor=1&scenario=1700` редактирует provinces; Undo/Redo сохраняются.
 
-В чанках `drawArcs` назначает ровно одному чанку право рисовать общую дугу.
-Классы взаимоисключающие: одно ребро не рисуется ADM2 + ADM1 + country.
-Выделение и DEV-аудит имеют отдельные диагностические контуры.
-Политические заливки по `atomic territory → owner` сшиваются из подготовленных дуг через `mergeArcs` в worker.
-Runtime не делает GIS union, clipping, erase или matching.
-Controller хранится отдельно и не определяет юридическую границу.
+## Сценарии и миграция
 
-## LOD, cache и управление
+Активные `1700` и `modern` имеют **scenario version 4**, geography **mandate-provinces-v1**. Ownership содержит все 5 001 ID; controllers и capitals тоже province-keyed. Государства сохраняют прежние identity-поля.
 
-- FAR (<2,5×): производные country/political shapes, без запросов ADM2.
-- MEDIUM (2,5–8×): производные ADM1 и классифицированные границы.
-- CLOSE (≥8×): ленивые пространственные чанки атомов и их классифицированные дуги.
+`npm run migrate:provinces` выполняет offline-проекцию через замороженный spatial mapping. Owner/controller выбираются по наибольшей положительной площади overlap; равенство разрешается ASCII country ID. Столица переносится в owned province с наибольшим overlap старого capital atom. QA каждого сценария перечисляет неоднозначности и fallback. Повторный запуск не меняет мигрированные данные.
 
-Физические координаты одинаковы на всех LOD; меняются видимость и толщина классов.
-Дуги передаются lossless: точные индексы исходных сеток, если они восстанавливают Float64 точно, иначе исходный Float64; gzip сжимает координатный payload.
-Никакого дополнительного округления. **901 chunk занимает 29,67 MB**, производная общая геометрия — **9,62 MB**.
-Political API возвращает ссылки на уже загруженные дуги и только новые координаты для границ внутри ADM1.
+Старые atomic сценарии, GameState и saves обычный runtime отклоняет. Исторические `.atomic-backups`/`.legacy-backups` и `migrate:atomic` относятся только к offline-authoring/debug. Для инспекции атомов существует явный `/?mapDebug=atomic&editor=1`; эта ветка не создаёт игровой GameState и требует подготовленных offline assets.
 
-Canvas работает в половинном разрешении; приглушённый стиль сохранён.
-Path2D кешируется, hit test использует пространственную сетку, невидимые полигоны пропускаются.
-Cache ограничен **128 чанками / 12 MiB сериализованных данных**, максимум четыре параллельных запроса; ненужные отменяются.
-При превышении бюджета интерфейс предлагает приблизиться для полной детализации.
-Дальний/средний статический векторный слой кешируется в одном bitmap размером viewport + 256 физических пикселей по каждой оси.
-Во время жеста bitmap переносится/масштабируется; через 120 мс после остановки zoom точный слой перерисовывается в текущем масштабе.
-Координаты геометрии, выделение, DEV-слои и close atoms остаются векторными.
-
-ЛКМ выбирает территорию, drag переносит карту; колесо масштабирует вокруг курсора (1–64×).
-В DEV ПКМ/средняя кнопка переносят карту независимо от кисти.
-`window.mandateMap.model.setOwner(regionId, countryId)` назначает atom или детей ADM1; `null` — нейтральное владение.
-`setColor` меняет цвет государства. `addLayer` добавляет слой в мировых координатах 360×180.
-Canvas `regionselect` содержит `detail.regionId`.
-
-## Сценарии и безопасная миграция
-
-`scenarios/<id>` содержит `scenario.json`, `countries.json`, `ownership.json` и необязательный `controllers.json`.
-Текущий формат: **version 3**, geography **mandate-atomic-v1**; ownership содержит все 52 262 атомарных ID.
-Государство: `id, name, shortName, color, capitalRegionId, governmentType`.
-
-`migrate:atomic` сохраняет побайтовую копию исходной папки в `scenarios/.atomic-backups/<id>`, готовит полную новую папку и заменяет её с rollback.
-Повторный запуск не меняет мигрированные сценарии или отчёт.
-Реальный v2 ownership и controller сохраняются по прежним ID.
-Старый fallback передаёт владение/контроль своим residual; исчезнувший fallback получает `status: fully-covered`.
-Все прежние fallback claims сохраняются в `scenario.territoryMigration.retiredOwnership / retiredControllers` и `effects`, даже если геометрия исчезла.
-
-Новый residual без старого fallback наследует owner только при единогласном владении реальными детьми ADM1; такие назначения перечислены в `inferredResidualOwners`.
-При неоднородном/отсутствующем владении он нейтрален.
-Для v1 atom наследует старое ADM1 владение; отсутствующий родитель остаётся нейтральным.
-Реальная ADM2-столица сохраняется; fallback-столица переносится на принадлежащий стране residual либо снимается с provenance, если fallback исчез.
-Настоящие ADM2 не переназначаются ради старых перекрывавшихся claims.
-
-`data/processed/canonical/migration.json` — географическое соответствие;
-`scenario-migration.json` — эффекты и SHA-256 оригинальных файлов.
-API читает v1/v2 с миграцией в памяти; явное сохранение v3 тоже делает backup.
-Прежние v1 backups сохраняются в `.legacy-backups`.
-DEV создаёт государства, красит территории и назначает столицы; Undo/Redo — до 100 операций кисти.
-При close редактируется atom, ниже — дети ADM1. Сохранение заменяет папку с rollback; чтения/записи сериализованы.
-`MANDATE_DEV_EDITOR=0` запрещает запись. Несохранённые изменения не переживают reload.
+`MANDATE_DEV_EDITOR=0` запрещает запись. Сохранение сценария заменяет папку с rollback; чтения/записи сериализованы. Несохранённые изменения не переживают reload.
 
 ## DEV audit и проверки
 
-ADM2 AUDIT загружается только по кнопке в DEV.
+ADM2 AUDIT загружается только по кнопке в явном atomic debug (`?mapDebug=atomic&editor=1`). Следующие GIS-проверки относятся к offline source:
 confident / ambiguous / unmatched описывают matching реальных ADM2 с исходным Natural Earth ADM1; residual имеет отдельный фиолетовый режим.
 Показываются площади, atomic overlap, residual area, uncovered land, geometry conflicts и migration effects с прежними owner.
 Диагностический видимый ADM1-контур тоже производный; кандидаты проверяются offline против исходного NE.
@@ -151,13 +93,13 @@ npm test
 Постоянная копия QA — `data/processed/canonical/qa/`.
 Before/after для Центральной Азии, России, Германии/Польши/Чехии, Балкан, Италии, США/Канады, Норвегии и Румынии — `data/processed/canonical-baseline/screenshots/`.
 Воспроизведение: `node scripts/capture-mesh.cjs after` при запущенном приложении на 3000.
-Приватные source/processed и test-results исключены из git; runtime assets должны быть подготовлены до запуска.
+Приватные source/processed и test-results исключены из git. Замороженные province runtime assets tracked: обычный `npm start` не требует ignored GIS-файлов. `npm run test:ci` проверяет tracked runtime; полный `npm test` дополнительно требует подготовленного offline GIS source.
 
 ## Основа симуляции и сохранения игры
 
 В обычном режиме сценарий инициализирует отдельный `GameState`, принадлежащий
 `shared/simulation.cjs`. Ядро переносимо между Node и браузером и не знает о DOM,
-Canvas, геометрии или реальном времени. Scenario v3 и geography остаются прежними.
+Canvas, геометрии или реальном времени. Scenario v4 и geography `mandate-provinces-v1` задают игровую территориальную authority.
 DEV-редактор по-прежнему работает отдельно с авторскими сценариями.
 
 Один фиксированный tick — **один игровой день**, с пролептическим Gregorian calendar.
@@ -170,13 +112,13 @@ DEV-редактор по-прежнему работает отдельно с 
 pause, смене скорости и загрузке. Seed + начальное состояние + команды/число
 фиксированных шагов определяют результат; реальная частота кадров — нет.
 
-GameState v1 содержит `game.scenario` (метаданные происхождения), `geography`,
+GameState v2 содержит `game.scenario` (метаданные происхождения), `geography`,
 `clock`, `rng`, `ownership`, `controllers`, `countries`, `systems`.
 Геометрия не дублируется. PRNG — xorshift32, seed по умолчанию 1;
 нулевой seed получает фиксированное ненулевое начальное состояние.
-Минимальный упорядоченный system pipeline содержит только `tickProbe`:
+System pipeline включает детерминированные ticks и monthly population updates. `tickProbe`:
 счётчик ticks и последний PRNG sample, без игровых последствий.
-`systems` допускает дальнейшие JSON-расширения; настоящие игровые системы не реализованы.
+`systems` допускает дальнейшие JSON-расширения; экономика и states/regions не реализованы.
 
 API `Simulation`: `start`, `pause`, `setSpeed`, `step`, `submit`, `subscribe`,
 `snapshot`, `serialize`, `load`. Команды проверяются до применения; отказ не
@@ -192,11 +134,11 @@ API `Simulation`: `start`, `pause`, `setSpeed`, `step`, `submit`, `subscribe`,
 Нижняя панель обычной игры показывает дату, pause/play, скорость и save/load.
 `window.mandateSimulation` даёт доступ к ядру для локальной отладки,
 например `mandateSimulation.step(10)` для десяти дней даже на паузе.
-На tick не выполняется клонирование или сериализация мира из 52k территорий;
-меняются только небольшие поля clock, RNG и probe.
+На tick не выполняется клонирование или сериализация мира из 5 001 province;
+Обычный дневной tick меняет небольшие поля clock, RNG и probe; на границе месяца отдельно обновляются population cohorts с точной fixed-point арифметикой.
 
 Сохранения лежат в **`saves/<save-id>/save.json`**, отдельно от `scenarios/`,
-и исключены из git. Envelope: `{format: "mandate-save", version: 1,
+и исключены из git. Envelope: `{format: "mandate-save", version: 2,
 geography, scenarioId, state}`. Внутри — полный runtime GameState без карты.
 Timestamp не добавляется: save/load восстанавливает сериализованное состояние точно.
 Если сохранение было запущено, после загрузки оно продолжает время;
@@ -221,7 +163,7 @@ UI play/pause/speed/save/reload/load, DEV и неизменность сцена
 нет игровых систем, командного журнала replay или multiplayer authority.
 # Population System v1
 
-Current 1700 population data is not yet historically populated.
+1700 runtime contains 591,714,189 people (urban 46,409,598; rural 545,304,591), projected from the immutable HYDE atomic baseline into 9,113 province cohorts. Culture/religion composition remains unclassified unless authored explicitly. Projection preserves each cohort identity and exact integer totals; see `population-migration-qa.json`.
 
 Population is simulation authority in `systems.population`, separate from geometry,
 ownership and editor state. Only authored cohorts exist: no territory × registry
@@ -236,7 +178,7 @@ Optional `scenarios/<id>/population.json` has the exact schema:
   "religions": [{"id": "religion-a", "name": "Religion A"}],
   "strata": [{"id": "stratum-a", "name": "Stratum A"}],
   "cohorts": [{
-    "id": "pop-001", "territoryId": "<canonical territory ID>",
+    "id": "pop-001", "territoryId": "province:00001",
     "cultureId": "culture-a", "religionId": "religion-a", "stratumId": "stratum-a",
     "settlement": "rural", "count": 0, "literacyBps": 0,
     "birthRateBps": 0, "deathRateBps": 0
@@ -386,7 +328,7 @@ literacy is null (unknown), and rates are omitted. Natural growth is disabled by
 the existing zero-rate defaults until a separate demographic model is authored.
 Numeric literacy scenarios/saves remain compatible; unknown stays unknown through
 save/load and monthly ticks. Runtime/save architecture and formats are unchanged.
-The local runtime save body limit is 64 MiB: two cohorts per 52k atoms can need
+The local runtime save body limit is 64 MiB: large authored cohort datasets can need
 about 30 MiB of cohort JSON alone. Scenario editor payload limits remain unchanged.
 
 Ignored audit contains summary.json, fallback-cells.jsonl, unresolved-cells.jsonl,

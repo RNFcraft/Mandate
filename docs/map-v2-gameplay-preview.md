@@ -1,5 +1,8 @@
 # Map v2: first gameplay-province generation pass
 
+> Historical preview/tuning report. Current authority: [frozen Map v2 runtime](map-v2-runtime.md), 5,001 provinces, mandate-provinces-v1. New preview generations use a separate output folder.
+
+
 **Superseded.** The atomic-union geometry below was rejected visually. The
 current Map v2 default uses [independent geometry](map-v2-independent-preview.md)
 with the [~5,000-province tuning pass](map-v2-geography-tuning.md).

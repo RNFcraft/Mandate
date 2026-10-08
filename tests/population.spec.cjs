@@ -65,7 +65,7 @@ test('wall-clock grouping leaves deterministic population and RNG unchanged',asy
 });
 test('derived summaries preserve correlated dimensions and integer weighted literacy; return values are detached',()=>{
   const engine=new Simulation(scenario,hierarchy),before=engine.serialize();expect(engine.populationSummary()).toEqual({total:112353,urban:12345,rural:100008,literacyBps:1262,byCulture:{'c-a':100008,'c-b':12345},byReligion:{'r-a':100001,'r-b':12352},byStratum:{'s-a':100001,'s-b':12345,'s-c':7}});
-  expect(engine.populationSummary('residual:A:p')).toEqual({total:7,urban:0,rural:7,literacyBps:10000,byCulture:{'c-a':7},byReligion:{'r-b':7},byStratum:{'s-c':7}});
+  expect(engine.populationSummary('province:00002')).toEqual({total:7,urban:0,rural:7,literacyBps:10000,byCulture:{'c-a':7},byReligion:{'r-b':7},byStratum:{'s-c':7}});
   const result=engine.populationSummary();result.byCulture['c-a']=0;result.total=0;expect(engine.serialize()).toBe(before);expect(engine.populationSummary('unknown').literacyBps).toBe(0);
   const p=initializePopulation(population,hierarchy);p.cohorts[0].count=0;p.cohorts[1].count=0;p.cohorts[2].count=0;expect(summarizePopulation(p).literacyBps).toBe(0);
 });
@@ -87,7 +87,7 @@ test('daily ticks do not clone/serialize population or evaluate summaries; pure 
 });
 test('optional scenario asset is validated; editor save preserves exact bytes; population persists through local save API',async({request})=>{
   const id=`popfixture-${Date.now()}`,root=path.resolve('scenarios'),folder=path.resolve(root,id),saveRoot=path.resolve('saves'),saveFolder=path.resolve(saveRoot,id);
-  const base=await(await request.get('/api/scenarios/1700')).json(),h=JSON.parse(await fs.readFile('client/data/adm2/hierarchy.json','utf8'));base.scenario.id=id;
+  const base=await(await request.get('/api/scenarios/1700')).json(),h=JSON.parse(await fs.readFile('client/data/map-v2/hierarchy.json','utf8'));base.scenario.id=id;
   try{
     expect((await request.put(`/api/scenarios/${id}`,{data:base})).status()).toBe(200);
     await expect(fs.access(path.join(folder,'population.json'))).rejects.toMatchObject({code:'ENOENT'});
@@ -103,7 +103,7 @@ test('optional scenario asset is validated; editor save preserves exact bytes; p
   }finally{for(const [target,baseRoot]of [[folder,root],[saveFolder,saveRoot]]){if(path.dirname(target)!==baseRoot||!/^popfixture-\d+$/.test(path.basename(target)))throw Error('Unsafe cleanup');await fs.rm(target,{recursive:true,force:true});}}
 });
 test('synthetic populated browser monthly update changes counts without political requests or map revision',async({page})=>{
-  const h=JSON.parse(await fs.readFile('client/data/adm2/hierarchy.json','utf8')),p=clone(population),errors=[];let requests=0;
+  const h=JSON.parse(await fs.readFile('client/data/map-v2/hierarchy.json','utf8')),p=clone(population),errors=[];let requests=0;
   for(const c of p.cohorts)c.territoryId=h.territories[c.id==='pop-3'?1:0].id;
   page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});page.on('request',r=>{if(r.url().includes('/api/political'))requests++;});
   // In-memory test input only; no synthetic data is ever written to real scenarios.

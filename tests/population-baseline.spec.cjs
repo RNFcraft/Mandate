@@ -15,7 +15,7 @@ async function inputs(total,urban=total.map(v=>v===-9999?-9999:0),rural=total,gr
   const result={};for(const [key,values]of Object.entries({total,urban,rural})){const text=ascii(values,grid);result[key]={...await parseAscii(text),sha256:digest(text)};}return result;
 }
 const options={sanity:false,maxAnomalyPct:100,geographyHash:digest('synthetic tiny geometry'),hierarchyHash:digest(JSON.stringify(hierarchy))};
-const features=[rect('gb:A:1',0,0,1)];
+const features=[rect('province:00001',0,0,1)];
 const resultOf=async(total,urban,rural,polygons=features,extra={})=>createBaseline(await inputs(total,urban,rural),polygons,hierarchy,{...options,...extra});
 const root=path.resolve('data/generated');
 for(const cellsize of [0.0833333,1/12])test(`HYDE 5 arc-minute validation accepts ${cellsize} without snapping parsed resolution`,async()=>{
@@ -44,15 +44,15 @@ test('grid mismatch rejects before allocation',async()=>{
   const rasters=await inputs([10]);rasters.urban.x=1;expect(()=>sameGrid(Object.values(rasters))).toThrow('mismatched');expect(()=>allocate(rasters,features)).toThrow('mismatched');
 });
 for(const [name,parts,expected]of [
-  ['full cell',[rect('gb:A:1',0,0,1)],{'gb:A:1':100}],
-  ['50/50',[rect('gb:A:1',0,0,0.5),rect('residual:A:p',0.5,0,0.5)],{'gb:A:1':50,'residual:A:p':50}],
-  ['25/75',[rect('gb:A:1',0,0,0.25),rect('residual:A:p',0.25,0,0.75)],{'gb:A:1':25,'residual:A:p':75}],
-  ['coastal partial cell',[rect('gb:A:1',0,0,0.1)],{'gb:A:1':100}]
+  ['full cell',[rect('province:00001',0,0,1)],{'province:00001':100}],
+  ['50/50',[rect('province:00001',0,0,0.5),rect('province:00002',0.5,0,0.5)],{'province:00001':50,'province:00002':50}],
+  ['25/75',[rect('province:00001',0,0,0.25),rect('province:00002',0.25,0,0.75)],{'province:00001':25,'province:00002':75}],
+  ['coastal partial cell',[rect('province:00001',0,0,0.1)],{'province:00001':100}]
 ])test(`${name}: overlap allocation conserves all intended land population`,async()=>{const result=await resultOf([100],[0],[100],parts);expect(Object.fromEntries(result.territories.map(r=>[r.territoryId,r.population]))).toEqual(expected);expect(result.meta.generated.total).toBe(100);});
 test('holes exclude land and multipolygon parts combine to one territory weight',async()=>{
-  const holed=rect('gb:A:1',0,0,1);holed.geometry.coordinates.push([[0.25,0.25],[0.25,0.75],[0.75,0.75],[0.75,0.25],[0.25,0.25]]);
-  const other=rect('residual:A:p',0.25,0.25,0.5,0.5),result=await resultOf([100],[0],[100],[holed,other]);expect(result.territories.map(r=>r.population)).toEqual([75,25]);
-  const multipart={id:'gb:A:1',geometry:{type:'MultiPolygon',coordinates:[rect('x',0,0,0.2).geometry.coordinates,rect('x',0.8,0,0.2).geometry.coordinates]}};expect((await resultOf([100],[0],[100],[multipart])).meta.generated.total).toBe(100);
+  const holed=rect('province:00001',0,0,1);holed.geometry.coordinates.push([[0.25,0.25],[0.25,0.75],[0.75,0.75],[0.75,0.25],[0.25,0.25]]);
+  const other=rect('province:00002',0.25,0.25,0.5,0.5),result=await resultOf([100],[0],[100],[holed,other]);expect(result.territories.map(r=>r.population)).toEqual([75,25]);
+  const multipart={id:'province:00001',geometry:{type:'MultiPolygon',coordinates:[rect('x',0,0,0.2).geometry.coordinates,rect('x',0.8,0,0.2).geometry.coordinates]}};expect((await resultOf([100],[0],[100],[multipart])).meta.generated.total).toBe(100);
 });
 test('Hamilton apportionment is integer, conservative and uses stable ASCII ID ties',()=>{
   const rows=[{id:'b',weight:1},{id:'a',weight:1},{id:'c',weight:1}];expect(apportion(rows,2)).toEqual([{id:'a',count:1},{id:'b',count:1},{id:'c',count:0}]);expect(apportion(rows.reverse(),2)).toEqual(apportion(rows,2));expect(()=>apportion(rows,1.5)).toThrow();
@@ -99,20 +99,20 @@ test('negative/NaN values are removed and audited without fractional or negative
   const rasters=await inputs([100,-3,NaN],[NaN,0,0],[100,0,0]),result=createBaseline(rasters,features,hierarchy,options);expect(result.audit.invalidSourceValues).toHaveLength(3);expect(result.audit.rawSourceTotal).toBe(97);expect(result.meta.generated.total).toBe(100);expect(result.population.cohorts.every(c=>Number.isSafeInteger(c.count)&&c.count>0)).toBe(true);
 });
 test('nearby zero-overlap fallback is deterministic and limited by resolution',async()=>{
-  const result=await resultOf([100],[0],[100],[rect('gb:A:1',1.2,0,0.2)]);expect(result.audit.fallbackCells).toHaveLength(1);expect(result.audit.fallbackPopulation).toBe(100);expect(result.audit.fallbackCells[0].distanceKm).toBeLessThan(result.audit.fallbackCells[0].limitKm);
+  const result=await resultOf([100],[0],[100],[rect('province:00001',1.2,0,0.2)]);expect(result.audit.fallbackCells).toHaveLength(1);expect(result.audit.fallbackPopulation).toBe(100);expect(result.audit.fallbackCells[0].distanceKm).toBeLessThan(result.audit.fallbackCells[0].limitKm);
 });
 test('nearest fallback tie uses territory ID even when candidate order is reversed',async()=>{
-  const parts=[rect('residual:A:p',1.2,0,0.2),rect('gb:A:1',1.2,0,0.2)],rasters=await inputs([100]),index=spatialIndex(parts);const a=allocate(rasters,parts),b=allocate(rasters,parts,{query:box=>index(box).reverse()});expect(a.rows).toEqual(b.rows);expect(a.audit.fallbackCells[0].id).toBe('gb:A:1');
+  const parts=[rect('province:00002',1.2,0,0.2),rect('province:00001',1.2,0,0.2)],rasters=await inputs([100]),index=spatialIndex(parts);const a=allocate(rasters,parts),b=allocate(rasters,parts,{query:box=>index(box).reverse()});expect(a.rows).toEqual(b.rows);expect(a.audit.fallbackCells[0].id).toBe('province:00001');
 });
 test('antimeridian nearest fallback wraps longitude rather than assigning across the world',async()=>{
-  const rasters=await inputs([100],[0],[100],{x:179}),parts=[rect('gb:A:1',-180,0,0.2)];const result=createBaseline(rasters,parts,hierarchy,options);expect(result.audit.fallbackCells).toHaveLength(1);expect(result.meta.generated.total).toBe(100);
+  const rasters=await inputs([100],[0],[100],{x:179}),parts=[rect('province:00001',-180,0,0.2)];const result=createBaseline(rasters,parts,hierarchy,options);expect(result.audit.fallbackCells).toHaveLength(1);expect(result.meta.generated.total).toBe(100);
 });
 test('far positive cells remain unresolved; tolerated mass is excluded explicitly from chosen target',async()=>{
   const rasters=await inputs([9999,0,0,0,0,1]),allocation=allocate(rasters,features);expect(allocation.audit.unresolvedPopulation).toBe(1);expect(allocation.audit.unresolvedPct).toBe(0.01);const result=createBaseline(rasters,features,hierarchy,options);expect(result.meta.generated.total).toBe(9999);expect(result.meta.audit.normalizedTarget).toBe(9999);expect(result.meta.audit.difference).toBe(0);
   expect(()=>normalize(allocation,{sanity:false,strict:true})).toThrow('unresolved');expect(()=>normalize(allocation,{sanity:false,maxUnresolvedPct:0.001})).toThrow('unresolved');
 });
 test('large unresolved share fails with attached complete audit; CLI strict flag is explicit',async()=>{
-  const rasters=await inputs([100]),allocation=allocate(rasters,[rect('gb:A:1',20,0,1)]);expect(allocation.audit.unresolvedCells).toHaveLength(1);try{normalize(allocation,{sanity:false});throw Error('Expected rejection');}catch(e){expect(e.audit.unresolvedPct).toBe(100);}
+  const rasters=await inputs([100]),allocation=allocate(rasters,[rect('province:00001',20,0,1)]);expect(allocation.audit.unresolvedCells).toHaveLength(1);try{normalize(allocation,{sanity:false});throw Error('Expected rejection');}catch(e){expect(e.audit.unresolvedPct).toBe(100);}
   expect(argsOf(['--total','t','--urban','u','--rural','r','--strict']).strict).toBe(true);expect(()=>argsOf(['--total','t'])).toThrow('explicit');expect(()=>argsOf(['--bad'])).toThrow('Invalid option');
 });
 test('broad sanity guards reject wrong global magnitude and all-urban totals',async()=>{
@@ -120,10 +120,10 @@ test('broad sanity guards reject wrong global magnitude and all-urban totals',as
   const result=allocate(await inputs([200000000],[200000000],[0]),features);expect(()=>normalize(result)).toThrow('sanity');expect(()=>normalize(result,{maxUnresolvedPct:-1})).toThrow('Invalid');
 });
 test('fractional source targets use global rounding and exact integer conservation',async()=>{
-  const result=await resultOf([101.7],[2],[3],[rect('gb:A:1',0,0,0.25),rect('residual:A:p',0.25,0,0.75)]);expect(result.meta.generated.total).toBe(102);expect(result.population.cohorts.reduce((n,c)=>n+c.count,0)).toBe(102);expect(result.population.cohorts.every(c=>Number.isSafeInteger(c.count)&&c.count>0)).toBe(true);
+  const result=await resultOf([101.7],[2],[3],[rect('province:00001',0,0,0.25),rect('province:00002',0.25,0,0.75)]);expect(result.meta.generated.total).toBe(102);expect(result.population.cohorts.reduce((n,c)=>n+c.count,0)).toBe(102);expect(result.population.cohorts.every(c=>Number.isSafeInteger(c.count)&&c.count>0)).toBe(true);
 });
 test('candidate/source polygon order does not change output bytes or stable IDs; collisions reject',async()=>{
-  const parts=[rect('gb:A:1',0,0,0.5),rect('residual:A:p',0.5,0,0.5)],rasters=await inputs([101],[20],[80]),a=createBaseline(rasters,parts,hierarchy,options),query=spatialIndex(parts),b=createBaseline(rasters,parts.slice().reverse(),hierarchy,{...options,query:box=>query(box).reverse()});expect(JSON.stringify(a)).toBe(JSON.stringify(b));
+  const parts=[rect('province:00001',0,0,0.5),rect('province:00002',0.5,0,0.5)],rasters=await inputs([101],[20],[80]),a=createBaseline(rasters,parts,hierarchy,options),query=spatialIndex(parts),b=createBaseline(rasters,parts.slice().reverse(),hierarchy,{...options,query:box=>query(box).reverse()});expect(JSON.stringify(a)).toBe(JSON.stringify(b));
   expect(buildCohorts(a.territories.slice().reverse())).toEqual(a.population);expect(()=>buildCohorts(a.territories,()=> '0'.repeat(24))).toThrow('collision');expect(a.population.cohorts.every(c=>c.id.startsWith('p1700-')&&c.birthRateBps===undefined&&c.deathRateBps===undefined&&c.literacyBps===null)).toBe(true);
 });
 test('nullable literacy is compatible with numeric cohorts, ignores zero-count unknowns and survives saves',async()=>{
@@ -154,7 +154,7 @@ test('missing real input CLI fails clearly without creating or modifying 1700 po
   expect(await Promise.all(targets.map(n=>fs.readFile(`scenarios/1700/${n}`).catch(e=>{if(e.code==='ENOENT')return null;throw e;})))).toEqual(before);
 });
 test('baseline-sized saves above former 16 MiB limit preserve generated cohorts exactly',async({request})=>{
-  const id=`baselinesize-${Date.now()}`,saveRoot=path.resolve('saves'),folder=path.join(saveRoot,id),data=await(await request.get('/api/scenarios/1700')).json(),h=JSON.parse(await fs.readFile('client/data/adm2/hierarchy.json','utf8'));
+  const id=`baselinesize-${Date.now()}`,saveRoot=path.resolve('saves'),folder=path.join(saveRoot,id),data=await(await request.get('/api/scenarios/1700')).json(),h=JSON.parse(await fs.readFile('client/data/map-v2/hierarchy.json','utf8'));
   const result=createBaseline(await inputs([100],[20],[80]),[rect(h.territories[0].id,0,0,1)],h,options),engine=new Simulation({...data,population:result.population},h),state=engine.snapshot();
   // Tiny synthetic raster stays tiny; JSON padding models payload volume only.
   state.systems.baselineVolumeProbe={padding:'x'.repeat(17*1024*1024)};const save=makeSave(state);
@@ -163,7 +163,7 @@ test('baseline-sized saves above former 16 MiB limit preserve generated cohorts 
 });
 test('game loads generated fixture, save/load is exact, ownership does not move cohorts, editor preserves both authored assets',async({request,page})=>{
   const id=`baselinefixture-${Date.now()}`,scenarioRoot=path.resolve('scenarios'),folder=path.join(scenarioRoot,id),saveRoot=path.resolve('saves'),saveFolder=path.join(saveRoot,id),errors=[];
-  const data=await(await request.get('/api/scenarios/1700')).json(),real=JSON.parse(await fs.readFile('client/data/adm2/hierarchy.json','utf8'));data.scenario.id=id;
+  const data=await(await request.get('/api/scenarios/1700')).json(),real=JSON.parse(await fs.readFile('client/data/map-v2/hierarchy.json','utf8'));data.scenario.id=id;
   const parts=[rect(real.territories[0].id,0,0,1)],result=createBaseline(await inputs([100],[20],[80]),parts,real,options);const realFiles=['scenario','countries','ownership'].map(n=>`scenarios/1700/${n}.json`),hashes=()=>Promise.all(realFiles.map(async f=>digest(await fs.readFile(f)))),before=await hashes();
   page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
   try{

@@ -27,7 +27,8 @@ function validateConfig(config){
   if(!Number.isInteger(config.targetProvinceCount)||config.targetProvinceCount<1||!config.samplingStep||!config.tileSize||!config.densityReference||config.densityClamp<1||!Number.isInteger(config.relaxationIterations))throw new Error('Invalid partition configuration');
   if(!config.densityGridDegrees||config.densityFloor>config.densityClamp||!Number.isInteger(config.densitySmoothingRadius)||!Number.isInteger(config.skinnyRepairPasses)||['relaxationStrength','relaxationDecay','relaxationAnchor','seedJitter','countTolerance'].some(key=>config[key]>1))throw new Error('Invalid tuning bounds');
 }
-async function generate(config=DEFAULTS,out='client/data/map-v2',log=console.log,resume=false){
+async function generate(config=DEFAULTS,out='client/data/map-v2-preview',log=console.log,resume=false){
+  try{await fs.access(path.join(out,'manifest.json'));throw Error('Frozen gameplay geography cannot be overwritten; use an authoring preview directory and an explicit new-version freeze');}catch(e){if(e.code!=='ENOENT')throw e;}
   validateConfig(config);const start=performance.now(),stages={};let last=start;const stage=name=>{stages[name]=Math.round(performance.now()-last);last=performance.now();};
   const [source,popbytes,baseline]=await Promise.all([fs.readFile(ATOMIC),fs.readFile(POPULATION),fs.readFile('data/population/baselines/1700/population.meta.json','utf8').then(JSON.parse)]);
   if(baseline.geography.sha256!==sha(source))throw new Error('Population baseline/canonical geography hash mismatch');
@@ -79,8 +80,8 @@ async function auditExisting(out){
   await fs.writeFile(path.join(out,'qa-recheck.json'),JSON.stringify(qa));return qa;
 }
 async function main(){const {values}=parseArgs({options:{target:{type:'string'},config:{type:'string'},out:{type:'string'},qa:{type:'boolean'},help:{type:'boolean'},'resume-partition':{type:'boolean'}}});
-  if(values.help){console.log('node scripts/generate-gameplay-map.cjs [--target 5000] [--config config.json] [--out directory] [--qa] [--resume-partition]\n--qa independently rechecks existing geometry, hashes and per-atom/province population allocations; writes qa-recheck.json.\n--resume-partition verifies config/source hashes before reusing the offline partition cache.\nDefault output: client/data/map-v2. Atomic/scenario files are read-only.');return;}
-  const out=values.out||'client/data/map-v2';if(values.qa){const qa=await auditExisting(out);console.log(JSON.stringify({provinceCount:qa.provinceCount,gaps:qa.gapArea,overlaps:qa.overlapArea,failures:qa.structuralFailures}));if(qa.structuralFailures.length)process.exitCode=1;return;}
+  if(values.help){console.log('node scripts/generate-gameplay-map.cjs [--target 5000] [--config config.json] [--out directory] [--qa] [--resume-partition]\n--qa independently rechecks existing geometry, hashes and per-atom/province population allocations; writes qa-recheck.json.\n--resume-partition verifies config/source hashes before reusing the offline partition cache.\nDefault authoring output: client/data/map-v2-preview. --qa defaults to frozen client/data/map-v2. Atomic/scenario files are read-only.');return;}
+  const out=values.out||(values.qa?'client/data/map-v2':'client/data/map-v2-preview');if(values.qa){const qa=await auditExisting(out);console.log(JSON.stringify({provinceCount:qa.provinceCount,gaps:qa.gapArea,overlaps:qa.overlapArea,failures:qa.structuralFailures}));if(qa.structuralFailures.length)process.exitCode=1;return;}
   const config={...DEFAULTS,...(values.config?JSON.parse(await fs.readFile(values.config,'utf8')):{})};if(values.target)config.targetProvinceCount=Number(values.target);const {qa}=await generate(config,out,console.log,values['resume-partition']);if(qa.structuralFailures.length)process.exitCode=1;
 }
 module.exports={generate,auditExisting,landMask,maskPolygons,validateConfig};

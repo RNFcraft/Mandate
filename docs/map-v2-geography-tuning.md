@@ -1,10 +1,12 @@
 # Map v2: final geography tuning for visual review
 
+> Historical preview/tuning report. Current authority: [frozen Map v2 runtime](map-v2-runtime.md), 5,001 provinces, mandate-provinces-v1. New preview generations use a separate output folder.
+
+
 The accepted independent-geometry architecture remains intact: dissolved
 Natural Earth land, independent partition, shared topology, spatial atomic
 overlay and exact integer population allocation. Default target is now 5,000;
-the generated preview contains **5,001 provinces**. No freeze, ID stabilization,
-ownership/save migration or simulation change is performed.
+the generated preview contains **5,001 provinces**. This tuning pass did not perform freeze or runtime migration; those are now complete in the separate [frozen runtime integration](map-v2-runtime.md).
 
 ## Configuration and target mass
 
@@ -165,12 +167,12 @@ Remaining visual limits: recognizable straight Voronoi boundaries; some
 near-quadrilateral/strata regularity; natural narrow islands and complicated
 coasts; polar projection distortion. Antarctica is intentionally coarse.
 Remote tiny groups and the uncovered-atom source policy remain explicit.
-Final freeze awaits the user's visual review.
+The subsequent integration froze this exact accepted geometry; see [current runtime](map-v2-runtime.md).
 
 ## Commands
 
 ```powershell
-node --max-old-space-size=8192 scripts/generate-gameplay-map.cjs
+node --max-old-space-size=8192 scripts/generate-gameplay-map.cjs --out tmp/new-geography-preview
 node --max-old-space-size=8192 scripts/generate-gameplay-map.cjs --qa
 node --max-old-space-size=8192 scripts/generate-gameplay-map.cjs --resume-partition --out tmp/map-v2-tuning-repeated
 npm start
@@ -181,4 +183,4 @@ npm test
 ```
 
 The partition cache verifies config and source hashes. Atomic source/baseline
-files, saves and scenario authority are preserved. No commit or push is made.
+files were preserved in this historical tuning pass. The subsequent freeze migrated scenario/state authority to provinces and rejects old atomic saves. No commit or push is made.

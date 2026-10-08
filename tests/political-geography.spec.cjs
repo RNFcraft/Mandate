@@ -114,7 +114,7 @@ test('offline preview/repeated atomic publication is deterministic; failed gener
 });
 test('scenario API initializes published politics and editor preserves authored political bytes',async({request})=>{
   const root=path.resolve('scenarios'),id=`politicalfixture-${crypto.randomUUID()}`,folder=path.join(root,id);
-  const base=await(await request.get('/api/scenarios/1700')).json(),h=JSON.parse(await fs.readFile('client/data/adm2/hierarchy.json'));base.scenario.id=id;
+  const base=await(await request.get('/api/scenarios/1700')).json(),h=JSON.parse(await fs.readFile('client/data/map-v2/hierarchy.json'));base.scenario.id=id;
   try{
     expect((await request.put(`/api/scenarios/${id}`,{data:base})).status()).toBe(200);
     const asset={version:1,year:1700,geography:h.id,status:'published',owners:{[h.territories[0].id]:'alpha'},controllers:{[h.territories[0].id]:'beta'},provenance:{note:'Synthetic API fixture'}};
@@ -128,7 +128,7 @@ test('scenario API initializes published politics and editor preserves authored 
 });
 test('real mesh preview is explicit, debug click queries runtime, and frozen file hashes remain identical',async({request,page})=>{
   test.setTimeout(120000);
-  const files=['data/processed/canonical/atomic.topo.json','client/data/adm2/hierarchy.json','scenarios/1700/population.json','scenarios/1700/population.meta.json','scenarios/1700/ownership.json','scenarios/1700/countries.json'];
+  const files=['data/processed/canonical/atomic.topo.json','client/data/map-v2/hierarchy.json','scenarios/1700/population.json','scenarios/1700/population.meta.json','scenarios/1700/ownership.json','scenarios/1700/countries.json'];
   const hashes=async()=>Promise.all(files.map(async file=>crypto.createHash('sha256').update(await fs.readFile(file)).digest('hex'))),before=await hashes();
   const result=await generatePoliticalGeography();expect(result.audit.summary.assignedTerritories).toBe(0);expect(result.audit.summary.unassignedPopulation).toBe(591714189);
   const preview=await(await request.get('/api/scenarios/1700?politicalPreview=1')).json();expect(preview.politicalPreview).toBe(true);expect(Object.values(preview.ownership).every(value=>value===null)).toBe(true);
