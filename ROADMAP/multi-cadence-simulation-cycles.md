@@ -461,7 +461,237 @@ The result emerges from dependent cycles.
 
 ---
 
-## 14. Intentionally deferred
+## 14. Current cadence assignment by system
+
+This is the current planning baseline for known Mandate systems.
+
+| System | Primary cadence | Reads | Writes / exposes |
+| --- | --- | --- | --- |
+| Clock / calendar | daily | previous date, speed state | current date, due cadence boundaries |
+| War / movement | daily | armies, control, terrain, infrastructure | movement, battles, controller changes, damage |
+| Political events | event-driven / daily | laws, institutions, scheduled dates | enacted decisions, appointments, crises, state changes |
+| Construction execution | daily | funded projects, labor/material availability | project progress, completed infrastructure/capacity |
+| Logistics / freight | weekly | routes, capacity, controller, inventories, demand destinations | delivered quantities, transit shortages, route load |
+| Trade routing | weekly | market price signals, transport costs, route capacity | inter-market flows, imports/exports, destination supply |
+| Labor short-term adjustment | weekly | population, vacancies, wages, enterprise demand | filled jobs, unemployment pressure, labor availability |
+| Resource extraction | monthly | known deposits, developed capacity, labor, equipment, energy | extracted primary commodities, depletion, extraction cost |
+| Production | monthly | inventories, delivered inputs, labor, capacity, production method | outputs, input use, utilization |
+| Household income / wages | monthly | employment, wage contracts, transfers | disposable income by population groups |
+| Consumption / demand | monthly | population needs, income, prices, state/enterprise demand | requested and fulfilled demand, unmet needs |
+| Markets / prices | monthly | inventories, supply, demand, imports/exports | prices, shortages, surpluses, closing inventories |
+| Enterprise accounting | monthly | sales, wages, inputs, taxes, maintenance | profit/loss, cash/capital position, performance history |
+| State finance | monthly / quarterly | taxes, customs, SOE results, spending obligations | treasury, budget balance, arrears, funded programs |
+| Population demographics | monthly | cohorts, living conditions modifiers | births, deaths, cohort totals |
+| Social effects | monthly | prices, real income, shortages, employment | welfare/unrest/support pressures for politics |
+| Enterprise investment | quarterly | multi-month profit, demand, prices, finance | expansion, contraction, new projects, closures |
+| Large public investment | quarterly | treasury, policy, approved budgets | funded infrastructure/industry projects |
+| Credit / banking | quarterly by default | enterprise/state finances, risk, policy | lending, refinancing, defaults, financing constraints |
+| Education / skills | yearly by default | schooling, institutions, funding | literacy/skill structural changes |
+| Slow institutions | yearly by default | administrative capacity, laws, accumulated outcomes | institutional effectiveness / long-run modifiers |
+| Renewable resource recovery | seasonal / yearly depending resource | stock, exploitation, environment | regenerated/degraded stock |
+| Science / research | monthly progress + event discoveries + quarterly funding | researchers, institutions, grants, equipment, knowledge | research progress, discoveries, available methods |
+| Diplomacy | event-driven + periodic review | relations, treaties, wars, interests | treaties, relation changes, diplomatic actions |
+
+The primary cadence is not necessarily the only moment a system may react. Event-driven invalidation may change inputs immediately, while the scheduled cadence determines when the heavier regular calculation occurs.
+
+---
+
+## 15. Core cross-system influence map
+
+The currently intended major dependency chains are:
+
+### War and logistics
+
+```text
+war / occupation / damage        [daily]
+→ route state
+→ logistics / freight            [weekly]
+→ delivered inputs and goods
+→ production / markets           [monthly]
+→ prices / employment / income
+→ social and political pressure
+```
+
+### Resources and industry
+
+```text
+physical geology
+→ knowledge / discovery
+→ developed extraction capacity
+→ extraction                     [monthly]
+→ freight                        [weekly]
+→ producer inventories
+→ production                     [monthly]
+→ market supply
+→ prices / profitability
+→ investment                     [quarterly]
+→ new extraction / production capacity
+```
+
+### Population and economy
+
+```text
+population
+→ labor supply + household demand
+→ enterprises
+→ employment + wages
+→ household income
+→ consumption
+→ markets / prices
+→ real income + shortages
+→ health / migration / politics
+→ population and labor conditions
+```
+
+### Enterprise loop
+
+```text
+market prices + delivered inputs
+→ production
+→ sales
+→ wages / costs / taxes
+→ profit or loss                 [monthly]
+→ rolling performance history
+→ investment / contraction       [quarterly]
+→ construction                   [daily]
+→ changed capacity
+→ future production
+```
+
+### State loop
+
+```text
+politics / laws / budget decisions
+→ taxes + spending + regulation
+→ enterprises / households / markets
+→ taxable income + trade + profits
+→ state revenue
+→ treasury / budget
+→ infrastructure / military / science funding
+→ future economic and political conditions
+```
+
+### Science loop
+
+```text
+political / institutional funding
+→ research activity              [monthly]
+→ discovery                      [event]
+→ new production / extraction / infrastructure method
+→ enterprise or state adoption decision [quarterly / event]
+→ construction / equipment installation [daily]
+→ productivity / capacity change [monthly]
+→ profits / taxes / military capability
+→ future research funding
+```
+
+---
+
+## 16. Event-driven layer
+
+Scheduled cadences are not sufficient for exact-date actions.
+
+The following kinds of changes should normally be event-driven:
+
+- declaration of war / peace;
+- treaty signing;
+- law enactment or repeal;
+- election result;
+- appointment / dismissal;
+- nationalization / privatization decision;
+- currency reform;
+- completion of a construction project;
+- discovery / invention;
+- bankruptcy or emergency closure when immediate handling is required;
+- natural disaster;
+- scripted or emergent political crisis.
+
+An event changes authoritative state immediately.
+
+Dependent scheduled systems then react on their next normal cadence unless the event explicitly requires an immediate recalculation.
+
+This prevents every law, war or discovery from waiting for an arbitrary monthly boundary.
+
+---
+
+## 17. Decision versus execution
+
+A strategic decision and its physical execution are separate simulation stages.
+
+Example:
+
+```text
+enterprise decides to expand     [quarterly]
+→ project is created
+→ construction progresses        [daily]
+→ required materials arrive      [weekly]
+→ project completes              [event]
+→ production capacity increases  [monthly use]
+```
+
+The same principle applies to:
+
+- state infrastructure;
+- mines;
+- factories;
+- ports;
+- railways;
+- military facilities;
+- research facilities.
+
+This prevents instantaneous investment effects and gives logistics, war and shortages a chance to interfere with projects.
+
+---
+
+## 18. Output-contract rule
+
+Subsystems should expose explicit simulation results rather than directly commanding unrelated subsystems.
+
+Examples:
+
+```text
+LOGISTICS writes:
+- delivered quantities
+- route capacity usage
+- transit failures
+
+MARKET reads logistics and writes:
+- inventory
+- recentSupply
+- recentDemand
+- price
+- shortage / surplus
+
+ENTERPRISE reads market and writes:
+- production
+- employment
+- revenue
+- costs
+- profit/loss
+
+STATE FINANCE reads taxable results and writes:
+- treasury
+- revenue
+- expenditure
+- budget balance
+```
+
+This is the preferred dependency style for future implementation:
+
+```text
+system
+→ read authoritative GameState
+→ calculate
+→ validate
+→ write its owned result fields
+→ later systems consume those fields
+```
+
+Direct hidden calls between unrelated systems should be avoided where shared state or explicit events are sufficient.
+
+---
+
+## 19. Intentionally deferred
 
 Not fixed yet:
 
