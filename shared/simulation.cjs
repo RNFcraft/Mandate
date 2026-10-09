@@ -109,7 +109,8 @@ class Simulation {
   serializeSave(){return JSON.stringify({format:'mandate-save',version:2,geography:this.#state.geography,scenarioId:this.#state.game.scenario.id,state:this.#state});}
   populationSummary(territoryId){return population.summarizePopulation(this.#state.systems.population,territoryId);}
   enableAutonomy(rules={}){const next=autonomy.enable(this.#state,rules);validateGameState(next,this.#hierarchy);this.#install(next);this.#emit('stateChanged',{kind:'autonomy',ownershipIds:null});}
-  economicReport(){return autonomy.report(this.#state);}
+  configureFoodFeedback(enabled){const next=autonomy.configureFoodFeedback(this.#state,enabled);validateGameState(next,this.#hierarchy);this.#install(next);this.#emit('stateChanged',{kind:'autonomy',ownershipIds:null});}
+  economicReport(provinceId){return autonomy.report(this.#state,provinceId);}
   economySummary(){return economy.summarizeEconomy(this.#state.systems.economy);}
   // Read-only presentation projection: physical inventories remain authoritative
   // and are requested separately for the selected enterprise.
@@ -155,7 +156,7 @@ class Simulation {
       if(date.day===1){
         if(this.#state.systems.economy||this.#state.systems.settlements){
           const preparedEconomy=stagedEconomy||(this.#state.systems.economy?economy.prepareEconomyMonth(this.#state.systems.economy,this.#state.systems.population,this.#hierarchy,{year:this.#state.clock.date.year,month:this.#state.clock.date.month}):null);
-          const preparedPopulation=population.preparePopulationMonth(this.#state.systems.population,this.#hierarchy);
+          const preparedPopulation=population.preparePopulationMonth(this.#state.systems.population,this.#hierarchy,preparedEconomy?autonomy.foodEffects(preparedEconomy.state):undefined);
           const developed=preparedEconomy?.state.autonomy?autonomy.develop(preparedEconomy.state,preparedPopulation.state,this.#state.systems.settlements,this.#hierarchy):this.#state.systems.settlements;
           const preparedSettlements=this.#state.systems.settlements?settlements.prepareSettlementsMonth(developed,preparedPopulation?.state||this.#state.systems.population,this.#hierarchy,preparedEconomy?.state):null;
           if(preparedEconomy?.state.autonomy){const births=preparedPopulation.state.stats.births-this.#state.systems.population.stats.births,deaths=preparedPopulation.state.stats.deaths-this.#state.systems.population.stats.deaths;preparedPopulation.update={births,deaths,netChange:births-deaths};economy.canonicalize(preparedEconomy.state);economy.validateEconomyState(preparedEconomy.state,this.#hierarchy);settlements.refreshCapitals(preparedSettlements,this.#state.countries);}

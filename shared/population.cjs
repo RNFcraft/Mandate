@@ -45,12 +45,14 @@ function initializePopulation(data=emptyPopulation(),hierarchy){
   validatePopulationScenario(data,hierarchy);
   return {...structuredClone(data),cohorts:data.cohorts.map(c=>({...c,birthRateBps:c.birthRateBps??0,deathRateBps:c.deathRateBps??0,birthRemainder:0,deathRemainder:0})),stats:{monthsProcessed:0,births:0,deaths:0}};
 }
-function preparePopulationMonth(state,hierarchy){
+function preparePopulationMonth(state,hierarchy,foodEffects){
   if(!state)return null;
   // Stage numeric results only; overflow cannot partially modify cohorts or stats.
   const changes=[];let births=0n,deaths=0n,total=0n;
   for(const c of state.cohorts){
-    const b=BigInt(c.count)*BigInt(c.birthRateBps)+BigInt(c.birthRemainder),d=BigInt(c.count)*BigInt(c.deathRateBps)+BigInt(c.deathRemainder),born=b/120000n,died=d/120000n;
+    const effect=foodEffects?.get(c.territoryId);if(effect&&(!bps(effect.birthReductionBps)||!bps(effect.extraDeathRateBps)))fail('invalid food demographic effect');
+    const birthRate=effect?Number(BigInt(c.birthRateBps)*BigInt(10000-effect.birthReductionBps)/10000n):c.birthRateBps,deathRate=effect?Math.min(10000,c.deathRateBps+effect.extraDeathRateBps):c.deathRateBps;
+    const b=BigInt(c.count)*BigInt(birthRate)+BigInt(c.birthRemainder),d=BigInt(c.count)*BigInt(deathRate)+BigInt(c.deathRemainder),born=b/120000n,died=d/120000n;
     const count=number(BigInt(c.count)+born-died);births+=born;deaths+=died;total+=BigInt(count);
     changes.push({count,birthRemainder:Number(b%120000n),deathRemainder:Number(d%120000n)});
   }

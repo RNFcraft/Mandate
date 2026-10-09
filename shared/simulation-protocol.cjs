@@ -23,7 +23,7 @@ function createEndpoint(send,{createPool}={}){
           case 'SetSpeed':result=simulation.setSpeed(payload.speed);break;
           case 'Step':await simulation.stepAsync(payload.count,pool);break;
           case 'SubmitCommand':result=simulation.submit(payload.command);break;
-          case 'RequestSummary':result=payload.kind==='enterprise'?simulation.enterpriseSummary(payload.id):payload.kind==='political'?simulation.territoryPoliticalState(payload.id):simulation.economicReport();break;
+          case 'RequestSummary':result=payload.kind==='enterprise'?simulation.enterpriseSummary(payload.id):payload.kind==='political'?simulation.territoryPoliticalState(payload.id):simulation.economicReport(payload.provinceId);break;
           case 'RequestSnapshot':result=simulation.snapshot();break;
           case 'Serialize':result=simulation.serialize();break;
           case 'Save':result=simulation.serializeSave();break;
@@ -34,6 +34,7 @@ function createEndpoint(send,{createPool}={}){
             simulation.pause();metadata=true;break;
           }
           case 'EnableAutonomy':simulation.enableAutonomy(payload.rules);metadata=true;break;
+          case 'ConfigureFoodFeedback':simulation.configureFoodFeedback(payload.enabled);pool?.reset();metadata=true;break;
           default:throw Error('Unknown simulation request');
         }
       }

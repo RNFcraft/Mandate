@@ -37,7 +37,8 @@ export class SimulationClient{
   step(count=1){return this.request('Step',{count});}submit(command){return this.request('SubmitCommand',{command});}
   snapshot(){return this.request('RequestSnapshot');}serialize(){return this.request('Serialize');}save(){return this.request('Save');}
   load(value){this.loading=(this.loading||0)+1;return this.request('Load',{value}).finally(()=>this.loading--);}
-  enableAutonomy(rules={}){return this.request('EnableAutonomy',{rules});}economicReport(){return this.request('RequestSummary');}
+  enableAutonomy(rules={}){return this.request('EnableAutonomy',{rules});}economicReport(provinceId){return this.request('RequestSummary',{provinceId});}
+  configureFoodFeedback(enabled){return this.request('ConfigureFoodFeedback',{enabled});}
   economySummary(){return this.view.economy;}economyView(){return this.view.economy;}
   enterpriseSummary(id){return this.request('RequestSummary',{kind:'enterprise',id});}
   settlementSummary(provinceId){return this.view.settlements===null?null:provinceId?this.view.settlements.filter(r=>r.provinceId===provinceId):this.view.settlements;}
