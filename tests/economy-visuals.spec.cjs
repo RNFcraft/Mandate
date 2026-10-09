@@ -40,7 +40,7 @@ test('monthly panel update preserves politics and anchor cache; save/load restor
   await ready(page);await select(page,'enterprise:demo-farm');
   const values=await page.evaluate(async()=>{
     const m=mandateMap,l=mandateEconomyLayer,revision=m.model.revision,generation=m.politicalGeneration,borders=m.ownershipBorders,background=m.background,anchors=l.anchors.get('province:00001');
-    mandateSimulation.step(31);await new Promise(requestAnimationFrame);
+    await mandateSimulation.step(31);await new Promise(requestAnimationFrame);
     return {revision:m.model.revision===revision,generation:m.politicalGeneration===generation,borders:m.ownershipBorders===borders,background:m.background===background,anchors:l.anchors.get('province:00001')===anchors,record:mandateSimulation.economySummary().enterprises.find(e=>e.id==='demo-farm')};
   });
   for(const key of ['revision','generation','borders','background','anchors'])expect(values[key]).toBe(true);
@@ -48,7 +48,7 @@ test('monthly panel update preserves politics and anchor cache; save/load restor
   const serialized=await page.evaluate(()=>mandateSimulation.serialize());await page.locator('#economy-toggle').click();
   expect(await page.evaluate(()=>mandateEconomyLayer.buildLayout().length)).toBe(0);expect(await page.evaluate(()=>mandateSimulation.serialize())).toBe(serialized);
   await page.locator('#economy-toggle').click();expect(await page.evaluate(()=>mandateSimulation.serialize())).toBe(serialized);
-  const loaded=await page.evaluate(()=>{const saved=JSON.parse(mandateSimulation.serialize()),points=mandateEconomyLayer.objects.map(o=>[o.key,o.point]);mandateSimulation.step(28);mandateSimulation.load(saved);return {points,after:mandateEconomyLayer.objects.map(o=>[o.key,o.point]),months:mandateEconomyLayer.state.stats.monthsProcessed};});
+  const loaded=await page.evaluate(async()=>{const saved=JSON.parse(await mandateSimulation.serialize()),points=mandateEconomyLayer.objects.map(o=>[o.key,o.point]);await mandateSimulation.step(28);await mandateSimulation.load(saved);return {points,after:mandateEconomyLayer.objects.map(o=>[o.key,o.point]),months:mandateEconomyLayer.state.stats.monthsProcessed};});
   expect(loaded.after).toEqual(loaded.points);expect(loaded.months).toBe(1);
   await select(page,'market:market-local');const market=await page.evaluate(()=>mandateSimulation.economySummary().markets.find(m=>m.id==='market-local'));
   await expect(page.locator('[data-field="food price"]')).toHaveText(String(market.goods[0].priceMinor));await expect(page.locator('[data-field="food supply"]')).toHaveText(String(market.goods[0].stats.supply));
@@ -87,11 +87,11 @@ test('dense records group within the render cap, reuse images and react to addit
   const requests=[];page.on('request',r=>{if(r.url().includes('/sprites/'))requests.push(r.url());});await ready(page);
   const countBefore=requests.length;
   const result=await page.evaluate(async()=>{
-    const s=mandateSimulation.snapshot(),template=s.systems.economy.enterprises[0];
+    const s=await mandateSimulation.snapshot(),template=s.systems.economy.enterprises[0];
     for(let i=0;i<500;i++)s.systems.economy.enterprises.push({...structuredClone(template),id:'dense-'+i});
-    mandateSimulation.load(s);await new Promise(requestAnimationFrame);
+    await mandateSimulation.load(s);await new Promise(requestAnimationFrame);
     const l=mandateEconomyLayer,items=l.buildLayout(),result={count:l.objects.length,drawn:items.length,cap:l.maxVisible,grouped:items.some(i=>i.objects.length>1),keys:new Set(items.flatMap(i=>i.objects.map(o=>o.key))).size};
-    s.systems.economy.enterprises=s.systems.economy.enterprises.filter(e=>!e.id.startsWith('dense-'));mandateSimulation.load(s);result.after=l.objects.length;return result;
+    s.systems.economy.enterprises=s.systems.economy.enterprises.filter(e=>!e.id.startsWith('dense-'));await mandateSimulation.load(s);result.after=l.objects.length;return result;
   });
   expect(result.count).toBe(509);expect(result.drawn).toBeLessThanOrEqual(result.cap);expect(result.grouped).toBe(true);expect(result.keys).toBe(result.count);expect(result.after).toBe(9);expect(requests.length).toBe(countBefore);
 });

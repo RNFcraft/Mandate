@@ -3,6 +3,12 @@ import {path} from './geometry.js';
 // Both edge classification and fills use the same runtime ownership authority.
 export function updateProvincePolitics(map,topology,regions){
   const object=topology.objects.provinces,owners=map.model.owners;
+  const ownerKey=JSON.stringify([...owners]),colorKey=JSON.stringify([...map.model.countries].map(([id,c])=>[id,c.color]));
+  if(map.ownerKey===ownerKey){
+    if(map.colorKey!==colorKey){map.colorKey=colorKey;map.politicalGeneration=(map.politicalGeneration||0)+1;map.background?.canvas.close?.();map.background=null;map.setRasterScene?.();}
+    map.invalidate();return;
+  }
+  map.ownerKey=ownerKey;map.colorKey=colorKey;
   map.politicalFeatures=regions.map(r=>({...r,owner:owners.get(r.id)??null}));
   // One Canvas fill per owner avoids antialias seams between equal-owner cells.
   // addPath only batches existing paths: no geometry merge or GIS operation.
@@ -17,6 +23,8 @@ export function updateProvincePolitics(map,topology,regions){
   const border=mesh(topology,object,(a,b)=>a!==b&&(owners.get(a.id)??null)!==(owners.get(b.id)??null));
   const internal=mesh(topology,object,(a,b)=>a!==b&&(owners.get(a.id)??null)===(owners.get(b.id)??null));
   map.politicalBorders=border;
-  map.classifiedBorders={province:new Path2D(path(internal)),political:new Path2D(path(border)),coastline:new Path2D(path(mesh(topology,topology.objects.land)))};
-  map.ownershipBorders=map.classifiedBorders.political;map.politicalGeneration=(map.politicalGeneration||0)+1;map.politicalPending=false;map.background=null;map.invalidate();
+  map.borderSVG={province:path(internal),political:path(border),coastline:map.borderSVG?.coastline||path(mesh(topology,topology.objects.land))};
+  map.classifiedBorders=Object.fromEntries(Object.entries(map.borderSVG).map(([k,v])=>[k,new Path2D(v)]));
+  map.setRasterScene?.();
+  map.ownershipBorders=map.classifiedBorders.political;map.politicalGeneration=(map.politicalGeneration||0)+1;map.politicalPending=false;map.background?.canvas.close?.();map.background=null;map.invalidate();
 }

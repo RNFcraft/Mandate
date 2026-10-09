@@ -1,4 +1,5 @@
 // Economy v1: portable JSON state, local clearing and exact inventory accounting.
+const autonomy=require('./autonomous-economy.cjs');
 const {TAG}=require('./scenario.cjs');
 const compare=(a,b)=>a<b?-1:a>b?1:0;
 const fail=message=>{throw Error(`Economy: ${message}`);};
@@ -31,8 +32,9 @@ function checkDemand(s,need){
 }
 function durableGoods(needs){return [...new Set(needs.filter(n=>n.usage==='durable').map(n=>n.goodId))].sort(compare);}
 function validate(data,hierarchy,runtime){
-  fields(data,['version','rules','goods','recipes','markets','households','enterprises',...(runtime?['stats']:[])]);
+  fields(data,['version','rules','goods','recipes','markets','households','enterprises',...(runtime?['stats']:[]),...(Object.hasOwn(data,'autonomy')?['autonomy']:[])]);
   if(data.version!==1||hierarchy.id!=='mandate-provinces-v1')fail('unsupported version/geography');
+  if(Object.hasOwn(data,'autonomy')&&!runtime)fail('autonomy is runtime-only; enable it explicitly');
   const rules=data.rules,multi=Object.hasOwn(rules||{},'consumerNeeds');fields(rules,['foodGoodId','foodPerPersonNumerator','foodPerPersonDenominator','laborParticipationBps','maxPriceAdjustmentBps','profitPayoutBps',...(multi?['consumerNeeds']:[])]);
   if(!safe(rules.foodPerPersonNumerator)||!safe(rules.foodPerPersonDenominator)||rules.foodPerPersonDenominator===0||!bps(rules.laborParticipationBps)||!bps(rules.maxPriceAdjustmentBps)||!bps(rules.profitPayoutBps))fail('invalid rules');
   const goods=registry(data.goods),recipes=registry(data.recipes),markets=registry(data.markets),houses=registry(data.households),enterprises=registry(data.enterprises);
@@ -108,9 +110,9 @@ function validate(data,hierarchy,runtime){
     const balances=registry(data.stats.goods,'goodId');if(balances.size!==goods.size)fail('missing goods balance');
     for(const b of balances.values()){
       const keys=['opening','produced','inputsConsumed','householdConsumed','closing',...(multi?['inUseOpening','inUseAdded','inUseClosing']:[])];fields(b,['goodId',...keys]);
-      if(!goods.has(b.goodId)||keys.some(k=>!safe(b[k]))||BigInt(b.opening)+BigInt(b.produced)-BigInt(b.inputsConsumed)-BigInt(b.householdConsumed)-BigInt(multi?b.inUseAdded:0)!==BigInt(b.closing))fail('invalid goods balance');
+      if(!goods.has(b.goodId)||keys.some(k=>!safe(b[k]))||BigInt(b.opening)+BigInt(b.produced)-BigInt(b.inputsConsumed)-BigInt(b.householdConsumed)-BigInt(multi?b.inUseAdded:0)-BigInt(data.autonomy?.goods.find(g=>g.goodId===b.goodId).capitalAdded||0)!==BigInt(b.closing))fail('invalid goods balance');
       if(multi){
-        if(BigInt(b.inUseOpening)+BigInt(b.inUseAdded)!==BigInt(b.inUseClosing))fail('invalid in-use balance');
+        if(BigInt(b.inUseOpening)+BigInt(b.inUseAdded)-BigInt(data.autonomy?.goods.find(g=>g.goodId===b.goodId).inUseRetired||0)!==BigInt(b.inUseClosing))fail('invalid in-use balance');
         if(data.stats.monthsProcessed){
           const held=[...houses.values()].reduce((sum,h)=>sum+BigInt(h.inUse.find(s=>s.goodId===b.goodId)?.quantity||0),0n);
           const closing=[...enterprises.values()].reduce((sum,e)=>sum+BigInt(e.inventories.find(s=>s.goodId===b.goodId).quantity),0n);
@@ -121,7 +123,7 @@ function validate(data,hierarchy,runtime){
       }
     }
   }
-  return data;
+  autonomy.validate(data);return data;
 }
 const validateEconomyScenario=(data,hierarchy)=>validate(data,hierarchy,false);
 const validateEconomyState=(data,hierarchy)=>validate(data,hierarchy,true);
@@ -134,6 +136,7 @@ function canonicalize(data){
     data.rules.consumerNeeds.sort((a,b)=>priorities[a.priority]-priorities[b.priority]||compare(a.id,b.id));
     for(const h of data.households){h.inUse?.sort((a,b)=>compare(a.goodId,b.goodId));h.consumerState?.sort((a,b)=>compare(a.needId,b.needId));}
   }
+  if(data.autonomy){data.autonomy.firms.sort((a,b)=>compare(a.enterpriseId,b.enterpriseId));data.autonomy.wear.sort((a,b)=>compare(a.householdId,b.householdId));data.autonomy.goods.sort((a,b)=>compare(a.goodId,b.goodId));data.autonomy.shortages.sort((a,b)=>compare(a.marketId,b.marketId)||compare(a.goodId,b.goodId));}
   if(data.stats)data.stats.goods.sort((a,b)=>compare(a.goodId,b.goodId));return data;
 }
 function initializeEconomy(data,hierarchy){
@@ -158,6 +161,11 @@ function take(stock,quantity){
 function transfer(from,to,amount){from.cashMinor=subtract(from.cashMinor,amount);to.cashMinor=add(to.cashMinor,amount);}
 function prepareEconomyMonth(state,population,hierarchy,period){
   validateEconomyState(state,hierarchy);
+  return prepareValidatedMonth(state,population,hierarchy,period);
+}
+// Internal partition entry: the coordinator validates the complete opening world.
+// Each local result and the merged world still undergo full closing validation.
+function prepareValidatedMonth(state,population,hierarchy,period){
   if(state.stats.lastCompletedPeriod&&(period.year*12+period.month!==state.stats.lastCompletedPeriod.year*12+state.stats.lastCompletedPeriod.month+1))fail('nonconsecutive economic period');
   const next=canonicalize(structuredClone(state)),rules=next.rules,recipes=new Map(next.recipes.map(r=>[r.id,r])),houses=new Map(next.households.map(h=>[h.id,h])),houseAt=new Map(next.households.map(h=>[h.provinceId,h])),marketAt=new Map(next.markets.flatMap(m=>m.provinceIds.map(id=>[id,m])));
   const stocks=new Map(next.enterprises.map(e=>[e.id,new Map(e.inventories.map(s=>[s.goodId,s]))]));
@@ -169,15 +177,16 @@ function prepareEconomyMonth(state,population,hierarchy,period){
   for(const e of next.enterprises)for(const s of e.inventories){const b=balance.get(s.goodId);b.opening=add(b.opening,s.quantity);}
   if(multi)for(const h of next.households)for(const s of h.inUse){const b=balance.get(s.goodId);b.inUseOpening=add(b.inUseOpening,s.quantity);}
   const cashBefore=totalCash();
+  const management=autonomy.begin(next,state,population,marketAt,balance,take);
   for(const h of next.households)h.stats=zero(householdKeys);
   for(const m of next.markets)for(const g of m.goods)g.stats=zero(marketKeys);
   // Production uses only opening inputs. Later purchases cannot trigger another pass.
   for(const e of next.enterprises){
     e.stats=zero(enterpriseKeys);const r=recipes.get(e.recipeId),inv=stocks.get(e.id),house=houseAt.get(e.provinceId);
-    let batches=Math.min(e.capacityBatches,divide(labor.get(e.provinceId),r.workersPerBatch));
+    const controller=management?.firms.get(e.id);let batches=Math.min(controller?controller.plannedBatches:e.capacityBatches,divide(labor.get(e.provinceId),r.workersPerBatch));if(controller&&batches<controller.plannedBatches)controller.idleReason='labor';
     const batchWage=mul(r.workersPerBatch,e.wagePerWorkerMinor);
-    if(batchWage)batches=Math.min(batches,divide(e.cashMinor,batchWage));
-    for(const input of r.inputs)batches=Math.min(batches,divide(inv.get(input.goodId).quantity,input.quantity));
+    if(batchWage){const affordable=divide(e.cashMinor,batchWage);if(controller&&affordable<batches)controller.idleReason='money';batches=Math.min(batches,affordable);}
+    for(const input of r.inputs){const available=divide(inv.get(input.goodId).quantity,input.quantity);if(controller&&available<batches)controller.idleReason='materials';batches=Math.min(batches,available);}
     const workers=mul(batches,r.workersPerBatch),wages=mul(workers,e.wagePerWorkerMinor);labor.set(e.provinceId,labor.get(e.provinceId)-workers);transfer(e,house,wages);house.stats.wages=add(house.stats.wages,wages);
     let inputsValue=0;
     for(const input of r.inputs){const quantity=mul(batches,input.quantity);if(quantity)inputsValue=add(inputsValue,take(inv.get(input.goodId),quantity));const b=balance.get(input.goodId);b.inputsConsumed=add(b.inputsConsumed,quantity);}
@@ -211,8 +220,9 @@ function prepareEconomyMonth(state,population,hierarchy,period){
   }
   for(const e of next.enterprises){
     const r=recipes.get(e.recipeId),m=marketAt.get(e.provinceId);let budget=e.cashMinor;
-    for(const input of r.inputs){const g=m.goods.find(g=>g.goodId===input.goodId),target=mul(e.capacityBatches,input.quantity),quantity=Math.min(Math.max(0,target-stocks.get(e.id).get(input.goodId).quantity),divide(budget,g.priceMinor));budget=subtract(budget,mul(quantity,g.priceMinor));g.stats.inputDemand=add(g.stats.inputDemand,quantity);orders.push({marketId:m.id,goodId:input.goodId,kind:1,buyer:e,quantity});}
+    for(const input of r.inputs){const g=m.goods.find(g=>g.goodId===input.goodId),target=mul(management?mul(management.firms.get(e.id).plannedBatches,next.autonomy.rules.inputReserveMonths):e.capacityBatches,input.quantity),quantity=Math.min(Math.max(0,target-stocks.get(e.id).get(input.goodId).quantity),divide(budget,g.priceMinor));budget=subtract(budget,mul(quantity,g.priceMinor));g.stats.inputDemand=add(g.stats.inputDemand,quantity);orders.push({marketId:m.id,goodId:input.goodId,kind:1,buyer:e,quantity});}
   }
+  if(management)autonomy.investmentOrders(next,management,marketAt,stocks,orders);
   const offers=next.enterprises.map(e=>({seller:e,marketId:marketAt.get(e.provinceId).id,goodId:recipes.get(e.recipeId).output.goodId,stock:stocks.get(e.id).get(recipes.get(e.recipeId).output.goodId),remaining:stocks.get(e.id).get(recipes.get(e.recipeId).output.goodId).quantity}));
   const offersByMarket=new Map();
   for(const o of offers){
@@ -221,6 +231,7 @@ function prepareEconomyMonth(state,population,hierarchy,period){
     bucket.offers.push(o);
     const g=marketAt.get(o.seller.provinceId).goods.find(g=>g.goodId===o.goodId);g.stats.supply=add(g.stats.supply,o.stock.quantity);
   }
+  if(management)for(const goods of offersByMarket.values())for(const bucket of goods.values()){const offset=state.stats.monthsProcessed%bucket.offers.length;bucket.offers=[...bucket.offers.slice(offset),...bucket.offers.slice(0,offset)];}
   orders.sort((a,b)=>compare(a.marketId,b.marketId)||compare(a.goodId,b.goodId)||a.kind-b.kind||(a.priority??0)-(b.priority??0)||compare(a.buyer.id,b.buyer.id)||compare(a.needState?.needId||'',b.needState?.needId||''));
   for(const order of orders){
     const market=marketAt.get(order.buyer.provinceId),g=market.goods.find(g=>g.goodId===order.goodId);let remaining=order.quantity;
@@ -230,7 +241,7 @@ function prepareEconomyMonth(state,population,hierarchy,period){
       const o=bucket.offers[offerIndex];
       if(o.seller===order.buyer)continue;
       const quantity=Math.min(remaining,o.remaining,o.stock.quantity);if(!quantity)continue;
-      const amount=mul(quantity,g.priceMinor),book=take(o.stock,quantity);transfer(order.buyer,o.seller,amount);remaining-=quantity;o.remaining-=quantity;g.stats.purchased=add(g.stats.purchased,quantity);o.seller.stats.revenue=add(o.seller.stats.revenue,amount);o.seller.stats.cogs=add(o.seller.stats.cogs,book);
+      const amount=mul(quantity,g.priceMinor),book=take(o.stock,quantity);transfer(order.buyer,o.seller,amount);remaining-=quantity;o.remaining-=quantity;g.stats.purchased=add(g.stats.purchased,quantity);o.seller.stats.revenue=add(o.seller.stats.revenue,amount);o.seller.stats.cogs=add(o.seller.stats.cogs,book);if(management){const f=management.firms.get(o.seller.id);f.sold=add(f.sold,quantity);}
       if(order.kind===0){
         const h=order.buyer;h.stats.purchased=add(h.stats.purchased,quantity);h.stats.spending=add(h.stats.spending,amount);h.stats.unmetNeed-=quantity;h.stats.rationedDemand-=quantity;
         if(order.needState){const s=order.needState.stats;s.purchased=add(s.purchased,quantity);s.spending=add(s.spending,amount);s.unmetNeed-=quantity;s.rationedDemand-=quantity;}
@@ -244,12 +255,13 @@ function prepareEconomyMonth(state,population,hierarchy,period){
   for(const e of next.enterprises)e.stats.profit=e.stats.revenue-e.stats.cogs;
   for(const m of next.markets)for(const g of m.goods){
     const demand=add(g.stats.affordableDemand,g.stats.inputDemand),supply=g.stats.supply;g.stats.shortage=Math.max(0,demand-supply);g.stats.surplus=Math.max(0,supply-demand);
-    const pressure=BigInt(demand-supply)*10000n/BigInt(Math.max(demand,supply,1)),adjustment=pressure*BigInt(rules.maxPriceAdjustmentBps)/10000n,n=BigInt(g.priceMinor)*adjustment+BigInt(g.priceRemainder),delta=n/10000n,definition=next.goods.find(row=>row.id===g.goodId),raw=BigInt(g.priceMinor)+delta;
+    const priceSupply=management?Math.max(0,supply-(management.priceReserves.get(m.id+':'+g.goodId)||0)):supply;const pressure=BigInt(demand-priceSupply)*10000n/BigInt(Math.max(demand,priceSupply,1)),adjustment=pressure*BigInt(rules.maxPriceAdjustmentBps)/10000n,n=BigInt(g.priceMinor)*adjustment+BigInt(g.priceRemainder),delta=n/10000n,definition=next.goods.find(row=>row.id===g.goodId),raw=BigInt(g.priceMinor)+delta;
     const bounded=raw<BigInt(definition.minPriceMinor)?BigInt(definition.minPriceMinor):raw>BigInt(definition.maxPriceMinor)?BigInt(definition.maxPriceMinor):raw;g.priceMinor=number(bounded);g.priceRemainder=bounded!==raw?0:Number(n%10000n);
   }
   for(const e of next.enterprises){
-    const r=recipes.get(e.recipeId),reserve=mul(mul(e.capacityBatches,r.workersPerBatch),e.wagePerWorkerMinor),desired=number(BigInt(Math.max(0,e.stats.profit))*BigInt(rules.profitPayoutBps)/10000n),payout=Math.min(desired,Math.max(0,e.cashMinor-reserve)),owner=houses.get(e.ownerRef.id);transfer(e,owner,payout);e.stats.payout=payout;owner.stats.payout=add(owner.stats.payout,payout);
+    const r=recipes.get(e.recipeId),reserve=management?mul(add(mul(mul(e.capacityBatches,r.workersPerBatch),e.wagePerWorkerMinor),r.inputs.reduce((n,i)=>add(n,mul(mul(e.capacityBatches,i.quantity),marketAt.get(e.provinceId).goods.find(g=>g.goodId===i.goodId).priceMinor)),0)),next.autonomy.rules.reserveMonths):mul(mul(e.capacityBatches,r.workersPerBatch),e.wagePerWorkerMinor),desired=number(BigInt(Math.max(0,e.stats.profit))*BigInt(next.autonomy?.rules.profitPayoutBps??rules.profitPayoutBps)/10000n),payout=Math.min(desired,Math.max(0,e.cashMinor-reserve)),owner=houses.get(e.ownerRef.id);transfer(e,owner,payout);e.stats.payout=payout;owner.stats.payout=add(owner.stats.payout,payout);
   }
+  if(management)autonomy.finish(next,management,marketAt,stocks,labor,houseAt,take,transfer,balance);
   for(const e of next.enterprises)for(const s of e.inventories){const b=balance.get(s.goodId);b.closing=add(b.closing,s.quantity);}
   if(multi)for(const h of next.households)for(const s of h.inUse){const b=balance.get(s.goodId);b.inUseClosing=add(b.inUseClosing,s.quantity);}
   next.stats={monthsProcessed:add(state.stats.monthsProcessed,1),lastCompletedPeriod:{year:period.year,month:period.month},cashBefore,cashAfter:totalCash(),goods:[...balance.values()]};
@@ -257,4 +269,4 @@ function prepareEconomyMonth(state,population,hierarchy,period){
   return {state:next,update:{monthsProcessed:next.stats.monthsProcessed,period:Object.freeze({...period})}};
 }
 function summarizeEconomy(state){return state?structuredClone(state):null;}
-module.exports={validateEconomyScenario,validateEconomyState,initializeEconomy,prepareEconomyMonth,summarizeEconomy,canonicalize};
+module.exports={prepareValidatedMonth,validateEconomyScenario,validateEconomyState,initializeEconomy,prepareEconomyMonth,summarizeEconomy,canonicalize};

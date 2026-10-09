@@ -21,35 +21,41 @@ export class EconomyLayer {
     this.control=document.createElement('section');this.control.className='economy-control';
     this.toggle=document.createElement('button');this.toggle.id='economy-toggle';this.toggle.onclick=()=>{this.enabled=!this.enabled;this.panel.hidden=true;this.updateToggle();this.layoutKey=null;map.invalidate();};
     this.control.append(this.toggle);document.body.append(this.control);
-    this.panel=document.createElement('section');this.panel.id='economy-info';this.panel.hidden=true;this.panel.setAttribute('aria-label','Economic object');document.body.append(this.panel);
+    this.panel=map.inspector?map.inspector.panel('enterprise','economy-info'):document.createElement('section');this.panel.id='economy-info';this.panel.hidden=true;this.panel.setAttribute('aria-label','Economic object');if(!map.inspector)document.body.append(this.panel);else map.inspector.panels.set('market',this.panel);
     this.removeLayer=map.addLayer((ctx)=>this.draw(ctx));
     this.previousSelect=map.objectSelect;map.objectSelect=(x,y)=>this.selectAt(x,y)||this.previousSelect?.(x,y);
-    this.unsubscribe=simulation.subscribe(event=>{if(['economyUpdated','gameLoaded'].includes(event.type))this.refresh();});
+    this.unsubscribe=simulation.subscribe(event=>{if(simulation.worker?event.type==='viewUpdated':['economyUpdated','gameLoaded'].includes(event.type))this.refresh();});
     this.refresh();
   }
   updateToggle(){this.control.hidden=!this.objects.length;this.toggle.textContent=`Economic objects: ${this.enabled?'Show':'Hide'}`;this.toggle.setAttribute('aria-pressed',String(this.enabled));}
   refresh(){
-    this.state=this.simulation.economySummary();const objects=[];
+    this.state=this.simulation.economyView?.()||this.simulation.economySummary();const objects=[];
+    if(this.state&&this.byKey&&this.objects.length===this.state.enterprises.length+this.state.markets.length&&this.state.enterprises.every(e=>this.byKey.has('enterprise:'+e.id))&&this.state.markets.every(m=>this.byKey.has('market:'+m.id))){
+      for(const record of this.state.enterprises)this.byKey.get('enterprise:'+record.id).record=record;
+      for(const record of this.state.markets)this.byKey.get('market:'+record.id).record=record;
+      this.updatePanel();this.map.invalidate();return;
+    }
     if(this.state){
       for(const record of this.state.enterprises)objects.push({key:'enterprise:'+record.id,kind:'enterprise',id:record.id,provinceId:record.provinceId,sprite:this.recipeSprites[record.recipeId]||null,record});
       for(const record of this.state.markets)objects.push({key:'market:'+record.id,kind:'market',id:record.id,provinceId:[...record.provinceIds].sort(compare)[0],sprite:'market',record});
     }
     objects.sort((a,b)=>compare(a.provinceId,b.provinceId)||compare(a.key,b.key));
     const groups=new Map();for(const object of objects){if(!groups.has(object.provinceId))groups.set(object.provinceId,[]);groups.get(object.provinceId).push(object);}
-    this.grid.clear();this.objects=[];
+    const previous=this.byKey||new Map(),oldKeys=this.objects.map(o=>o.key).join('|');this.objects=[];
     for(const [provinceId,rows]of groups){
       const region=this.regions.get(provinceId);if(!region)continue;
       if(!this.anchors.has(provinceId))this.anchors.set(provinceId,interiorAnchors(region));
       const anchors=this.anchors.get(provinceId);if(!anchors.length)continue;
       for(let i=0;i<rows.length;i++){
-        const o=rows[i];o.point=anchors[i%anchors.length];this.objects.push(o);
-        const key=`${Math.floor(o.point[0]/5)},${Math.floor(o.point[1]/5)}`;
-        if(!this.grid.has(key))this.grid.set(key,[]);this.grid.get(key).push(o);
+        const o=rows[i],old=previous.get(o.key);let hash=0;for(const char of o.key)hash=(hash*31+char.charCodeAt(0))>>>0;
+        o.point=old?.point||anchors[hash%anchors.length];this.objects.push(o);
         const url=visuals.sprites[o.sprite];if(url)o.image=imageFor(url,this.invalidate);
       }
     }
     this.byKey=new Map(this.objects.map(o=>[o.key,o]));
-    this.revision++;this.layoutKey=null;this.updateToggle();this.updatePanel();this.map.invalidate();
+    if(oldKeys!==this.objects.map(o=>o.key).join('|')){this.grid.clear();for(const o of this.objects){const key=`${Math.floor(o.point[0]/5)},${Math.floor(o.point[1]/5)}`;if(!this.grid.has(key))this.grid.set(key,[]);this.grid.get(key).push(o);}this.revision++;this.layoutKey=null;}
+    else {for(const rows of this.grid.values())for(let i=0;i<rows.length;i++)rows[i]=this.byKey.get(rows[i].key);for(const item of this.layout)for(let i=0;i<item.objects.length;i++)item.objects[i]=this.byKey.get(item.objects[i].key);}
+    this.updateToggle();this.updatePanel();this.map.invalidate();
   }
   get level(){return this.map.zoom<3?'far':this.map.zoom<12?'medium':'close';}
   visibleObjects(){
@@ -88,6 +94,7 @@ export class EconomyLayer {
     ctx.setTransform(m.canvas.width/m.width,0,0,m.canvas.height/m.height,0,0);
     ctx.imageSmoothingEnabled=false;
     for(const item of items){
+      m.symbols?.push({x:item.x,y:item.y,radius:item.size/2});
       const o=item.objects[0],image=o.image;
       if(this.level==='close'&&item.objects.length===1&&image?.status==='ready'){
         const width=44,height=width*image.image.naturalHeight/image.image.naturalWidth;
@@ -109,6 +116,7 @@ export class EconomyLayer {
   updatePanel(){
     if(!this.selectedKey)return;
     const o=this.byKey.get(this.selectedKey);if(!o){this.panel.hidden=true;this.selectedKey=null;return;}
+    if(this.map.inspector&&!this.panel.hidden){this.map.inspector.provinceId=o.provinceId;this.map.inspector.show(o.kind);}
     this.panel.replaceChildren();
     const heading=document.createElement('strong');heading.textContent=o.id;this.panel.append(heading);
     const close=document.createElement('button');close.textContent='Close';close.onclick=()=>{this.selectedKey=null;this.panel.hidden=true;this.map.invalidate();};this.panel.append(close);
@@ -119,7 +127,9 @@ export class EconomyLayer {
     if(o.kind==='enterprise'){
       const recipe=this.state.recipes.find(row=>row.id===r.recipeId);field('Production type',r.recipeId);field('Capacity (batches)',r.capacityBatches);field('Workers',r.stats?.workers);
       field('Production',recipe&&r.stats?`${r.stats.batches*recipe.output.quantity} ${recipe.output.goodId}`:null);
-      field('Inventories',r.inventories.map(s=>`${s.goodId}: ${s.quantity} (book value ${s.bookValueMinor})`).join('; '));field('Revenue',r.stats?.revenue);field('Profit/loss',r.stats?.profit);
+      const inventory=document.createElement('table');inventory.dataset.field='Inventories';this.panel.append(inventory);
+      Promise.resolve(this.simulation.enterpriseSummary(r.id)).then(detail=>{if(this.selectedKey!==o.key||!inventory.isConnected)return;for(const stock of detail?.inventories||[]){const tr=document.createElement('tr');for(const value of [this.state.goods.find(g=>g.id===stock.goodId)?.name||stock.goodId,stock.quantity,stock.bookValueMinor]){const cell=document.createElement('td');cell.textContent=value;tr.append(cell);}inventory.append(tr);}}).catch(()=>{});
+      field('Revenue',r.stats?.revenue);field('Profit/loss',r.stats?.profit);
     }else{
       field('Covered provinces',r.provinceIds.join(', '));
       for(const g of r.goods){field(`${g.goodId} price`,g.priceMinor);field(`${g.goodId} supply`,g.stats?.supply);field(`${g.goodId} demand`,g.stats?g.stats.affordableDemand+g.stats.inputDemand:null);field(`${g.goodId} shortage/surplus`,g.stats?`${g.stats.shortage} / ${g.stats.surplus}`:null);}

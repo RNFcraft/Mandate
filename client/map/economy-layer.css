@@ -3,4 +3,9 @@
 .economy-control[hidden],#economy-info[hidden]{display:none}
 .economy-control button,#economy-info button{font:inherit;color:inherit;background:#304953;border:1px solid #61747a;padding:4px 6px;cursor:pointer}
 #economy-info>button{float:right}#economy-info dl{display:grid;grid-template-columns:1fr 1.4fr;gap:6px;margin:12px 0 0}#economy-info dd{margin:0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+#world-inspector #economy-info{position:static;width:auto;max-height:none;border:0;padding:8px 0}
+#world-inspector[hidden],#world-inspector section[hidden]{display:none}
+#world-inspector nav{display:flex;flex-wrap:wrap;gap:4px}
+#world-inspector table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+#world-inspector td{padding:3px;border-bottom:1px solid #61747a}
 .economy-group{display:flex;flex-wrap:wrap;gap:4px;margin-top:12px}

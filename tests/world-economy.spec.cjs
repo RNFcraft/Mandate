@@ -33,13 +33,13 @@ test('browser opt-in creates the world once, displays bounded city markers and u
   const point=await page.evaluate(()=>{const p=mandateSettlementLayer.visible[0];return {x:p.x,y:p.y};});await page.mouse.click(point.x,point.y);await expect(page.locator('#settlement-info')).toBeVisible();await expect(page.locator('#settlement-info')).toContainText('координаты города не подтверждены');
   const saveId='world-economy-test-save',saveFolder=require('node:path').resolve('saves',saveId),saveRoot=require('node:path').resolve('saves');
   try{
-    const timing=await page.evaluate(()=>{
-      const revision=mandateMap.model.revision,start=performance.now();mandateSimulation.step(31);const monthMs=performance.now()-start;
-      return {monthMs,revision,after:mandateMap.model.revision,state:mandateSimulation.snapshot()};
+    const timing=await page.evaluate(async()=>{
+      const revision=mandateMap.model.revision,start=performance.now();await mandateSimulation.step(31);const monthMs=performance.now()-start;
+      return {monthMs,revision,after:mandateMap.model.revision,state:await mandateSimulation.snapshot()};
     });
     expect(timing.revision).toBe(timing.after);const save=makeSave(timing.state);expect((await request.put('/api/saves/'+saveId,{data:save})).status()).toBe(200);
     const loaded=await(await request.get('/api/saves/'+saveId)).json();
-    const same=await page.evaluate(state=>{mandateSimulation.load(state);const a=mandateSimulation.serialize();mandateSimulation.load(state);return a===mandateSimulation.serialize();},loaded.state);expect(same).toBe(true);
+    const same=await page.evaluate(async state=>{await mandateSimulation.load(state);const a=await mandateSimulation.serialize();await mandateSimulation.load(state);return a===await mandateSimulation.serialize();},loaded.state);expect(same).toBe(true);
     console.log('Browser world month ms:',timing.monthMs);
   }finally{if(require('node:path').dirname(saveFolder)!==saveRoot)throw Error('Unsafe save cleanup');await fs.rm(saveFolder,{recursive:true,force:true});}
   expect(errors).toEqual([]);expect(urls.some(u=>/\/adm2\/|\/api\/political/.test(u))).toBe(false);

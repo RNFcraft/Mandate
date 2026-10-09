@@ -4,17 +4,19 @@ export const path=geoPath(projection);
 export function prepare(f){
   const polygons=f.geometry.type==='Polygon'?[f.geometry.coordinates]:f.geometry.coordinates;
   for(const rings of polygons)if(geoArea({type:'Polygon',coordinates:rings})>2*Math.PI)rings.forEach(r=>r.reverse());
-  return {id:f.id,path:new Path2D(path(f)),bounds:path.bounds(f),feature:f};
+  const svg=path(f);
+  return {id:f.id,path:new Path2D(svg),svg,bounds:path.bounds(f),feature:f};
 }
 
 // Scan the projected path, including clipping at the date line and holes.
 // Even-odd scanline intervals always provide interior candidates, unlike a
 // centroid (which can fall in a hole, ocean or between islands).
 export function interiorAnchors(region,count=24){
+  if(region.anchorCache?.has(count))return region.anchorCache.get(count);
   const rings=[];let ring;
   // Use the exact rounded coordinates consumed by Path2D, so candidates near
   // a coast cannot disagree with the map because of SVG serialization precision.
-  const tokens=path(region.feature).match(/[MLZ]|-?\d+(?:\.\d+)?(?:e[-+]?\d+)?/gi)||[];
+  const tokens=(region.svg||path(region.feature)).match(/[MLZ]|-?\d+(?:\.\d+)?(?:e[-+]?\d+)?/gi)||[];
   for(let i=0;i<tokens.length;){
     const command=tokens[i++];
     if(command==='M'){ring=[[Number(tokens[i++]),Number(tokens[i++])]];rings.push(ring);}
@@ -48,5 +50,5 @@ export function interiorAnchors(region,count=24){
     }
     if(score<=1e-16)break;selected.push(pool.splice(best,1)[0].point);
   }
-  return selected;
+  (region.anchorCache??=new Map()).set(count,selected);return selected;
 }

@@ -4,6 +4,20 @@ export class WorldMap {
     this.geometry = geometry; this.model = model; this.layers = [];
     this.hoveredId = null; this.selectedId = null; this.zoom = 1;
     this.frames = 0; this.lastRenderMs = 0;
+    if(typeof Worker!=='undefined'&&typeof OffscreenCanvas!=='undefined'&&new URLSearchParams(location.search).get('raster')!=='canvas'){
+      try{
+        this.rasterWorker=new Worker('/raster-worker.bundle.js',{type:'module'});
+        this.rasterWorker.onmessage=({data})=>{
+          if(data.overview){if(data.key===this.rasterSceneRevision){this.overview?.close();this.overview=data.bitmap;this.invalidate();}else data.bitmap.close();return;}
+          this.rasterBusy=false;
+          if(data.error){this.disableRaster();return;}
+          if(data.key===this.rasterKey){this.background?.canvas.close?.();this.background={...data,canvas:data.bitmap};this.perf?.count('cacheRebuilds');this.invalidate();}
+          else data.bitmap.close();
+          if(this.rasterQueued){const camera=this.rasterQueued;this.rasterQueued=null;this.requestRaster(camera);}
+        };
+        this.rasterWorker.onerror=()=>this.disableRaster();
+      }catch{this.rasterWorker=null;}
+    }
     this.setInteractive(geometry.regions);
     this.resize();
     window.addEventListener('resize', () => this.resize());
@@ -55,14 +69,41 @@ export class WorldMap {
       const [color,width]=styles[name];ctx.strokeStyle=color;ctx.lineWidth=width/this.scale;ctx.stroke(p);
     }
   }
+  disableRaster(){this.rasterWorker?.terminate();this.rasterWorker=null;this.rasterBusy=false;this.rasterQueued=null;this.overview?.close();this.overview=null;this.background?.canvas.close?.();this.background=null;this.invalidate();}
+  setRasterScene(){
+    if(!this.rasterWorker)return;
+    this.rasterTarget=null;this.rasterQueued=null;clearTimeout(this.backgroundTimer);this.rasterSceneRevision=(this.rasterSceneRevision||0)+1;
+    if(!this.rasterGeometrySent){this.rasterWorker.postMessage({type:'geometry',land:this.geometry.countries.map(r=>({svg:r.svg,bounds:r.bounds})),regions:this.geometry.regions.map(r=>({id:r.id,svg:r.svg,bounds:r.bounds}))});this.rasterGeometrySent=true;}
+    this.rasterWorker.postMessage({type:'scene',owners:this.geometry.regions.map(r=>{const owner=this.model.owners.get(r.id)??null;return [r.id,owner,this.model.countries.get(owner)?.color||'#727c78'];}),borders:this.borderSVG});
+    this.rasterWorker.postMessage({type:'paint',id:0,camera:{overview:true,key:this.rasterSceneRevision,width:1024,height:512,rx:1,ry:1,pad:0,scale:1024/360,x:0,y:0,level:'far',audit:!!this.audit?.enabled}});
+  }
+  requestRaster(camera){
+    if(this.rasterBusy){this.rasterQueued=camera;return;}
+    this.rasterBusy=true;this.rasterWorker.postMessage({type:'paint',id:(this.rasterRequest=(this.rasterRequest||0)+1),camera});
+  }
   globalBackground(ctx){
     // Cache the exact static vector layer in one bounded viewport bitmap. During
     // gestures translate/scale it immediately, then redraw at the settled scale.
     // Selection, DEV overlays and close atoms stay vector and independent.
     const rx=this.canvas.width/this.width,ry=this.canvas.height/this.height,pad=128;
-    const key=[this.lod.level,this.model.revision,this.politicalGeneration||0,!!this.audit?.enabled,!!this.politicalPending,this.width,this.height].join(':');
+    const key=[this.lod.level,this.politicalGeneration||0,!!this.audit?.enabled,!!this.politicalPending,this.width,this.height].join(':');
     const view=[...this.screenToWorld(0,0),...this.screenToWorld(this.width,this.height)];
     let cache=this.background;
+    if(this.rasterWorker){
+      this.rasterKey=key;
+      if(this.overview){ctx.resetTransform();ctx.drawImage(this.overview,this.x*rx,this.y*ry,360*this.scale*rx,180*this.scale*ry);ctx.setTransform(rx*this.scale,0,0,ry*this.scale,this.x*rx,this.y*ry);}
+      const needs=!cache||cache.key!==key||Math.abs(cache.scale-this.scale)>this.scale*1e-6||view[0]<cache.bounds[0]||view[1]<cache.bounds[1]||view[2]>cache.bounds[2]||view[3]>cache.bounds[3];
+      if(needs){
+        const camera={width:this.width,height:this.height,rx,ry,pad:256,scale:this.scale,x:this.x,y:this.y,level:this.lod.level,key,audit:!!this.audit?.enabled};
+        const signature=[key,this.scale,this.x,this.y].join(':');
+        if(this.rasterTarget!==signature){this.rasterTarget=signature;clearTimeout(this.backgroundTimer);
+          if(!cache)this.requestRaster(camera);
+          else this.backgroundTimer=setTimeout(()=>{if(this.rasterWorker)this.requestRaster(camera);},120);
+        }
+      }
+      if(cache){const ratio=this.scale/cache.scale;ctx.resetTransform();ctx.drawImage(cache.canvas,(this.x-cache.x*ratio)*rx-cache.pad*ratio,(this.y-cache.y*ratio)*ry-cache.pad*ratio,cache.canvas.width*ratio,cache.canvas.height*ratio);ctx.setTransform(rx*this.scale,0,0,ry*this.scale,this.x*rx,this.y*ry);}
+      return;
+    }
     if(!cache||cache.key!==key||view[0]<cache.bounds[0]||view[1]<cache.bounds[1]||view[2]>cache.bounds[2]||view[3]>cache.bounds[3]){
       clearTimeout(this.backgroundTimer);this.backgroundTarget=null;
       const canvas=document.createElement('canvas');canvas.width=this.canvas.width+pad*2;canvas.height=this.canvas.height+pad*2;
@@ -86,6 +127,7 @@ export class WorldMap {
   addLayer(layer) { this.layers.push(layer); this.invalidate(); return ()=>{this.layers=this.layers.filter(l=>l!==layer);this.invalidate();}; }
   render() {
     const start=performance.now();
+    this.symbols=[];
     this.lod?.update();
     if(this.lod?.level==='close'){clearTimeout(this.backgroundTimer);this.backgroundTarget=null;}
     const ctx=this.ctx;

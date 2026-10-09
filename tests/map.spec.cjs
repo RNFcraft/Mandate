@@ -44,11 +44,11 @@ test('world geometry, interaction, resize and ownership', async ({ page }) => {
   },first);
   expect(another).toBeTruthy();await page.mouse.click(another.x,another.y);
   expect(await page.evaluate(() => mandateMap.selectedId)).toBe(another.id);
-  const transfer = await page.evaluate(id => {
+  const transfer = await page.evaluate(async id => {
     const m=mandateMap, old=m.model.ownerOf(id), target=[...m.model.countries.keys()].find(c=>c!==old);
-    m.model.setOwner(id,target);
+    await m.model.setOwner(id,target);
     const result={owner:m.model.ownerOf(id),target,borders:!!m.ownershipBorders};
-    m.model.setOwner(id,old);return result;
+    await m.model.setOwner(id,old);return result;
   },first);
   expect(transfer.owner).toBe(transfer.target);expect(transfer.borders).toBe(true);
   await page.evaluate(()=>{for(let i=0;i<20;i++)mandateMap.canvas.dispatchEvent(new WheelEvent('wheel',{deltaY:-10000,clientX:500,clientY:350,cancelable:true}));});

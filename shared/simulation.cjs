@@ -2,6 +2,7 @@
 const {validateScenario,migrateLegacy}=require('./scenario.cjs');
 const population=require('./population.cjs');
 const economy=require('./economy.cjs');
+const autonomy=require('./autonomous-economy.cjs');
 const politicalGeography=require('./political-geography.cjs');
 const settlements=require('./settlements.cjs');
 const SPEEDS=Object.freeze([1,5,20,100]);
@@ -47,6 +48,7 @@ function validateGameState(state,hierarchy){
   if(Object.hasOwn(state.systems,'population'))population.validatePopulationState(state.systems.population,hierarchy);
   if(Object.hasOwn(state.systems,'economy')){
     if(!Object.hasOwn(state.systems,'population'))throw Error('Economy: population is required');
+    if(state.systems.economy.autonomy&&!state.systems.settlements)throw Error('Autonomy: settlements are required');
     economy.validateEconomyState(state.systems.economy,hierarchy);
     const stats=state.systems.economy.stats,months=(state.clock.date.year-state.game.scenario.year)*12+state.clock.date.month-1;
     if(stats.monthsProcessed!==months)throw Error('Economy: inconsistent calendar');
@@ -104,8 +106,25 @@ class Simulation {
   }
   snapshot(){return structuredClone(this.#state);}
   serialize(){return JSON.stringify(this.#state);}
+  serializeSave(){return JSON.stringify({format:'mandate-save',version:2,geography:this.#state.geography,scenarioId:this.#state.game.scenario.id,state:this.#state});}
   populationSummary(territoryId){return population.summarizePopulation(this.#state.systems.population,territoryId);}
+  enableAutonomy(rules={}){const next=autonomy.enable(this.#state,rules);validateGameState(next,this.#hierarchy);this.#install(next);this.#emit('stateChanged',{kind:'autonomy',ownershipIds:null});}
+  economicReport(){return autonomy.report(this.#state);}
   economySummary(){return economy.summarizeEconomy(this.#state.systems.economy);}
+  // Read-only presentation projection: physical inventories remain authoritative
+  // and are requested separately for the selected enterprise.
+  economyView(){const e=this.#state.systems.economy;return e?structuredClone({goods:e.goods,recipes:e.recipes,markets:e.markets,enterprises:e.enterprises.map(({inventories,...row})=>row),stats:e.stats}):null;}
+  enterpriseSummary(id){const row=this.#state.systems.economy?.enterprises.find(e=>e.id===id);return row?structuredClone(row):null;}
+  presentationView({metadata=false,monthly=false}={}){
+    const view={clock:this.clock};
+    if(metadata)Object.assign(view,{scenario:this.scenario,countries:[...this.countries.values()],ownership:Object.fromEntries(this.ownership),controllers:this.controllers});
+    if(metadata||monthly){
+      const groups=new Map();for(const c of this.#state.systems.population?.cohorts||[]){if(!groups.has(c.territoryId))groups.set(c.territoryId,[]);groups.get(c.territoryId).push(c);}
+      view.population=Object.fromEntries([...groups].map(([id,cohorts])=>[id,population.summarizePopulation({cohorts})]));view.population.total=this.populationSummary();
+      view.economy=this.economyView();view.settlements=this.settlementSummary();
+    }
+    return view;
+  }
   settlementSummary(provinceId){return settlements.summarizeSettlements(this.#state.systems.settlements,this.#state.systems.population,this.#state.systems.economy,provinceId);}
   territoryPoliticalState(territoryId){return politicalGeography.territoryPoliticalState(this.#state,territoryId);}
   load(state){
@@ -117,15 +136,29 @@ class Simulation {
   setSpeed(speed){return this.submit({type:'SetSimulationSpeed',speed});}
   step(count=1){
     if(!Number.isInteger(count)||count<1||count>1000||ordinal(this.#state.clock.date)+count>ordinal({year:9999,month:12,day:31}))throw new Error('Invalid step count or calendar limit');
-    // Only small clock/system fields change per tick; never clone/serialize the world.
+    for(let i=0;i<count;i++)this.#advanceDay();
+    this.#emit('timeAdvanced',{steps:count,clock:this.clock});this.#emit('stateChanged',{kind:'time',ownershipIds:[]});
+  }
+  async stepAsync(count=1,executor){
+    if(!executor)return this.step(count);
+    if(!Number.isInteger(count)||count<1||count>1000||ordinal(this.#state.clock.date)+count>ordinal({year:9999,month:12,day:31}))throw Error('Invalid step count or calendar limit');
     for(let i=0;i<count;i++){
+      const date=nextDay(this.#state.clock.date);
+      const prepared=date.day===1&&this.#state.systems.economy?await executor.prepare(this.#state.systems.economy,this.#state.systems.population,this.#hierarchy,{year:this.#state.clock.date.year,month:this.#state.clock.date.month}):undefined;
+      this.#advanceDay(prepared);
+    }
+    this.#emit('timeAdvanced',{steps:count,clock:this.clock});this.#emit('stateChanged',{kind:'time',ownershipIds:[]});
+  }
+  #advanceDay(stagedEconomy){
       const date=nextDay(this.#state.clock.date);let update,economyUpdate;
       // Monthly work is staged before committing this day's clock/RNG.
       if(date.day===1){
         if(this.#state.systems.economy||this.#state.systems.settlements){
-          const preparedEconomy=this.#state.systems.economy?economy.prepareEconomyMonth(this.#state.systems.economy,this.#state.systems.population,this.#hierarchy,{year:this.#state.clock.date.year,month:this.#state.clock.date.month}):null;
+          const preparedEconomy=stagedEconomy||(this.#state.systems.economy?economy.prepareEconomyMonth(this.#state.systems.economy,this.#state.systems.population,this.#hierarchy,{year:this.#state.clock.date.year,month:this.#state.clock.date.month}):null);
           const preparedPopulation=population.preparePopulationMonth(this.#state.systems.population,this.#hierarchy);
-          const preparedSettlements=this.#state.systems.settlements?settlements.prepareSettlementsMonth(this.#state.systems.settlements,preparedPopulation?.state||this.#state.systems.population,this.#hierarchy,preparedEconomy?.state):null;
+          const developed=preparedEconomy?.state.autonomy?autonomy.develop(preparedEconomy.state,preparedPopulation.state,this.#state.systems.settlements,this.#hierarchy):this.#state.systems.settlements;
+          const preparedSettlements=this.#state.systems.settlements?settlements.prepareSettlementsMonth(developed,preparedPopulation?.state||this.#state.systems.population,this.#hierarchy,preparedEconomy?.state):null;
+          if(preparedEconomy?.state.autonomy){const births=preparedPopulation.state.stats.births-this.#state.systems.population.stats.births,deaths=preparedPopulation.state.stats.deaths-this.#state.systems.population.stats.deaths;preparedPopulation.update={births,deaths,netChange:births-deaths};economy.canonicalize(preparedEconomy.state);economy.validateEconomyState(preparedEconomy.state,this.#hierarchy);settlements.refreshCapitals(preparedSettlements,this.#state.countries);}
           // Both preparations succeed before any authority, clock, RNG or event changes.
           if(preparedPopulation){this.#state.systems.population=preparedPopulation.state;update=preparedPopulation.update;}
           if(preparedEconomy){this.#state.systems.economy=preparedEconomy.state;economyUpdate=preparedEconomy.update;}
@@ -135,8 +168,6 @@ class Simulation {
       for(const system of DAILY_SYSTEMS)system(this.#state);this.#state.clock.tick++;this.#state.clock.date=date;
       if(update)this.#emit('populationUpdated',{date:Object.freeze({...date}),...update});
       if(economyUpdate)this.#emit('economyUpdated',{date:Object.freeze({...date}),...economyUpdate});
-    }
-    this.#emit('timeAdvanced',{steps:count,clock:this.clock});this.#emit('stateChanged',{kind:'time',ownershipIds:[]});
   }
   submit(command){
     try{

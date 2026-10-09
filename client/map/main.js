@@ -4,12 +4,13 @@ import {WorldMap} from './renderer.js';
 import {loadScenario} from '../scenarios/store.js';
 import {prepare} from './geometry.js';
 import {unpackTopology} from './topology.js';
-import kernel from '../../shared/simulation.cjs';
+import {createSimulation} from '../game/simulation-client.js';
 import {gameControls} from '../game/controls.js';
 import {gameplayPreview} from './gameplay-preview.js';
 import {updateProvincePolitics} from './province-borders.js';
 import {EconomyLayer} from './economy-layer.js';
 import {SettlementLayer} from './settlement-layer.js';
+import {Inspector} from './inspector.js';
 try {
   const params=new URLSearchParams(location.search);
   if(params.get('mapPreview')==='gameplay')await gameplayPreview();
@@ -23,27 +24,34 @@ try {
       if(initial.scenario.id!=='1700')throw Error('Procedural world opt-in requires the 1700 scenario');
       const response=await fetch('/data/map-v2/adjacency.json');if(!response.ok)throw Error('Missing published land adjacency');proceduralWorld={adjacency:await response.json()};
     }
-    const simulation=params.get('editor')==='1'?null:new kernel.Simulation(initial,geography,proceduralWorld?{seed:Number(params.get('worldSeed')??1700),proceduralWorld}:undefined),model=new MapModel(geography,initial,{simulation});
+    const simulation=params.get('editor')==='1'?null:await createSimulation(initial,geography,proceduralWorld?{seed:Number(params.get('worldSeed')??1700),proceduralWorld}:undefined),model=new MapModel(geography,initial,{simulation});
     const regions=feature(topology,topology.objects.provinces).features.map(prepare),land=feature(topology,topology.objects.land).features.map(prepare);
     const map=new WorldMap(document.querySelector('canvas'),{regions,countries:land},model);
+    if(params.get('perf')==='1'){const {PerformanceMonitor}=await import('./performance-monitor.js');window.mandatePerf=new PerformanceMonitor(map);}
     // Full frozen province geometry remains interactive at every zoom; no ADM LOD.
     map.lod={level:'far',update(){this.level=map.zoom>=2?'middle':'far';}};
-    const refresh=()=>updateProvincePolitics(map,topology,regions);model.addEventListener('change',refresh);refresh();window.mandateMap=map;
+    const refresh=()=>{const start=map.perf?performance.now():0;updateProvincePolitics(map,topology,regions);if(map.perf)map.perf.record('politicalBorders',performance.now()-start);};model.addEventListener('change',refresh);refresh();window.mandateMap=map;
     if(simulation){
-      window.mandateSimulation=simulation;window.mandateGameControls=gameControls(simulation,geography);window.inspectPoliticalTerritory=id=>({...simulation.territoryPoliticalState(id),population:simulation.populationSummary(id).total});
+      window.mandateSimulation=simulation;window.mandateGameControls=gameControls(simulation,geography);window.inspectPoliticalTerritory=async id=>({...await simulation.territoryPoliticalState(id),population:simulation.populationSummary(id).total});
+      map.inspector=new Inspector(map,simulation);
       let presentation={};
       try{const response=await fetch(`/api/scenarios/${encodeURIComponent(initial.scenario.id)}/economy-visuals`);if(response.ok)presentation=await response.json();}catch{}
       window.mandateEconomyLayer=new EconomyLayer(map,simulation,presentation);
       if(proceduralWorld)window.mandateSettlementLayer=new SettlementLayer(map,simulation);
+      map.economyLayer=window.mandateEconomyLayer;map.settlementLayer=window.mandateSettlementLayer;
+      if(map.perf){map.perf.wrap(window.mandateEconomyLayer,'refresh','economyView');map.perf.wrap(window.mandateEconomyLayer,'draw','economyDraw');if(window.mandateSettlementLayer){map.perf.wrap(window.mandateSettlementLayer,'refresh','settlementView');map.perf.wrap(window.mandateSettlementLayer,'draw','settlementDraw');}}
       if(params.get('economyDemo')==='1'&&initial.scenario.id==='economy-visual-demo'){
         const points=window.mandateEconomyLayer.objects.map(o=>o.point);
         if(points.length){const center=[0,1].map(axis=>(Math.min(...points.map(p=>p[axis]))+Math.max(...points.map(p=>p[axis])))/2);
           map.zoom=64;map.scale=map.baseScale*map.zoom;map.x=map.width/2-center[0]*map.scale;map.y=map.height/2-center[1]*map.scale;map.invalidate();}
       }
     }
+    // Raster worker owns its parsed geometry. Anchors can use the cached scanline
+    // result or regenerate SVG from the unchanged feature if a new count is asked.
+    for(const r of [...regions,...land,...map.politicalFeatures])delete r.svg;
     if(simulation&&(params.get('politicalDebug')==='1'||params.get('politicalPreview'))){
       const output=document.createElement('output');output.id='political-inspect';output.textContent=initial.politicalPreview?'Political PREVIEW (not published)':initial.politicalGeography?.status==='published'?'Published political geography':'Historical geography is draft; current ownership is DEV TEST DATA';document.body.append(output);
-      map.canvas.addEventListener('regionselect',event=>{if(simulation.ownership.has(event.detail.regionId))output.textContent=JSON.stringify(window.inspectPoliticalTerritory(event.detail.regionId));});
+      map.canvas.addEventListener('regionselect',async event=>{if(simulation.ownership.has(event.detail.regionId))output.textContent=JSON.stringify(await window.inspectPoliticalTerritory(event.detail.regionId));});
     }
     if(params.get('editor')==='1'){const {ScenarioEditor}=await import('../editor/editor.js');window.mandateEditor=new ScenarioEditor(map);}
   }

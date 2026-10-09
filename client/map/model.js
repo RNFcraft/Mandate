@@ -25,9 +25,9 @@ export class MapModel extends EventTarget {
     const controllers=this.simulation.controllers;this.controllers=Object.keys(controllers).length?controllers:undefined;
     this.refreshGroups();this.changed(null);
   }
-  command(value){const result=this.simulation.submit(value);if(!result.ok)throw new Error(result.error);}
+  command(value){const check=result=>{if(!result.ok)throw new Error(result.error);return result;};const result=this.simulation.submit(value);return result?.then?result.then(check):check(result);}
   loadScenario(data) {
-    if(this.simulation){this.simulation.load(kernel.initializeGameState(data,this.hierarchy));return;}
+    if(this.simulation)return this.simulation.load(kernel.initializeGameState(data,this.hierarchy));
     data = schema.migrateLegacy(data,this.hierarchy);
     this.scenario = { ...data.scenario };
     this.countries = new Map(data.countries.map(c => [c.id, { ...c }]));
@@ -48,7 +48,7 @@ export class MapModel extends EventTarget {
   ownerOf(id) {return this.owners.has(id)?this.owners.get(id):this.groupOwners.get(id);}
   baseIds(id) {return this.territories.has(id)?[id]:this.children.get(id)||[];}
   setOwner(regionId, countryId) {
-    if(this.simulation){this.command({type:'SetOwnership',ids:this.baseIds(regionId),owner:countryId});return;}
+    if(this.simulation)return this.command({type:'SetOwnership',ids:this.baseIds(regionId),owner:countryId});
     if (!this.regions.has(regionId) || (countryId !== null && !this.countries.has(countryId))) throw new Error('Unknown region or country');
     const ids=this.baseIds(regionId),changed=[];
     for(const id of ids){if(this.owners.get(id)===countryId)continue;changed.push(id);this.owners.set(id,countryId);
@@ -60,7 +60,7 @@ export class MapModel extends EventTarget {
   }
   setCapital(countryId, regionId) {
     if(this.adm1.has(regionId))regionId=this.baseIds(regionId).find(id=>this.owners.get(id)===countryId);
-    if(this.simulation){this.command({type:'SetCapital',countryId,territoryId:regionId});return;}
+    if(this.simulation)return this.command({type:'SetCapital',countryId,territoryId:regionId});
     if (!this.countries.has(countryId) || this.owners.get(regionId) !== countryId) throw new Error('Столичный регион должен принадлежать выбранному государству');
     this.countries.get(countryId).capitalRegionId = regionId; this.changed();
   }
@@ -71,7 +71,7 @@ export class MapModel extends EventTarget {
     this.countries.set(country.id, { ...country }); this.changed();
   }
   setColor(countryId, color) {
-    if(this.simulation){this.command({type:'SetCountryColor',countryId,color});return;}
+    if(this.simulation)return this.command({type:'SetCountryColor',countryId,color});
     if (!this.countries.has(countryId) || !/^#[0-9a-f]{6}$/i.test(color)) throw new Error('Invalid country or color');
     this.countries.get(countryId).color = color; this.changed();
   }

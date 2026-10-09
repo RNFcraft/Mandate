@@ -8,12 +8,13 @@ export class ClockDriver {
   reset(){this.carry=0;this.last=this.now();}
   pump(){
     const current=this.now(),elapsed=Math.max(0,current-this.last);this.last=current;
-    const clock=this.simulation.clock;if(clock.paused){this.carry=0;return;}
+    const clock=this.simulation.clock;if(clock.paused||this.inFlight||this.simulation.failed||this.simulation.loading){this.carry=0;return;}
     // Cap suspension catch-up at one second; no background-tab spiral of work.
     this.carry+=Math.min(1000,elapsed)*clock.speed/1000;
-    const count=Math.min(100,Math.floor(this.carry));if(!count)return;
+    const count=Math.min(this.simulation.worker?28:100,Math.floor(this.carry));if(!count)return;
     this.carry-=count;
-    try{this.simulation.step(count);}catch(error){this.simulation.pause();this.error=error.message;}
+    const fail=error=>{Promise.resolve(this.simulation.pause()).catch(()=>{});this.error=error.message;};
+    try{const result=this.simulation.step(count);if(result?.then){this.inFlight=true;result.catch(fail).finally(()=>{this.inFlight=false;this.reset();});}}catch(error){fail(error);}
   }
   dispose(){clearInterval(this.timer);this.unsubscribe();}
 }
