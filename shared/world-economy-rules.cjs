@@ -1,0 +1,29 @@
+// Synthetic calibration, never historical prices or authoritative geology.
+module.exports={
+  version:1,maxMarketProvinces:5,maxMarketPopulation:2000000,wagePerWorkerMinor:8,workingCapitalMonths:120,
+  prices:{grain:3,flour:8,food:12,fiber:3,yarn:8,cloth:18,clothing:48,timber:3,charcoal:11,'iron-ore':4,iron:28,tools:64},
+  consumerNeeds:[
+    {id:'basic-food',goodId:'food',priority:'essential',perPersonNumerator:1,perPersonDenominator:100,usage:'consumable'},
+    {id:'basic-clothing',goodId:'clothing',priority:'ordinary',perPersonNumerator:1,perPersonDenominator:100,usage:'durable'}
+  ],
+  sectors:[
+    {id:'food',perPeople:300,minimumAny:{},requires:[],chance:{modulo:1,min:0,max:0},excludes:[],recipeIds:['grow-grain','mill-flour','prepare-food']},
+    {id:'textiles',perPeople:2400,minimumAny:{urban:500,population:50000},requires:[],chance:{modulo:5,min:1,max:4},excludes:[],recipeIds:['grow-fiber','spin-yarn','weave-cloth','sew-clothing']},
+    {id:'metals',perPeople:20000,minimumAny:{},requires:['forestry','ore-extraction'],chance:{modulo:3,min:0,max:0},excludes:[],recipeIds:['harvest-timber','make-charcoal','mine-iron-ore','smelt-iron','forge-tools']},
+    {id:'forestry',perPeople:30000,minimumAny:{},requires:['forestry'],chance:{modulo:3,min:0,max:0},excludes:['metals'],recipeIds:['harvest-timber','make-charcoal']}
+  ],
+  placement:{
+    'grow-grain':{specialization:'agriculture',classification:'rural',external:true},
+    'grow-fiber':{specialization:'textile-fiber',classification:'rural',external:true},
+    'mill-flour':{specialization:'food-processing',classification:'urban',external:false},
+    'prepare-food':{specialization:'food-processing',classification:'urban',external:false},
+    'spin-yarn':{specialization:'textiles',classification:'urban',external:false},
+    'weave-cloth':{specialization:'textiles',classification:'urban',external:false},
+    'sew-clothing':{specialization:'textiles',classification:'urban',external:false},
+    'harvest-timber':{specialization:'forestry',classification:'rural',external:true},
+    'make-charcoal':{specialization:'forestry',classification:'rural',external:true},
+    'mine-iron-ore':{specialization:'ore-extraction',classification:'rural',external:true},
+    'smelt-iron':{specialization:'metalworking',classification:'urban',external:false},
+    'forge-tools':{specialization:'metalworking',classification:'urban',external:false}
+  }
+};

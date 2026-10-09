@@ -9,6 +9,7 @@ import {gameControls} from '../game/controls.js';
 import {gameplayPreview} from './gameplay-preview.js';
 import {updateProvincePolitics} from './province-borders.js';
 import {EconomyLayer} from './economy-layer.js';
+import {SettlementLayer} from './settlement-layer.js';
 try {
   const params=new URLSearchParams(location.search);
   if(params.get('mapPreview')==='gameplay')await gameplayPreview();
@@ -17,7 +18,12 @@ try {
     const [packed,geography,manifest]=await Promise.all(['provinces.topo','hierarchy','manifest'].map(async name=>{const response=await fetch('/data/map-v2/'+name+'.json');if(!response.ok)throw Error('Missing frozen Map v2 data');return response.json();}));
     if(manifest.geographyId!==geography.id||manifest.provinceCount!==5001)throw Error('Frozen geography manifest mismatch');
     const topology=await unpackTopology(packed),initial=await loadScenario(params.get('scenario')||'modern',{population:params.get('editor')!=='1',politicalPreview:params.get('politicalPreview')||false});
-    const simulation=params.get('editor')==='1'?null:new kernel.Simulation(initial,geography),model=new MapModel(geography,initial,{simulation});
+    let proceduralWorld=null;
+    if(params.get('worldEconomy')==='1'&&params.get('editor')!=='1'){
+      if(initial.scenario.id!=='1700')throw Error('Procedural world opt-in requires the 1700 scenario');
+      const response=await fetch('/data/map-v2/adjacency.json');if(!response.ok)throw Error('Missing published land adjacency');proceduralWorld={adjacency:await response.json()};
+    }
+    const simulation=params.get('editor')==='1'?null:new kernel.Simulation(initial,geography,proceduralWorld?{seed:Number(params.get('worldSeed')??1700),proceduralWorld}:undefined),model=new MapModel(geography,initial,{simulation});
     const regions=feature(topology,topology.objects.provinces).features.map(prepare),land=feature(topology,topology.objects.land).features.map(prepare);
     const map=new WorldMap(document.querySelector('canvas'),{regions,countries:land},model);
     // Full frozen province geometry remains interactive at every zoom; no ADM LOD.
@@ -28,6 +34,7 @@ try {
       let presentation={};
       try{const response=await fetch(`/api/scenarios/${encodeURIComponent(initial.scenario.id)}/economy-visuals`);if(response.ok)presentation=await response.json();}catch{}
       window.mandateEconomyLayer=new EconomyLayer(map,simulation,presentation);
+      if(proceduralWorld)window.mandateSettlementLayer=new SettlementLayer(map,simulation);
       if(params.get('economyDemo')==='1'&&initial.scenario.id==='economy-visual-demo'){
         const points=window.mandateEconomyLayer.objects.map(o=>o.point);
         if(points.length){const center=[0,1].map(axis=>(Math.min(...points.map(p=>p[axis]))+Math.max(...points.map(p=>p[axis])))/2);

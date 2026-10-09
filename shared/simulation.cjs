@@ -3,6 +3,7 @@ const {validateScenario,migrateLegacy}=require('./scenario.cjs');
 const population=require('./population.cjs');
 const economy=require('./economy.cjs');
 const politicalGeography=require('./political-geography.cjs');
+const settlements=require('./settlements.cjs');
 const SPEEDS=Object.freeze([1,5,20,100]);
 const STATE_VERSION=2;
 const uint=n=>Number.isInteger(n)&&n>=0&&n<=0xffffffff;
@@ -53,14 +54,25 @@ function validateGameState(state,hierarchy){
     if(months){const month=state.clock.date.month===1?12:state.clock.date.month-1,year=state.clock.date.year-(state.clock.date.month===1?1:0);if(stats.lastCompletedPeriod.year!==year||stats.lastCompletedPeriod.month!==month)throw Error('Economy: inconsistent completed period');}
   }
   if(Object.hasOwn(state.systems,'polityRelations'))politicalGeography.validateRelations(state.systems.polityRelations,state.countries.map(c=>({id:c.id,name:c.name,shortName:c.shortName,type:c.polityType||c.governmentType,color:c.color})));
+  if(Object.hasOwn(state.systems,'settlements')){
+    if(!state.systems.population)throw Error('Settlements: population is required');
+    settlements.validateSettlements(state.systems.settlements,state.systems.population,hierarchy,state.systems.economy);
+    const countries=new Map(state.countries.map(c=>[c.id,c]));
+    for(const row of state.systems.settlements.rows)for(const id of row.capitalOf)if(countries.get(id)?.capitalRegionId!==row.provinceId)throw Error('Settlements: invalid capital reference');
+  }
   return state;
 }
-function initializeGameState(scenario,hierarchy,seed=1){
+function initializeGameState(scenario,hierarchy,seed=1,proceduralWorld=null){
   if(!uint(seed))throw new Error('Seed must be an unsigned 32-bit integer');
   const data=migrateLegacy(politicalGeography.initializePoliticalScenario(scenario,hierarchy),hierarchy);
   const state={version:STATE_VERSION,geography:hierarchy.id,game:{scenario:structuredClone(data.scenario)},clock:{tick:0,date:{year:data.scenario.year,month:1,day:1},paused:true,speed:1},rng:{seed,state:seed||0x6d2b79f5},countries:structuredClone(data.countries),ownership:structuredClone(data.ownership),controllers:structuredClone(data.controllers||{}),systems:{tickProbe:{ticks:0,lastRandom:0}}};
   state.systems.population=population.initializePopulation(scenario.population,hierarchy);
+  if(proceduralWorld){
+    const generated=require('./world-economy.cjs').generateWorld({...scenario,countries:data.countries,ownership:data.ownership},hierarchy,proceduralWorld.adjacency,seed);
+    state.systems.settlements=generated.settlements;state.systems.economy=economy.initializeEconomy(generated.economy,hierarchy);
+  }
   if(Object.hasOwn(scenario,'economy'))state.systems.economy=economy.initializeEconomy(scenario.economy,hierarchy);
+  if(Object.hasOwn(scenario,'settlements'))state.systems.settlements=settlements.canonicalizeSettlements(structuredClone(scenario.settlements));
   if(scenario.politicalGeography?.status==='published')state.systems.polityRelations={version:1,relations:politicalGeography.validateRelations(scenario.polityRelations,scenario.polities)};
   validateGameState(state,hierarchy);return state;
 }
@@ -72,8 +84,8 @@ function freeze(value){if(value&&typeof value==='object'){for(const child of Obj
 const DAILY_SYSTEMS=Object.freeze([state=>{state.rng.state=nextRandom(state.rng.state);state.systems.tickProbe.ticks++;state.systems.tickProbe.lastRandom=state.rng.state;}]);
 class Simulation {
   #state;#hierarchy;#owners;#countries;#listeners=new Set();
-  constructor(scenario,hierarchy,{seed=1}={}){
-    this.#hierarchy=hierarchy;this.#install(initializeGameState(scenario,hierarchy,seed));
+  constructor(scenario,hierarchy,{seed=1,proceduralWorld=null}={}){
+    this.#hierarchy=hierarchy;this.#install(initializeGameState(scenario,hierarchy,seed,proceduralWorld));
     this.ownership=readOnlyMap(()=>this.#owners);this.countries=readOnlyMap(()=>this.#countries);
     this.polities=this.countries; // Compatibility storage/name for the same registry, never a second authority.
   }
@@ -94,9 +106,10 @@ class Simulation {
   serialize(){return JSON.stringify(this.#state);}
   populationSummary(territoryId){return population.summarizePopulation(this.#state.systems.population,territoryId);}
   economySummary(){return economy.summarizeEconomy(this.#state.systems.economy);}
+  settlementSummary(provinceId){return settlements.summarizeSettlements(this.#state.systems.settlements,this.#state.systems.population,this.#state.systems.economy,provinceId);}
   territoryPoliticalState(territoryId){return politicalGeography.territoryPoliticalState(this.#state,territoryId);}
   load(state){
-    validateGameState(state,this.#hierarchy);const next=structuredClone(state);if(next.systems.economy)economy.canonicalize(next.systems.economy);this.#install(next);
+    validateGameState(state,this.#hierarchy);const next=structuredClone(state);if(next.systems.economy)economy.canonicalize(next.systems.economy);if(next.systems.settlements)settlements.canonicalizeSettlements(next.systems.settlements);this.#install(next);
     this.#emit('stateChanged',{kind:'loaded',ownershipIds:null});this.#emit('gameLoaded',{clock:this.clock});
   }
   start(){return this.submit({type:'ResumeSimulation'});}
@@ -109,12 +122,14 @@ class Simulation {
       const date=nextDay(this.#state.clock.date);let update,economyUpdate;
       // Monthly work is staged before committing this day's clock/RNG.
       if(date.day===1){
-        if(this.#state.systems.economy){
-          const preparedEconomy=economy.prepareEconomyMonth(this.#state.systems.economy,this.#state.systems.population,this.#hierarchy,{year:this.#state.clock.date.year,month:this.#state.clock.date.month});
+        if(this.#state.systems.economy||this.#state.systems.settlements){
+          const preparedEconomy=this.#state.systems.economy?economy.prepareEconomyMonth(this.#state.systems.economy,this.#state.systems.population,this.#hierarchy,{year:this.#state.clock.date.year,month:this.#state.clock.date.month}):null;
           const preparedPopulation=population.preparePopulationMonth(this.#state.systems.population,this.#hierarchy);
+          const preparedSettlements=this.#state.systems.settlements?settlements.prepareSettlementsMonth(this.#state.systems.settlements,preparedPopulation?.state||this.#state.systems.population,this.#hierarchy,preparedEconomy?.state):null;
           // Both preparations succeed before any authority, clock, RNG or event changes.
           if(preparedPopulation){this.#state.systems.population=preparedPopulation.state;update=preparedPopulation.update;}
-          this.#state.systems.economy=preparedEconomy.state;economyUpdate=preparedEconomy.update;
+          if(preparedEconomy){this.#state.systems.economy=preparedEconomy.state;economyUpdate=preparedEconomy.update;}
+          if(preparedSettlements)this.#state.systems.settlements=preparedSettlements;
         }else update=population.advancePopulationMonth(this.#state.systems.population);
       }
       for(const system of DAILY_SYSTEMS)system(this.#state);this.#state.clock.tick++;this.#state.clock.date=date;
@@ -144,6 +159,7 @@ class Simulation {
           this.#state.countries=this.#state.countries.map(c=>{
             if(c.capitalRegionId&&changedSet.has(c.capitalRegionId)&&c.id!==command.owner){const next=Object.freeze({...c,capitalRegionId:null});this.#countries.set(c.id,next);return next;}return c;
           });
+          settlements.refreshCapitals(this.#state.systems.settlements,this.#state.countries);
           this.#emit('stateChanged',{kind:'ownership',ownershipIds:Object.freeze(changed)});return {ok:true};
         }
         case 'SetCountryColor':case 'SetCapital':{
@@ -152,6 +168,7 @@ class Simulation {
           if(color?!/^#[0-9a-f]{6}$/i.test(command.color):(command.territoryId!==null&&this.#owners.get(command.territoryId)!==command.countryId))throw new Error('Invalid country metadata command');
           const next=freeze({...country,...(color?{color:command.color}:{capitalRegionId:command.territoryId})});
           this.#countries.set(country.id,next);this.#state.countries=this.#state.countries.map(c=>c.id===country.id?next:c);
+          if(!color)settlements.refreshCapitals(this.#state.systems.settlements,this.#state.countries);
           this.#emit('stateChanged',{kind:'countries',ownershipIds:[]});return {ok:true};
         }
         default:throw new Error('Unknown simulation command');
