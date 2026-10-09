@@ -49,6 +49,18 @@ test('indexed clearing matches the old scan across markets, goods, self trades a
   expect(state.stats.monthsProcessed).toBe(12);
 });
 
+test('indexed multi-good clearing preserves global-scan results and visit savings',async()=>{
+  const fixture=require('./fixtures/economy-demand.cjs'),input=fixture.createScenario();
+  input.economy.rules.consumerNeeds.push({id:'extra-food',goodId:'food',priority:'luxury',perPersonNumerator:1,perPersonDenominator:200,usage:'consumable'});
+  const indexed=await clearingImplementation(false),legacy=await clearingImplementation(true);
+  let state=initializeEconomy(input.economy,fixture.hierarchy);
+  for(let m=1;m<=12;m++){
+    const period={year:1700,month:m},expected=legacy.prepareEconomyMonth(state,input.population,fixture.hierarchy,period);
+    const actual=indexed.prepareEconomyMonth(state,input.population,fixture.hierarchy,period);expect(actual).toEqual(expected);state=actual.state;
+  }
+  expect(indexed.visits()).toBeLessThan(legacy.visits());
+});
+
 test('economy saves require population and synchronized monthly counters before installation',()=>{
   const s=engine();s.step(365);const valid=s.snapshot();
   expect(valid.systems.population.stats.monthsProcessed).toBe(12);expect(valid.systems.economy.stats.monthsProcessed).toBe(12);

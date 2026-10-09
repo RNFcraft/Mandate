@@ -23,14 +23,27 @@ function quantities(row,keys){fields(row,keys);if(keys.some(k=>!safe(row[k])))fa
 const enterpriseKeys=['batches','workers','wages','inputsConsumedValue','productionCost','inputPurchases','revenue','cogs','profit','payout'];
 const householdKeys=['essentialNeed','affordableDemand','purchased','unmetNeed','unaffordableNeed','rationedDemand','wages','spending','payout'];
 const marketKeys=['supply','essentialNeed','affordableDemand','inputDemand','purchased','shortage','surplus'];
+const needKeys=['need','affordableDemand','purchased','unmetNeed','unaffordableNeed','rationedDemand','spending'];
+const priorities={essential:0,ordinary:1,luxury:2};
 const zero=keys=>Object.fromEntries(keys.map(k=>[k,0]));
+function checkDemand(s,need){
+  if(s.affordableDemand>s[need]||s.purchased>s.affordableDemand||s.unmetNeed!==s[need]-s.purchased||s.unaffordableNeed!==s[need]-s.affordableDemand||s.rationedDemand!==s.affordableDemand-s.purchased)fail('inconsistent household statistics');
+}
+function durableGoods(needs){return [...new Set(needs.filter(n=>n.usage==='durable').map(n=>n.goodId))].sort(compare);}
 function validate(data,hierarchy,runtime){
   fields(data,['version','rules','goods','recipes','markets','households','enterprises',...(runtime?['stats']:[])]);
   if(data.version!==1||hierarchy.id!=='mandate-provinces-v1')fail('unsupported version/geography');
-  const rules=data.rules;fields(rules,['foodGoodId','foodPerPersonNumerator','foodPerPersonDenominator','laborParticipationBps','maxPriceAdjustmentBps','profitPayoutBps']);
+  const rules=data.rules,multi=Object.hasOwn(rules||{},'consumerNeeds');fields(rules,['foodGoodId','foodPerPersonNumerator','foodPerPersonDenominator','laborParticipationBps','maxPriceAdjustmentBps','profitPayoutBps',...(multi?['consumerNeeds']:[])]);
   if(!safe(rules.foodPerPersonNumerator)||!safe(rules.foodPerPersonDenominator)||rules.foodPerPersonDenominator===0||!bps(rules.laborParticipationBps)||!bps(rules.maxPriceAdjustmentBps)||!bps(rules.profitPayoutBps))fail('invalid rules');
   const goods=registry(data.goods),recipes=registry(data.recipes),markets=registry(data.markets),houses=registry(data.households),enterprises=registry(data.enterprises);
   if(!goods.has(rules.foodGoodId))fail('unknown food good');
+  const needs=multi?registry(rules.consumerNeeds):new Map(),usage=new Map();
+  for(const n of needs.values()){
+    fields(n,['id','goodId','priority','perPersonNumerator','perPersonDenominator','usage']);
+    if(!goods.has(n.goodId)||typeof n.priority!=='string'||!Object.hasOwn(priorities,n.priority)||!safe(n.perPersonNumerator)||!safe(n.perPersonDenominator)||n.perPersonDenominator===0||!['consumable','durable'].includes(n.usage))fail('invalid consumer need');
+    if(usage.has(n.goodId)&&usage.get(n.goodId)!==n.usage)fail('conflicting good usage');usage.set(n.goodId,n.usage);
+  }
+  const durable=multi?durableGoods(rules.consumerNeeds):[];
   for(const g of goods.values()){
     fields(g,['id','name','quantityUnit','minPriceMinor','maxPriceMinor']);
     if(typeof g.name!=='string'||!g.name.trim()||g.name.length>160||typeof g.quantityUnit!=='string'||!g.quantityUnit.trim()||g.quantityUnit.length>32||!safe(g.minPriceMinor)||g.minPriceMinor===0||!safe(g.maxPriceMinor)||g.maxPriceMinor<g.minPriceMinor)fail('invalid good');
@@ -54,9 +67,27 @@ function validate(data,hierarchy,runtime){
   }
   const byProvince=new Map();let cash=0n;
   for(const h of houses.values()){
-    fields(h,['id','provinceId','cashMinor',...(runtime?['consumptionRemainder','stats']:[])]);
+    fields(h,['id','provinceId','cashMinor',...(runtime?['consumptionRemainder','stats']:[]),...(multi&&(runtime||Object.hasOwn(h,'inUse'))?['inUse']:[]),...(multi&&runtime?['consumerState']:[])]);
     if(!coverage.has(h.provinceId)||byProvince.has(h.provinceId)||!safe(h.cashMinor))fail('invalid household');byProvince.set(h.provinceId,h);cash+=BigInt(h.cashMinor);
-    if(runtime){if(!safe(h.consumptionRemainder)||h.consumptionRemainder>=rules.foodPerPersonDenominator)fail('invalid consumption remainder');quantities(h.stats,householdKeys);if(h.stats.affordableDemand>h.stats.essentialNeed||h.stats.purchased>h.stats.affordableDemand||h.stats.unmetNeed!==h.stats.essentialNeed-h.stats.purchased||h.stats.unaffordableNeed!==h.stats.essentialNeed-h.stats.affordableDemand||h.stats.rationedDemand!==h.stats.affordableDemand-h.stats.purchased)fail('inconsistent household statistics');}
+    if(multi&&Object.hasOwn(h,'inUse')){
+      const held=registry(h.inUse,'goodId');if(held.size!==durable.length)fail('missing in-use good');
+      for(const s of held.values()){fields(s,['goodId','quantity','bookValueMinor']);if(!durable.includes(s.goodId)||!safe(s.quantity)||!safe(s.bookValueMinor)||s.quantity===0&&s.bookValueMinor!==0)fail('invalid in-use stock');}
+    }
+    if(runtime){
+      if(!safe(h.consumptionRemainder)||h.consumptionRemainder>=rules.foodPerPersonDenominator||multi&&h.consumptionRemainder!==0)fail('invalid consumption remainder');
+      quantities(h.stats,householdKeys);checkDemand(h.stats,'essentialNeed');
+      if(multi){
+        const states=registry(h.consumerState,'needId');if(states.size!==needs.size)fail('missing consumer state');
+        const totals=zero(needKeys);
+        for(const s of states.values()){
+          fields(s,['needId','remainder','stats']);const n=needs.get(s.needId);
+          if(!n||!safe(s.remainder)||s.remainder>=n.perPersonDenominator||n.usage==='durable'&&s.remainder!==0)fail('invalid need remainder');
+          quantities(s.stats,needKeys);checkDemand(s.stats,'need');
+          for(const key of needKeys)totals[key]=add(totals[key],s.stats[key]);
+        }
+        for(const key of needKeys)if(totals[key]!==h.stats[key==='need'?'essentialNeed':key])fail('inconsistent consumer totals');
+      }
+    }
   }
   if(byProvince.size!==coverage.size)fail('coverage needs one household per province');
   for(const e of enterprises.values()){
@@ -75,7 +106,20 @@ function validate(data,hierarchy,runtime){
     if(data.stats.monthsProcessed===0?p!==null:!p||Object.getPrototypeOf(p)!==Object.prototype)fail('invalid completed period');
     if(p){fields(p,['year','month']);if(!Number.isInteger(p.year)||p.year<1700||p.year>9999||!Number.isInteger(p.month)||p.month<1||p.month>12)fail('invalid completed period');}
     const balances=registry(data.stats.goods,'goodId');if(balances.size!==goods.size)fail('missing goods balance');
-    for(const b of balances.values()){fields(b,['goodId','opening','produced','inputsConsumed','householdConsumed','closing']);if(!goods.has(b.goodId)||['opening','produced','inputsConsumed','householdConsumed','closing'].some(k=>!safe(b[k]))||BigInt(b.opening)+BigInt(b.produced)-BigInt(b.inputsConsumed)-BigInt(b.householdConsumed)!==BigInt(b.closing))fail('invalid goods balance');}
+    for(const b of balances.values()){
+      const keys=['opening','produced','inputsConsumed','householdConsumed','closing',...(multi?['inUseOpening','inUseAdded','inUseClosing']:[])];fields(b,['goodId',...keys]);
+      if(!goods.has(b.goodId)||keys.some(k=>!safe(b[k]))||BigInt(b.opening)+BigInt(b.produced)-BigInt(b.inputsConsumed)-BigInt(b.householdConsumed)-BigInt(multi?b.inUseAdded:0)!==BigInt(b.closing))fail('invalid goods balance');
+      if(multi){
+        if(BigInt(b.inUseOpening)+BigInt(b.inUseAdded)!==BigInt(b.inUseClosing))fail('invalid in-use balance');
+        if(data.stats.monthsProcessed){
+          const held=[...houses.values()].reduce((sum,h)=>sum+BigInt(h.inUse.find(s=>s.goodId===b.goodId)?.quantity||0),0n);
+          const closing=[...enterprises.values()].reduce((sum,e)=>sum+BigInt(e.inventories.find(s=>s.goodId===b.goodId).quantity),0n);
+          let consumed=0n,stocked=0n;
+          for(const h of houses.values())for(const s of h.consumerState){const n=needs.get(s.needId);if(n.goodId===b.goodId){if(n.usage==='durable')stocked+=BigInt(s.stats.purchased);else consumed+=BigInt(s.stats.purchased);}}
+          if(held!==BigInt(b.inUseClosing)||closing!==BigInt(b.closing)||consumed!==BigInt(b.householdConsumed)||stocked!==BigInt(b.inUseAdded))fail('inconsistent physical holdings');
+        }
+      }
+    }
   }
   return data;
 }
@@ -86,14 +130,24 @@ function canonicalize(data){
   for(const r of data.recipes)r.inputs.sort((a,b)=>compare(a.goodId,b.goodId));
   for(const m of data.markets){m.provinceIds.sort(compare);m.goods.sort((a,b)=>compare(a.goodId,b.goodId));}
   for(const e of data.enterprises)e.inventories.sort((a,b)=>compare(a.goodId,b.goodId));
+  if(data.rules.consumerNeeds){
+    data.rules.consumerNeeds.sort((a,b)=>priorities[a.priority]-priorities[b.priority]||compare(a.id,b.id));
+    for(const h of data.households){h.inUse?.sort((a,b)=>compare(a.goodId,b.goodId));h.consumerState?.sort((a,b)=>compare(a.needId,b.needId));}
+  }
   if(data.stats)data.stats.goods.sort((a,b)=>compare(a.goodId,b.goodId));return data;
 }
 function initializeEconomy(data,hierarchy){
   validateEconomyScenario(data,hierarchy);const next=canonicalize(structuredClone(data));
   for(const m of next.markets)for(const g of m.goods){g.priceRemainder=0;g.stats=zero(marketKeys);}
-  for(const h of next.households){h.consumptionRemainder=0;h.stats=zero(householdKeys);}
+  for(const h of next.households){
+    h.consumptionRemainder=0;h.stats=zero(householdKeys);
+    if(next.rules.consumerNeeds){
+      h.inUse??=durableGoods(next.rules.consumerNeeds).map(goodId=>({goodId,quantity:0,bookValueMinor:0}));
+      h.consumerState=next.rules.consumerNeeds.map(n=>({needId:n.id,remainder:0,stats:zero(needKeys)})).sort((a,b)=>compare(a.needId,b.needId));
+    }
+  }
   for(const e of next.enterprises)e.stats=zero(enterpriseKeys);
-  next.stats={monthsProcessed:0,lastCompletedPeriod:null,cashBefore:0,cashAfter:0,goods:next.goods.map(g=>({goodId:g.id,opening:0,produced:0,inputsConsumed:0,householdConsumed:0,closing:0}))};
+  next.stats={monthsProcessed:0,lastCompletedPeriod:null,cashBefore:0,cashAfter:0,goods:next.goods.map(g=>({goodId:g.id,opening:0,produced:0,inputsConsumed:0,householdConsumed:0,closing:0,...(next.rules.consumerNeeds?{inUseOpening:0,inUseAdded:0,inUseClosing:0}:{})}))};
   validateEconomyState(next,hierarchy);return next;
 }
 function take(stock,quantity){
@@ -110,8 +164,10 @@ function prepareEconomyMonth(state,population,hierarchy,period){
   const mass=new Map();for(const c of population?.cohorts||[])mass.set(c.territoryId,add(mass.get(c.territoryId)||0,c.count));
   const labor=new Map(next.households.map(h=>[h.provinceId,number(BigInt(mass.get(h.provinceId)||0)*BigInt(rules.laborParticipationBps)/10000n)]));
   const totalCash=()=>number([...next.households,...next.enterprises].reduce((n,a)=>n+BigInt(a.cashMinor),0n));
-  const balance=new Map(next.goods.map(g=>[g.id,{goodId:g.id,opening:0,produced:0,inputsConsumed:0,householdConsumed:0,closing:0}]));
+  const multi=Object.hasOwn(rules,'consumerNeeds');
+  const balance=new Map(next.goods.map(g=>[g.id,{goodId:g.id,opening:0,produced:0,inputsConsumed:0,householdConsumed:0,closing:0,...(multi?{inUseOpening:0,inUseAdded:0,inUseClosing:0}:{})}]));
   for(const e of next.enterprises)for(const s of e.inventories){const b=balance.get(s.goodId);b.opening=add(b.opening,s.quantity);}
+  if(multi)for(const h of next.households)for(const s of h.inUse){const b=balance.get(s.goodId);b.inUseOpening=add(b.inUseOpening,s.quantity);}
   const cashBefore=totalCash();
   for(const h of next.households)h.stats=zero(householdKeys);
   for(const m of next.markets)for(const g of m.goods)g.stats=zero(marketKeys);
@@ -130,6 +186,24 @@ function prepareEconomyMonth(state,population,hierarchy,period){
   }
   const orders=[];
   for(const h of next.households){
+    if(multi){
+      let budget=h.cashMinor;const targets=new Map(),states=new Map(h.consumerState.map(s=>[s.needId,s])),held=new Map(h.inUse.map(s=>[s.goodId,s]));
+      for(const n of rules.consumerNeeds){
+        const s=states.get(n.id),numerator=BigInt(mass.get(h.provinceId)||0)*BigInt(n.perPersonNumerator)+BigInt(n.usage==='consumable'?s.remainder:0);
+        const target=number(numerator/BigInt(n.perPersonDenominator));s.remainder=n.usage==='consumable'?Number(numerator%BigInt(n.perPersonDenominator)):0;
+        // Multiple durable needs raise one shared target, not additive stocks.
+        const need=n.usage==='durable'?Math.max(0,target-Math.max(held.get(n.goodId).quantity,targets.get(n.goodId)||0)):target;
+        if(n.usage==='durable')targets.set(n.goodId,Math.max(targets.get(n.goodId)||0,target));
+        const m=marketAt.get(h.provinceId),g=m.goods.find(g=>g.goodId===n.goodId),affordable=Math.min(need,divide(budget,g.priceMinor));
+        // Unfilled orders retain their reservation until next month's fresh budget.
+        budget=subtract(budget,mul(affordable,g.priceMinor));
+        s.stats={need,affordableDemand:affordable,purchased:0,unmetNeed:need,unaffordableNeed:need-affordable,rationedDemand:affordable,spending:0};
+        for(const key of needKeys)h.stats[key==='need'?'essentialNeed':key]=add(h.stats[key==='need'?'essentialNeed':key],s.stats[key]);
+        if(n.priority==='essential')g.stats.essentialNeed=add(g.stats.essentialNeed,need);g.stats.affordableDemand=add(g.stats.affordableDemand,affordable);
+        orders.push({marketId:m.id,goodId:n.goodId,kind:0,buyer:h,quantity:affordable,needState:s,usage:n.usage,priority:priorities[n.priority]});
+      }
+      continue;
+    }
     const numerator=BigInt(mass.get(h.provinceId)||0)*BigInt(rules.foodPerPersonNumerator)+BigInt(h.consumptionRemainder),need=number(numerator/BigInt(rules.foodPerPersonDenominator));h.consumptionRemainder=Number(numerator%BigInt(rules.foodPerPersonDenominator));
     const m=marketAt.get(h.provinceId),g=m.goods.find(g=>g.goodId===rules.foodGoodId),affordable=Math.min(need,divide(h.cashMinor,g.priceMinor));
     Object.assign(h.stats,{essentialNeed:need,affordableDemand:affordable,unmetNeed:need,unaffordableNeed:need-affordable,rationedDemand:affordable});g.stats.essentialNeed=add(g.stats.essentialNeed,need);g.stats.affordableDemand=add(g.stats.affordableDemand,affordable);
@@ -147,7 +221,7 @@ function prepareEconomyMonth(state,population,hierarchy,period){
     bucket.offers.push(o);
     const g=marketAt.get(o.seller.provinceId).goods.find(g=>g.goodId===o.goodId);g.stats.supply=add(g.stats.supply,o.stock.quantity);
   }
-  orders.sort((a,b)=>compare(a.marketId,b.marketId)||compare(a.goodId,b.goodId)||a.kind-b.kind||compare(a.buyer.id,b.buyer.id));
+  orders.sort((a,b)=>compare(a.marketId,b.marketId)||compare(a.goodId,b.goodId)||a.kind-b.kind||(a.priority??0)-(b.priority??0)||compare(a.buyer.id,b.buyer.id)||compare(a.needState?.needId||'',b.needState?.needId||''));
   for(const order of orders){
     const market=marketAt.get(order.buyer.provinceId),g=market.goods.find(g=>g.goodId===order.goodId);let remaining=order.quantity;
     const bucket=offersByMarket.get(order.marketId)?.get(order.goodId);if(!bucket)continue;
@@ -157,7 +231,13 @@ function prepareEconomyMonth(state,population,hierarchy,period){
       if(o.seller===order.buyer)continue;
       const quantity=Math.min(remaining,o.remaining,o.stock.quantity);if(!quantity)continue;
       const amount=mul(quantity,g.priceMinor),book=take(o.stock,quantity);transfer(order.buyer,o.seller,amount);remaining-=quantity;o.remaining-=quantity;g.stats.purchased=add(g.stats.purchased,quantity);o.seller.stats.revenue=add(o.seller.stats.revenue,amount);o.seller.stats.cogs=add(o.seller.stats.cogs,book);
-      if(order.kind===0){const h=order.buyer;h.stats.purchased=add(h.stats.purchased,quantity);h.stats.spending=add(h.stats.spending,amount);h.stats.unmetNeed-=quantity;h.stats.rationedDemand-=quantity;const b=balance.get(order.goodId);b.householdConsumed=add(b.householdConsumed,quantity);}
+      if(order.kind===0){
+        const h=order.buyer;h.stats.purchased=add(h.stats.purchased,quantity);h.stats.spending=add(h.stats.spending,amount);h.stats.unmetNeed-=quantity;h.stats.rationedDemand-=quantity;
+        if(order.needState){const s=order.needState.stats;s.purchased=add(s.purchased,quantity);s.spending=add(s.spending,amount);s.unmetNeed-=quantity;s.rationedDemand-=quantity;}
+        const b=balance.get(order.goodId);
+        if(order.usage==='durable'){const held=h.inUse.find(s=>s.goodId===order.goodId);held.quantity=add(held.quantity,quantity);held.bookValueMinor=add(held.bookValueMinor,amount);b.inUseAdded=add(b.inUseAdded,quantity);}
+        else b.householdConsumed=add(b.householdConsumed,quantity);
+      }
       else{const e=order.buyer,s=stocks.get(e.id).get(order.goodId);s.quantity=add(s.quantity,quantity);s.bookValueMinor=add(s.bookValueMinor,amount);e.stats.inputPurchases=add(e.stats.inputPurchases,amount);}
     }
   }
@@ -171,6 +251,7 @@ function prepareEconomyMonth(state,population,hierarchy,period){
     const r=recipes.get(e.recipeId),reserve=mul(mul(e.capacityBatches,r.workersPerBatch),e.wagePerWorkerMinor),desired=number(BigInt(Math.max(0,e.stats.profit))*BigInt(rules.profitPayoutBps)/10000n),payout=Math.min(desired,Math.max(0,e.cashMinor-reserve)),owner=houses.get(e.ownerRef.id);transfer(e,owner,payout);e.stats.payout=payout;owner.stats.payout=add(owner.stats.payout,payout);
   }
   for(const e of next.enterprises)for(const s of e.inventories){const b=balance.get(s.goodId);b.closing=add(b.closing,s.quantity);}
+  if(multi)for(const h of next.households)for(const s of h.inUse){const b=balance.get(s.goodId);b.inUseClosing=add(b.inUseClosing,s.quantity);}
   next.stats={monthsProcessed:add(state.stats.monthsProcessed,1),lastCompletedPeriod:{year:period.year,month:period.month},cashBefore,cashAfter:totalCash(),goods:[...balance.values()]};
   validateEconomyState(next,hierarchy);
   return {state:next,update:{monthsProcessed:next.stats.monthsProcessed,period:Object.freeze({...period})}};
