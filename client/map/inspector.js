@@ -6,7 +6,7 @@ export class Inspector{
     this.nav=document.createElement('nav');this.root.append(this.nav);document.body.append(this.root);
     for(const [key,title]of [['province','Провинция'],['settlement','Поселения'],['enterprise','Предприятия'],['market','Рынок']]){const button=document.createElement('button');button.textContent=title;button.dataset.tab=key;button.onclick=()=>this.selectTab(key);this.nav.append(button);}
     this.province=this.panel('province','province-info');
-    map.canvas.addEventListener('regionselect',({detail})=>{this.provinceId=detail.regionId;if(detail.regionId)this.showProvince();});
+    map.canvas.addEventListener('regionselect',({detail})=>{this.provinceId=detail.regionId;if(detail.regionId&&this.active!=='economy')this.showProvince();});
     this.unsubscribe=simulation.subscribe(event=>{if(['viewUpdated','populationUpdated','gameLoaded'].includes(event.type)&&this.active==='province')this.showProvince();});
   }
   panel(kind,id){const panel=document.createElement('section');panel.id=id;panel.hidden=true;this.root.append(panel);this.panels.set(kind,panel);return panel;}

@@ -55,6 +55,7 @@ function validateGameState(state,hierarchy){
     if(state.systems.population.stats.monthsProcessed!==stats.monthsProcessed)throw Error('Economy: inconsistent population calendar');
     if(months){const month=state.clock.date.month===1?12:state.clock.date.month-1,year=state.clock.date.year-(state.clock.date.month===1?1:0);if(stats.lastCompletedPeriod.year!==year||stats.lastCompletedPeriod.month!==month)throw Error('Economy: inconsistent completed period');}
   }
+  if(Object.hasOwn(state.systems,'economyHistory')){const h=state.systems.economyHistory;require('./economy-history.cjs').validate(h);const last=h.monthly.at(-1),period=state.systems.economy?.stats.lastCompletedPeriod;if(!state.systems.economy||last&&(!period||last.year!==period.year||last.month!==period.month))throw Error('History: inconsistent economy calendar');}
   if(Object.hasOwn(state.systems,'polityRelations'))politicalGeography.validateRelations(state.systems.polityRelations,state.countries.map(c=>({id:c.id,name:c.name,shortName:c.shortName,type:c.polityType||c.governmentType,color:c.color})));
   if(Object.hasOwn(state.systems,'settlements')){
     if(!state.systems.population)throw Error('Settlements: population is required');
@@ -85,9 +86,9 @@ function freeze(value){if(value&&typeof value==='object'){for(const child of Obj
 // Trusted system order is explicit. This probe has no gameplay consequences.
 const DAILY_SYSTEMS=Object.freeze([state=>{state.rng.state=nextRandom(state.rng.state);state.systems.tickProbe.ticks++;state.systems.tickProbe.lastRandom=state.rng.state;}]);
 class Simulation {
-  #state;#hierarchy;#owners;#countries;#listeners=new Set();
-  constructor(scenario,hierarchy,{seed=1,proceduralWorld=null}={}){
-    this.#hierarchy=hierarchy;this.#install(initializeGameState(scenario,hierarchy,seed,proceduralWorld));
+  #state;#hierarchy;#adjacency;#owners;#countries;#listeners=new Set();
+  constructor(scenario,hierarchy,{seed=1,proceduralWorld=null,landAdjacency=null}={}){
+    this.#adjacency=landAdjacency||proceduralWorld?.adjacency;this.#hierarchy=hierarchy;this.#install(initializeGameState(scenario,hierarchy,seed,proceduralWorld));
     this.ownership=readOnlyMap(()=>this.#owners);this.countries=readOnlyMap(()=>this.#countries);
     this.polities=this.countries; // Compatibility storage/name for the same registry, never a second authority.
   }
@@ -108,9 +109,11 @@ class Simulation {
   serialize(){return JSON.stringify(this.#state);}
   serializeSave(){return JSON.stringify({format:'mandate-save',version:2,geography:this.#state.geography,scenarioId:this.#state.game.scenario.id,state:this.#state});}
   populationSummary(territoryId){return population.summarizePopulation(this.#state.systems.population,territoryId);}
-  enableAutonomy(rules={}){const next=autonomy.enable(this.#state,rules);validateGameState(next,this.#hierarchy);this.#install(next);this.#emit('stateChanged',{kind:'autonomy',ownershipIds:null});}
+  enableAutonomy(rules={}){let next=autonomy.enable(this.#state,rules);if(this.#adjacency)next=require('./economy-trade.cjs').enable(next,this.#adjacency,this.#hierarchy);validateGameState(next,this.#hierarchy);this.#install(next);this.#emit('stateChanged',{kind:'autonomy',ownershipIds:null});}
+  enableTrade(adjacency=this.#adjacency){const next=require('./economy-trade.cjs').enable(this.#state,adjacency,this.#hierarchy);validateGameState(next,this.#hierarchy);this.#install(next);this.#emit('stateChanged',{kind:'trade',ownershipIds:null});}
   configureFoodFeedback(enabled){const next=autonomy.configureFoodFeedback(this.#state,enabled);validateGameState(next,this.#hierarchy);this.#install(next);this.#emit('stateChanged',{kind:'autonomy',ownershipIds:null});}
   economicReport(provinceId){return autonomy.report(this.#state,provinceId);}
+  economyAnalytics(selection={}){return structuredClone(require('./economy-history.cjs').analytics(this.#state,selection));}
   economySummary(){return economy.summarizeEconomy(this.#state.systems.economy);}
   // Read-only presentation projection: physical inventories remain authoritative
   // and are requested separately for the selected enterprise.
@@ -147,6 +150,7 @@ class Simulation {
       const date=nextDay(this.#state.clock.date);
       const prepared=date.day===1&&this.#state.systems.economy?await executor.prepare(this.#state.systems.economy,this.#state.systems.population,this.#hierarchy,{year:this.#state.clock.date.year,month:this.#state.clock.date.month}):undefined;
       this.#advanceDay(prepared);
+      if(prepared?.state.trade)executor.reset?.(); // Coordinator changed cash/inventories; reload partitions next month.
     }
     this.#emit('timeAdvanced',{steps:count,clock:this.clock});this.#emit('stateChanged',{kind:'time',ownershipIds:[]});
   }
@@ -156,14 +160,17 @@ class Simulation {
       if(date.day===1){
         if(this.#state.systems.economy||this.#state.systems.settlements){
           const preparedEconomy=stagedEconomy||(this.#state.systems.economy?economy.prepareEconomyMonth(this.#state.systems.economy,this.#state.systems.population,this.#hierarchy,{year:this.#state.clock.date.year,month:this.#state.clock.date.month}):null);
+          if(preparedEconomy?.state.trade){require('./economy-trade.cjs').coordinate(preparedEconomy.state);economy.validateEconomyState(preparedEconomy.state,this.#hierarchy);}
           const preparedPopulation=population.preparePopulationMonth(this.#state.systems.population,this.#hierarchy,preparedEconomy?autonomy.foodEffects(preparedEconomy.state):undefined);
           const developed=preparedEconomy?.state.autonomy?autonomy.develop(preparedEconomy.state,preparedPopulation.state,this.#state.systems.settlements,this.#hierarchy):this.#state.systems.settlements;
           const preparedSettlements=this.#state.systems.settlements?settlements.prepareSettlementsMonth(developed,preparedPopulation?.state||this.#state.systems.population,this.#hierarchy,preparedEconomy?.state):null;
           if(preparedEconomy?.state.autonomy){const births=preparedPopulation.state.stats.births-this.#state.systems.population.stats.births,deaths=preparedPopulation.state.stats.deaths-this.#state.systems.population.stats.deaths;preparedPopulation.update={births,deaths,netChange:births-deaths};economy.canonicalize(preparedEconomy.state);economy.validateEconomyState(preparedEconomy.state,this.#hierarchy);settlements.refreshCapitals(preparedSettlements,this.#state.countries);}
+          const preparedHistory=preparedEconomy?require('./economy-history.cjs').append({...this.#state,systems:{...this.#state.systems,economy:preparedEconomy.state,population:preparedPopulation.state}},this.#state.systems.economyHistory):null;
           // Both preparations succeed before any authority, clock, RNG or event changes.
           if(preparedPopulation){this.#state.systems.population=preparedPopulation.state;update=preparedPopulation.update;}
           if(preparedEconomy){this.#state.systems.economy=preparedEconomy.state;economyUpdate=preparedEconomy.update;}
           if(preparedSettlements)this.#state.systems.settlements=preparedSettlements;
+          if(preparedHistory)this.#state.systems.economyHistory=preparedHistory;
         }else update=population.advancePopulationMonth(this.#state.systems.population);
       }
       for(const system of DAILY_SYSTEMS)system(this.#state);this.#state.clock.tick++;this.#state.clock.date=date;

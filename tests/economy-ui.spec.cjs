@@ -1,0 +1,7 @@
+const {test,expect}=require('@playwright/test');
+test('economy is a shared Inspector tab with explicit absent-state messaging',async({page})=>{
+  await page.goto('/?scenario=1700');await page.waitForFunction(()=>window.mandateEconomyPanel&&window.mandateSimulation);const before=await page.evaluate(()=>window.mandateSimulation.serialize());await page.locator('#economy-toggle').click();await expect(page.locator('#live-economy')).toBeVisible();await expect(page.locator('#live-economy')).toContainText('Экономика в этом сценарии не инициализирована');expect(await page.evaluate(()=>window.mandateSimulation.serialize())).toBe(before);await page.locator('#live-economy header button').click();await expect(page.locator('#world-inspector')).toBeHidden();await expect(page.locator('#game-play')).toBeEnabled();
+});
+test('province selection remains in the economy tab and unlocks current-country scope',async({page})=>{
+  await page.goto('/?scenario=1700');await page.waitForFunction(()=>window.mandateEconomyPanel);await page.locator('#economy-toggle').click();await expect(page.locator('#live-economy')).toBeVisible();await page.evaluate(()=>{window.mandateMap.selectedId='province:00001';window.mandateMap.canvas.dispatchEvent(new CustomEvent('regionselect',{detail:{regionId:'province:00001'}}));});await expect(page.locator('#live-economy')).toBeVisible();await expect(page.locator('#live-economy nav button').filter({hasText:'Страна'})).toBeEnabled();
+});

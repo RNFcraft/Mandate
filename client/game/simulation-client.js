@@ -26,7 +26,7 @@ export class SimulationClient{
   }
   async install(view){
     if(!view)return;
-    if(view.economyPatch){const p=view.economyPatch,e=this.view.economy,firms=new Map([...e.enterprises,...p.added].map(f=>[f.id,f])),markets=new Map(p.markets);view.economy={...e,stats:p.stats,enterprises:p.enterprises.map(([id,capacityBatches,cashMinor,stats])=>({...firms.get(id),capacityBatches,cashMinor,stats})),markets:e.markets.map(m=>({...m,goods:markets.get(m.id)}))};delete view.economyPatch;}
+    if(view.economyPatch){const p=view.economyPatch,e=this.view.economy,firms=new Map([...e.enterprises,...p.added].map(f=>[f.id,f])),markets=new Map(p.markets);view.economy={...e,stats:p.stats,enterprises:p.enterprises.map(([id,capacityBatches,cashMinor,stats,wagePerWorkerMinor])=>({...firms.get(id),capacityBatches,cashMinor,stats,...(wagePerWorkerMinor===undefined?{}:{wagePerWorkerMinor})})),markets:e.markets.map(m=>({...m,goods:markets.get(m.id)}))};delete view.economyPatch;}
     if(view.settlementPatch){const p=view.settlementPatch,rows=new Map([...this.view.settlements,...p.added].map(r=>[r.id,r]));view.settlements=p.rows.map(([id,type,population,capitalOf,enterprises,availableLabor,usedLabor,revenue,activeEnterprises,industries])=>({...rows.get(id),type,population,capitalOf,enterprises,availableLabor,usedLabor,revenue,activeEnterprises,industries}));delete view.settlementPatch;}
     await freezeView(view);Object.assign(this.view,view);if(view.ownership)this.owners=new Map(Object.entries(view.ownership));if(view.countries)this.countryRows=new Map(view.countries.map(c=>[c.id,c]));
   }
@@ -39,6 +39,8 @@ export class SimulationClient{
   load(value){this.loading=(this.loading||0)+1;return this.request('Load',{value}).finally(()=>this.loading--);}
   enableAutonomy(rules={}){return this.request('EnableAutonomy',{rules});}economicReport(provinceId){return this.request('RequestSummary',{provinceId});}
   configureFoodFeedback(enabled){return this.request('ConfigureFoodFeedback',{enabled});}
+  economyAnalytics(selection={}){return this.request('EconomyAnalytics',selection);}
+  enableTrade(adjacency){return this.request('EnableTrade',{adjacency});}
   economySummary(){return this.view.economy;}economyView(){return this.view.economy;}
   enterpriseSummary(id){return this.request('RequestSummary',{kind:'enterprise',id});}
   settlementSummary(provinceId){return this.view.settlements===null?null:provinceId?this.view.settlements.filter(r=>r.provinceId===provinceId):this.view.settlements;}

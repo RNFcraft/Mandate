@@ -32,9 +32,9 @@ function checkDemand(s,need){
 }
 function durableGoods(needs){return [...new Set(needs.filter(n=>n.usage==='durable').map(n=>n.goodId))].sort(compare);}
 function validate(data,hierarchy,runtime){
-  fields(data,['version','rules','goods','recipes','markets','households','enterprises',...(runtime?['stats']:[]),...(Object.hasOwn(data,'autonomy')?['autonomy']:[])]);
+  fields(data,['version','rules','goods','recipes','markets','households','enterprises',...(runtime?['stats']:[]),...(Object.hasOwn(data,'autonomy')?['autonomy']:[]),...(Object.hasOwn(data,'trade')?['trade']:[])]);
   if(data.version!==1||hierarchy.id!=='mandate-provinces-v1')fail('unsupported version/geography');
-  if(Object.hasOwn(data,'autonomy')&&!runtime)fail('autonomy is runtime-only; enable it explicitly');
+  if((Object.hasOwn(data,'autonomy')||Object.hasOwn(data,'trade'))&&!runtime)fail('autonomy is runtime-only; enable it explicitly');
   const rules=data.rules,multi=Object.hasOwn(rules||{},'consumerNeeds');fields(rules,['foodGoodId','foodPerPersonNumerator','foodPerPersonDenominator','laborParticipationBps','maxPriceAdjustmentBps','profitPayoutBps',...(multi?['consumerNeeds']:[])]);
   if(!safe(rules.foodPerPersonNumerator)||!safe(rules.foodPerPersonDenominator)||rules.foodPerPersonDenominator===0||!bps(rules.laborParticipationBps)||!bps(rules.maxPriceAdjustmentBps)||!bps(rules.profitPayoutBps))fail('invalid rules');
   const goods=registry(data.goods),recipes=registry(data.recipes),markets=registry(data.markets),houses=registry(data.households),enterprises=registry(data.enterprises);
@@ -115,7 +115,7 @@ function validate(data,hierarchy,runtime){
         if(BigInt(b.inUseOpening)+BigInt(b.inUseAdded)-BigInt(data.autonomy?.goods.find(g=>g.goodId===b.goodId).inUseRetired||0)!==BigInt(b.inUseClosing))fail('invalid in-use balance');
         if(data.stats.monthsProcessed){
           const held=[...houses.values()].reduce((sum,h)=>sum+BigInt(h.inUse.find(s=>s.goodId===b.goodId)?.quantity||0),0n);
-          const closing=[...enterprises.values()].reduce((sum,e)=>sum+BigInt(e.inventories.find(s=>s.goodId===b.goodId).quantity),0n);
+          const closing=[...enterprises.values()].reduce((sum,e)=>sum+BigInt(e.inventories.find(s=>s.goodId===b.goodId).quantity),0n)+(data.trade&&b.goodId===rules.foodGoodId?data.trade.householdStocks.reduce((n,s)=>n+BigInt(s.quantity),0n):0n);
           let consumed=0n,stocked=0n;
           for(const h of houses.values())for(const s of h.consumerState){const n=needs.get(s.needId);if(n.goodId===b.goodId){if(n.usage==='durable')stocked+=BigInt(s.stats.purchased);else consumed+=BigInt(s.stats.purchased);}}
           if(held!==BigInt(b.inUseClosing)||closing!==BigInt(b.closing)||consumed!==BigInt(b.householdConsumed)||stocked!==BigInt(b.inUseAdded))fail('inconsistent physical holdings');
@@ -123,7 +123,8 @@ function validate(data,hierarchy,runtime){
       }
     }
   }
-  autonomy.validate(data);return data;
+  if(data.trade&&data.stats.monthsProcessed){const b=data.stats.goods.find(g=>g.goodId===rules.foodGoodId),held=data.trade.householdStocks.reduce((n,s)=>add(n,s.quantity),0);if(b.closing<held)fail('invalid imported inventory');}
+  autonomy.validate(data);require('./economy-trade.cjs').validate(data);return data;
 }
 const validateEconomyScenario=(data,hierarchy)=>validate(data,hierarchy,false);
 const validateEconomyState=(data,hierarchy)=>validate(data,hierarchy,true);
@@ -137,6 +138,7 @@ function canonicalize(data){
     for(const h of data.households){h.inUse?.sort((a,b)=>compare(a.goodId,b.goodId));h.consumerState?.sort((a,b)=>compare(a.needId,b.needId));}
   }
   if(data.autonomy){if(data.autonomy.foodSecurity)data.autonomy.foodSecurity.households.sort((a,b)=>compare(a.householdId,b.householdId));data.autonomy.firms.sort((a,b)=>compare(a.enterpriseId,b.enterpriseId));data.autonomy.wear.sort((a,b)=>compare(a.householdId,b.householdId));data.autonomy.goods.sort((a,b)=>compare(a.goodId,b.goodId));data.autonomy.shortages.sort((a,b)=>compare(a.marketId,b.marketId)||compare(a.goodId,b.goodId));}
+  if(data.trade){data.trade.householdStocks.sort((a,b)=>compare(a.householdId,b.householdId));data.trade.labor.sort((a,b)=>compare(a.provinceId,b.provinceId));data.trade.performance.sort((a,b)=>compare(a.enterpriseId,b.enterpriseId));data.trade.edges.sort((a,b)=>compare(a.a,b.a)||compare(a.b,b.b));}
   if(data.stats)data.stats.goods.sort((a,b)=>compare(a.goodId,b.goodId));return data;
 }
 function initializeEconomy(data,hierarchy){
@@ -176,7 +178,9 @@ function prepareValidatedMonth(state,population,hierarchy,period){
   const balance=new Map(next.goods.map(g=>[g.id,{goodId:g.id,opening:0,produced:0,inputsConsumed:0,householdConsumed:0,closing:0,...(multi?{inUseOpening:0,inUseAdded:0,inUseClosing:0}:{})}]));
   for(const e of next.enterprises)for(const s of e.inventories){const b=balance.get(s.goodId);b.opening=add(b.opening,s.quantity);}
   if(multi)for(const h of next.households)for(const s of h.inUse){const b=balance.get(s.goodId);b.inUseOpening=add(b.inUseOpening,s.quantity);}
+  if(next.trade)for(const s of next.trade.householdStocks)balance.get(rules.foodGoodId).opening=add(balance.get(rules.foodGoodId).opening,s.quantity);
   const cashBefore=totalCash();
+  if(next.trade){next.trade.householdOpening=next.trade.householdStocks.reduce((n,s)=>add(n,s.quantity),0);next.trade.consumedImports=0;next.trade.flows=[];next.trade.month={quantity:0,goodsPayments:0,freight:0,workers:0};}
   const management=autonomy.begin(next,state,population,marketAt,balance,take);
   for(const h of next.households)h.stats=zero(householdKeys);
   for(const m of next.markets)for(const g of m.goods)g.stats=zero(marketKeys);
@@ -193,6 +197,7 @@ function prepareValidatedMonth(state,population,hierarchy,period){
     const quantity=mul(batches,r.output.quantity),cost=add(wages,inputsValue),out=inv.get(r.output.goodId);out.quantity=add(out.quantity,quantity);out.bookValueMinor=add(out.bookValueMinor,cost);balance.get(r.output.goodId).produced=add(balance.get(r.output.goodId).produced,quantity);
     Object.assign(e.stats,{batches,workers,wages,inputsConsumedValue:inputsValue,productionCost:cost});
   }
+  const importedAt=new Map((next.trade?.householdStocks||[]).map(s=>[s.householdId,s]));
   const orders=[];
   for(const h of next.households){
     if(multi){
@@ -203,10 +208,10 @@ function prepareValidatedMonth(state,population,hierarchy,period){
         // Multiple durable needs raise one shared target, not additive stocks.
         const need=n.usage==='durable'?Math.max(0,target-Math.max(held.get(n.goodId).quantity,targets.get(n.goodId)||0)):target;
         if(n.usage==='durable')targets.set(n.goodId,Math.max(targets.get(n.goodId)||0,target));
-        const m=marketAt.get(h.provinceId),g=m.goods.find(g=>g.goodId===n.goodId),affordable=Math.min(need,divide(budget,g.priceMinor));
+        const m=marketAt.get(h.provinceId),g=m.goods.find(g=>g.goodId===n.goodId),arrival=next.trade&&n.goodId===rules.foodGoodId&&n.usage==='consumable'?importedAt.get(h.id):null,delivered=arrival?Math.min(need,arrival.quantity):0,affordable=Math.min(need-delivered,divide(budget,g.priceMinor));if(delivered){next.trade.consumedImports=add(next.trade.consumedImports,delivered);require('./economy-trade.cjs').take(arrival,delivered);balance.get(n.goodId).householdConsumed=add(balance.get(n.goodId).householdConsumed,delivered);}
         // Unfilled orders retain their reservation until next month's fresh budget.
         budget=subtract(budget,mul(affordable,g.priceMinor));
-        s.stats={need,affordableDemand:affordable,purchased:0,unmetNeed:need,unaffordableNeed:need-affordable,rationedDemand:affordable,spending:0};
+        s.stats={need,affordableDemand:add(affordable,delivered),purchased:delivered,unmetNeed:need-delivered,unaffordableNeed:need-delivered-affordable,rationedDemand:affordable,spending:0};
         for(const key of needKeys)h.stats[key==='need'?'essentialNeed':key]=add(h.stats[key==='need'?'essentialNeed':key],s.stats[key]);
         if(n.priority==='essential')g.stats.essentialNeed=add(g.stats.essentialNeed,need);g.stats.affordableDemand=add(g.stats.affordableDemand,affordable);
         orders.push({marketId:m.id,goodId:n.goodId,kind:0,buyer:h,quantity:affordable,needState:s,usage:n.usage,priority:priorities[n.priority]});
@@ -267,8 +272,10 @@ function prepareValidatedMonth(state,population,hierarchy,period){
     const r=recipes.get(e.recipeId),reserve=management?autonomy.workingReserve(next,e,r,marketAt.get(e.provinceId),management.firms.get(e.id)):mul(mul(e.capacityBatches,r.workersPerBatch),e.wagePerWorkerMinor),desired=number(BigInt(Math.max(0,e.stats.profit))*BigInt(next.autonomy?.rules.profitPayoutBps??rules.profitPayoutBps)/10000n),payout=Math.min(desired,Math.max(0,e.cashMinor-reserve)),owner=houses.get(e.ownerRef.id);transfer(e,owner,payout);e.stats.payout=payout;owner.stats.payout=add(owner.stats.payout,payout);
   }
   if(management)autonomy.finish(next,management,marketAt,stocks,labor,houseAt,take,transfer,balance);
+  if(next.trade)next.trade.labor=[...labor].map(([provinceId,remaining])=>({provinceId,remaining}));
   for(const e of next.enterprises)for(const s of e.inventories){const b=balance.get(s.goodId);b.closing=add(b.closing,s.quantity);}
   if(multi)for(const h of next.households)for(const s of h.inUse){const b=balance.get(s.goodId);b.inUseClosing=add(b.inUseClosing,s.quantity);}
+  if(next.trade)for(const s of next.trade.householdStocks)balance.get(rules.foodGoodId).closing=add(balance.get(rules.foodGoodId).closing,s.quantity);
   next.stats={monthsProcessed:add(state.stats.monthsProcessed,1),lastCompletedPeriod:{year:period.year,month:period.month},cashBefore,cashAfter:totalCash(),goods:[...balance.values()]};
   validateEconomyState(next,hierarchy);
   return {state:next,update:{monthsProcessed:next.stats.monthsProcessed,period:Object.freeze({...period})}};

@@ -24,6 +24,8 @@ function createEndpoint(send,{createPool}={}){
           case 'Step':await simulation.stepAsync(payload.count,pool);break;
           case 'SubmitCommand':result=simulation.submit(payload.command);break;
           case 'RequestSummary':result=payload.kind==='enterprise'?simulation.enterpriseSummary(payload.id):payload.kind==='political'?simulation.territoryPoliticalState(payload.id):simulation.economicReport(payload.provinceId);break;
+          case 'EconomyAnalytics':result=simulation.economyAnalytics(payload);break;
+          case 'EnableTrade':simulation.enableTrade(payload.adjacency);pool?.reset();metadata=true;break;
           case 'RequestSnapshot':result=simulation.snapshot();break;
           case 'Serialize':result=simulation.serialize();break;
           case 'Save':result=simulation.serializeSave();break;
@@ -42,7 +44,7 @@ function createEndpoint(send,{createPool}={}){
       metadata ||= events.some(e=>e.type==='stateChanged'&&!['time','clock'].includes(e.kind));
       const view=simulation.presentationView({metadata,monthly});
       if(monthly&&!metadata){
-        if(view.economy){const e=view.economy;view.economyPatch={stats:e.stats,enterprises:e.enterprises.map(f=>[f.id,f.capacityBatches,f.cashMinor,f.stats]),added:e.enterprises.filter(f=>!knownFirms.has(f.id)),markets:e.markets.map(m=>[m.id,m.goods])};delete view.economy;}
+        if(view.economy){const e=view.economy;view.economyPatch={stats:e.stats,enterprises:e.enterprises.map(f=>[f.id,f.capacityBatches,f.cashMinor,f.stats,f.wagePerWorkerMinor]),added:e.enterprises.filter(f=>!knownFirms.has(f.id)),markets:e.markets.map(m=>[m.id,m.goods])};delete view.economy;}
         if(view.settlements){view.settlementPatch={added:view.settlements.filter(r=>!knownSettlements.has(r.id)),rows:view.settlements.map(r=>[r.id,r.type,r.population,r.capitalOf,r.enterprises,r.availableLabor,r.usedLabor,r.revenue,r.activeEnterprises,r.industries])};delete view.settlements;}
       }
       if(view.economy)knownFirms=new Set(view.economy.enterprises.map(f=>f.id));else for(const f of view.economyPatch?.added||[])knownFirms.add(f.id);

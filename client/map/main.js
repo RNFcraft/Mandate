@@ -1,3 +1,4 @@
+import {EconomyPanel} from './economy-panel.js';
 import {feature} from 'topojson-client';
 import {MapModel} from './model.js';
 import {WorldMap} from './renderer.js';
@@ -34,6 +35,7 @@ try {
     if(simulation){
       window.mandateSimulation=simulation;window.mandateGameControls=gameControls(simulation,geography);window.inspectPoliticalTerritory=async id=>({...await simulation.territoryPoliticalState(id),population:simulation.populationSummary(id).total});
       map.inspector=new Inspector(map,simulation);
+      window.mandateEconomyPanel=new EconomyPanel(map,simulation,map.inspector);
       let presentation={};
       try{const response=await fetch(`/api/scenarios/${encodeURIComponent(initial.scenario.id)}/economy-visuals`);if(response.ok)presentation=await response.json();}catch{}
       window.mandateEconomyLayer=new EconomyLayer(map,simulation,presentation);
