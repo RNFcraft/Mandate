@@ -6,10 +6,10 @@ const month=s=>{s.step(days(s));return s.snapshot();};
 test('land market links come only from explicit published-style adjacency',()=>{
   const s=create(),edges=s.snapshot().systems.economy.trade.edges;expect(edges).toHaveLength(1);for(const edge of edges)expect(fixture.adjacency.neighbors[edge.provinceA]).toContain(edge.provinceB);
 });
-test('food import is paid, owned, conserved and consumed only in the following month',()=>{
+test('food import is paid, owned, consumed next month and then replenished',()=>{
   const s=create(),cash=s.economicReport().cash,first=month(s),e=first.systems.economy,house=e.households.find(h=>h.id==='household-neighbor'),owned=e.trade.householdStocks.find(h=>h.householdId===house.id);
-  expect(e.trade.month.quantity).toBe(10);expect(e.trade.month.freight).toBe(10);expect(e.trade.month.workers).toBe(1);expect(owned.quantity).toBe(10);expect(house.stats.purchased).toBe(0);expect(house.cashMinor).toBeLessThan(10000);expect(e.stats.cashAfter).toBe(cash);validateGameState(first,fixture.hierarchy);
-  const second=month(s),h=second.systems.economy.households.find(h=>h.id===house.id);expect(h.stats.purchased).toBe(10);expect(second.systems.economy.trade.householdStocks.find(row=>row.householdId===h.id).quantity).toBe(0);expect(s.economicReport().cash).toBe(cash);
+  expect(e.trade.month.quantity).toBe(10);expect(e.trade.month.freight).toBe(8);expect(e.trade.month.workers).toBe(1);expect(owned.quantity).toBe(10);expect(house.stats.purchased).toBe(0);expect(house.cashMinor).toBeLessThan(10000);expect(e.stats.cashAfter).toBe(cash);validateGameState(first,fixture.hierarchy);
+  const second=month(s),h=second.systems.economy.households.find(h=>h.id===house.id);expect(h.stats.purchased).toBe(10);expect(second.systems.economy.trade.householdStocks.find(row=>row.householdId===h.id).quantity).toBe(10);expect(s.economicReport().cash).toBe(cash);
 });
 test('current export profits are distributed once rather than trapped after local clearing',()=>{
   const s=create(),e=month(s).systems.economy,f=e.enterprises.find(f=>f.recipeId==='prepare-food');expect(f.stats.profit).toBeGreaterThan(0);expect(f.stats.payout).toBeGreaterThan(0);expect(f.stats.payout).toBeLessThanOrEqual(f.stats.profit);expect(e.households.find(h=>h.id===f.ownerRef.id).stats.payout).toBeGreaterThan(0);

@@ -109,8 +109,8 @@ class Simulation {
   serialize(){return JSON.stringify(this.#state);}
   serializeSave(){return JSON.stringify({format:'mandate-save',version:2,geography:this.#state.geography,scenarioId:this.#state.game.scenario.id,state:this.#state});}
   populationSummary(territoryId){return population.summarizePopulation(this.#state.systems.population,territoryId);}
-  enableAutonomy(rules={}){let next=autonomy.enable(this.#state,rules);if(this.#adjacency)next=require('./economy-trade.cjs').enable(next,this.#adjacency,this.#hierarchy);validateGameState(next,this.#hierarchy);this.#install(next);this.#emit('stateChanged',{kind:'autonomy',ownershipIds:null});}
-  enableTrade(adjacency=this.#adjacency){const next=require('./economy-trade.cjs').enable(this.#state,adjacency,this.#hierarchy);validateGameState(next,this.#hierarchy);this.#install(next);this.#emit('stateChanged',{kind:'trade',ownershipIds:null});}
+  enableAutonomy(rules={}){const {householdProduction=true,...enterpriseRules}=rules;if(typeof householdProduction!=='boolean')throw Error('Invalid household production setting');let next=autonomy.enable(this.#state,enterpriseRules);if(householdProduction)next=require('./household-economy.cjs').enable(next);if(this.#adjacency)next=require('./economy-trade.cjs').enable(next,this.#adjacency,this.#hierarchy);require('./economy-routes.cjs').enable(next.systems.economy);validateGameState(next,this.#hierarchy);this.#install(next);this.#emit('stateChanged',{kind:'autonomy',ownershipIds:null});}
+  enableTrade(adjacency=this.#adjacency){const next=require('./economy-trade.cjs').enable(this.#state,adjacency,this.#hierarchy);require('./economy-routes.cjs').enable(next.systems.economy);validateGameState(next,this.#hierarchy);this.#install(next);this.#emit('stateChanged',{kind:'trade',ownershipIds:null});}
   configureFoodFeedback(enabled){const next=autonomy.configureFoodFeedback(this.#state,enabled);validateGameState(next,this.#hierarchy);this.#install(next);this.#emit('stateChanged',{kind:'autonomy',ownershipIds:null});}
   economicReport(provinceId){return autonomy.report(this.#state,provinceId);}
   economyAnalytics(selection={}){return structuredClone(require('./economy-history.cjs').analytics(this.#state,selection));}
@@ -132,7 +132,7 @@ class Simulation {
   settlementSummary(provinceId){return settlements.summarizeSettlements(this.#state.systems.settlements,this.#state.systems.population,this.#state.systems.economy,provinceId);}
   territoryPoliticalState(territoryId){return politicalGeography.territoryPoliticalState(this.#state,territoryId);}
   load(state){
-    validateGameState(state,this.#hierarchy);const next=structuredClone(state);if(next.systems.economy)economy.canonicalize(next.systems.economy);if(next.systems.settlements)settlements.canonicalizeSettlements(next.systems.settlements);this.#install(next);
+    validateGameState(state,this.#hierarchy);let next=structuredClone(state);if(next.systems.economy?.autonomy&&!next.systems.economy.householdEconomy)next=require('./household-economy.cjs').enable(next);if(next.systems.economy)require('./economy-routes.cjs').enable(next.systems.economy);validateGameState(next,this.#hierarchy);if(next.systems.economy)economy.canonicalize(next.systems.economy);if(next.systems.settlements)settlements.canonicalizeSettlements(next.systems.settlements);this.#install(next);
     this.#emit('stateChanged',{kind:'loaded',ownershipIds:null});this.#emit('gameLoaded',{clock:this.clock});
   }
   start(){return this.submit({type:'ResumeSimulation'});}
@@ -150,7 +150,7 @@ class Simulation {
       const date=nextDay(this.#state.clock.date);
       const prepared=date.day===1&&this.#state.systems.economy?await executor.prepare(this.#state.systems.economy,this.#state.systems.population,this.#hierarchy,{year:this.#state.clock.date.year,month:this.#state.clock.date.month}):undefined;
       this.#advanceDay(prepared);
-      if(prepared?.state.trade)executor.reset?.(); // Coordinator changed cash/inventories; reload partitions next month.
+      if(prepared?.state.trade||prepared?.state.householdEconomy)executor.reset?.(); // Coordinator changed cash/inventories; reload partitions next month.
     }
     this.#emit('timeAdvanced',{steps:count,clock:this.clock});this.#emit('stateChanged',{kind:'time',ownershipIds:[]});
   }
