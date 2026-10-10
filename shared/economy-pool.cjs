@@ -15,7 +15,8 @@ class EconomyPool{
       if(!this.last||this.last.month!==state.stats.monthsProcessed||this.last.stateRef!==state||this.signature!==signature){
         this.reset();this.signature=signature;this.groups=partitions.partitionMarkets(state,this.size);this.workers=this.groups.map(()=>this.makeWorker());
         this.provinces=this.groups.map(ids=>new Set(state.markets.filter(m=>ids.includes(m.id)).flatMap(m=>m.provinceIds)));
-        await Promise.all(this.workers.map((w,i)=>this.call(w,'Initialize',{state:partitions.project(state,this.groups[i]),hierarchy:{id:hierarchy.id,territories:hierarchy.territories.filter(t=>this.provinces[i].has(t.id))}})));
+        const openingOpportunities=require('./economy-routes.cjs').opportunities(state);
+        await Promise.all(this.workers.map((w,i)=>this.call(w,'Initialize',{state:partitions.project(state,this.groups[i],openingOpportunities),hierarchy:{id:hierarchy.id,territories:hierarchy.territories.filter(t=>this.provinces[i].has(t.id))}})));
         this.last={month:state.stats.monthsProcessed,stateRef:state,cash:new Map(state.households.map(h=>[h.id,h.cashMinor])),firms:new Set(state.enterprises.map(e=>e.id))};
       }
       const token=this.generation,results=await Promise.all(this.workers.map((w,i)=>{
