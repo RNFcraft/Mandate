@@ -64,8 +64,21 @@ test('invalid physical capital and cargo lineage fail load atomically',()=>{
 });
 test('oversized paid cargo drains in parts over several months without reselling or multiplying stored fragments',()=>{
   const d=create();month(d.s);d.s.enablePhysicalTransport();const state=d.s.snapshot(),e=state.systems.economy,original={...e.trade.routing.cargo[0]},market=original.path[original.index],carrier=e.transport.carriers.find(c=>c.baseMarketId===market);
-  e.trade.rules.capacityPerEdge=3;accounts.transfer(e.enterprises[0],carrier,1000);d.s.load(state);const money=cash(e);let delivered=0;
-  for(let i=0;i<4;i++){const next=month(d.s);delivered+=next.trade.routing.month.byDeliveredGood.clothing||0;expect(cash(next)).toBe(money);const fragments=next.trade.routing.cargo.filter(c=>c.haul[0]===original.id);expect(fragments.length).toBeLessThanOrEqual(original.path.length-2);expect(fragments.reduce((n,c)=>n+c.quantity,0)+delivered).toBe(original.quantity);expect(next.trade.routing.month.started).toBe(0);validateGameState(d.s.snapshot(),d.hierarchy);}
+  e.trade.rules.capacityPerEdge=3;accounts.transfer(e.enterprises[0],carrier,1000);d.s.load(state);const money=cash(e),buyer=e.households.find(h=>h.id===original.ownerId);let delivered=0;
+  // Driver wages can fund unrelated clothing orders in the intermediate market.
+  // Count receipts for the original recipient and forbid new purchases by that buyer.
+  for(let i=0;i<4;i++){
+    const next=month(d.s),routing=next.trade.routing;
+    delivered+=routing.month.receipts[buyer.provinceId]||0;
+    expect(cash(next)).toBe(money);
+    const fragments=routing.cargo.filter(c=>c.haul[0]===original.id);
+    expect(fragments.length).toBeLessThanOrEqual(original.path.length-2);
+    expect(fragments.reduce((n,c)=>n+c.quantity,0)+delivered).toBe(original.quantity);
+    expect(routing.cargo.filter(c=>c.ownerId===original.ownerId&&c.haul[0]!==original.id)).toEqual([]);
+    expect(next.trade.flows.filter(f=>f.buyerId===original.ownerId)).toEqual([]);
+    expect(next.households.find(h=>h.id===original.ownerId).stats.spending).toBe(0);
+    validateGameState(d.s.snapshot(),d.hierarchy);
+  }
   expect(delivered).toBe(original.quantity);expect(d.s.economySummary().trade.routing.cargo.some(c=>c.haul[0]===original.id)).toBe(false);
 });
 test('worker adapter preserves physical state through explicit sequential fallback',async()=>{
