@@ -13,10 +13,10 @@ function create(rules={}){
   const s=new Simulation(input,chains.hierarchy);s.enableAutonomy({birthRateBps:0,deathRateBps:0,foodFeedback:false,...rules});return s;
 }
 function month(s){const d=s.clock.date;s.step(ordinal({year:d.year+(d.month===12?1:0),month:d.month===12?1:d.month+1,day:1})-ordinal(d));return s.snapshot();}
-function impoverished(s){const state=s.snapshot();for(const h of state.systems.economy.households)h.cashMinor=0;for(const f of state.systems.economy.enterprises)f.cashMinor=0;s.load(state);}
+function impoverished(s){const state=s.snapshot();for(const h of state.systems.economy.households)require('./fixtures/economy-v33.cjs').legacyCash(h,0);for(const f of state.systems.economy.enterprises)f.cashMinor=0;s.load(state);}
 test('past payroll and payout never become another forecast income',()=>{
   const a=create(),b=create(),opening=a.snapshot(),e=opening.systems.economy;
-  e.households[0].cashMinor=0;for(const f of e.enterprises)f.wagePerWorkerMinor=0;
+  require('./fixtures/economy-v33.cjs').legacyCash(e.households[0],0);for(const f of e.enterprises)f.wagePerWorkerMinor=0;
   a.load(opening);const altered=structuredClone(opening);altered.systems.economy.households[0].stats.wages=100000;altered.systems.economy.households[0].stats.payout=100000;b.load(altered);
   month(a);month(b);expect(b.serialize()).toBe(a.serialize());
 });
@@ -24,14 +24,13 @@ test('fully offered equilibrium stock does not create reserve-driven price infla
   const s=create(),state=s.snapshot(),e=state.systems.economy,f=e.enterprises.find(f=>f.recipeId==='prepare-food');stock(f,'food').quantity=10;s.load(state);
   const next=month(s),g=next.systems.economy.markets[0].goods.find(g=>g.goodId==='food');expect(g.stats.supply).toBe(10);expect(g.stats.affordableDemand).toBe(10);expect(g.priceMinor).toBe(10);expect(g.priceRemainder).toBe(0);
 });
-test('a physically needed chain restarts from zero plans with real wages and purchases',()=>{
-  const s=create(),state=s.snapshot(),e=state.systems.economy;e.households[0].cashMinor=0;for(const f of e.autonomy.firms)f.plannedBatches=0;s.load(state);
-  const cash=s.economicReport().cash;let produced=0,purchased=0;
-  for(let i=0;i<8;i++){const next=month(s),report=s.economicReport();expect(report.cash).toBe(cash);produced+=report.goods.food.produced;purchased+=report.goods.food.householdPurchased;for(const f of next.systems.economy.enterprises)for(const v of f.inventories)expect(v.quantity).toBeGreaterThanOrEqual(0);}
-  expect(produced).toBeGreaterThan(0);expect(purchased).toBeGreaterThan(0);
+test('physical need alone does not force a recovery batch with zero funded demand',()=>{
+  const s=create(),state=s.snapshot(),e=state.systems.economy;require('./fixtures/economy-v33.cjs').legacyCash(e.households[0],0);for(const c of e.autonomy.firms)c.plannedBatches=0;s.load(state);
+  const cash=s.economicReport().cash,next=month(s).systems.economy;expect(s.economicReport().cash).toBe(cash);expect(next.enterprises.every(f=>f.stats.batches===0)).toBe(true);
 });
+
 test('input procurement keeps the next planned payroll rather than spending all cash',()=>{
-  const s=create(),state=s.snapshot(),e=state.systems.economy;e.households[0].cashMinor=0;for(const f of e.enterprises)f.wagePerWorkerMinor=0;
+  const s=create(),state=s.snapshot(),e=state.systems.economy;require('./fixtures/economy-v33.cjs').legacyCash(e.households[0],100);for(const f of e.enterprises)f.wagePerWorkerMinor=0;
   const buyer=e.enterprises.find(f=>f.recipeId==='prepare-food'),seller=e.enterprises.find(f=>f.recipeId==='mill-flour');buyer.wagePerWorkerMinor=2;buyer.cashMinor=32;stock(seller,'flour').quantity=100;s.load(state);
   const next=month(s),f=next.systems.economy.enterprises.find(f=>f.id===buyer.id);expect(f.stats.batches).toBe(0);expect(f.stats.inputPurchases).toBe(30);expect(f.cashMinor).toBe(2);expect(stock(f,'flour').quantity).toBe(3);
 });

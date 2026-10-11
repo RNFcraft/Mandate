@@ -49,7 +49,7 @@ test('installed equipment retires explicitly, contracts capacity and replacement
   s.load(state);const next=month(s),balance=next.systems.economy.autonomy.goods.find(g=>g.goodId==='tools');expect(balance.capitalRetired).toBe(3);expect(next.systems.economy.autonomy.events.contracted).toBeGreaterThan(0);
 });
 test('durable wear happens once per good even for duplicate needs; book value falls proportionally',()=>{
-  const s=controlled({durableLifetimeMonths:2}),state=s.snapshot(),e=state.systems.economy,h=e.households[0];e.rules.consumerNeeds.push({...e.rules.consumerNeeds[1],id:'duplicate'});h.consumerState.push({...structuredClone(h.consumerState.find(n=>n.needId==='clothing')),needId:'duplicate'});h.inUse[0].quantity=8;h.inUse[0].bookValueMinor=80;h.cashMinor=0;s.load(state);
+  const s=controlled({durableLifetimeMonths:2}),state=s.snapshot(),e=state.systems.economy,h=e.households[0];e.rules.consumerNeeds.push({...e.rules.consumerNeeds[1],id:'duplicate'});h.consumerState.push({...structuredClone(h.consumerState.find(n=>n.needId==='clothing')),needId:'duplicate'});h.inUse[0].quantity=8;h.inUse[0].bookValueMinor=80;require('./fixtures/economy-v33.cjs').legacyCash(h,0);s.load(state);
   const next=month(s),b=next.systems.economy.autonomy.goods.find(g=>g.goodId==='clothing');expect(b.inUseRetired).toBe(4);
 });
 test('sustained absence of demand closes after grace period while preserving assets',()=>{

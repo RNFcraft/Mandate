@@ -15,18 +15,18 @@ class EconomyPool{
       if(!this.last||this.last.month!==state.stats.monthsProcessed||this.last.stateRef!==state||this.signature!==signature){
         this.reset();this.signature=signature;this.groups=partitions.partitionMarkets(state,this.size);this.workers=this.groups.map(()=>this.makeWorker());
         this.provinces=this.groups.map(ids=>new Set(state.markets.filter(m=>ids.includes(m.id)).flatMap(m=>m.provinceIds)));
-        const openingOpportunities=require('./economy-routes.cjs').opportunities(state);
+        const openingOpportunities=require('./economy-routes.cjs').opportunities(state,population);
         await Promise.all(this.workers.map((w,i)=>this.call(w,'Initialize',{state:partitions.project(state,this.groups[i],openingOpportunities),hierarchy:{id:hierarchy.id,territories:hierarchy.territories.filter(t=>this.provinces[i].has(t.id))}})));
-        this.last={month:state.stats.monthsProcessed,stateRef:state,cash:new Map(state.households.map(h=>[h.id,h.cashMinor])),firms:new Set(state.enterprises.map(e=>e.id))};
+        this.last={month:state.stats.monthsProcessed,stateRef:state,accounts:new Map(state.households.map(h=>[h.id,JSON.stringify(h.accounts)])),cash:new Map(state.households.map(h=>[h.id,h.cashMinor])),firms:new Set(state.enterprises.map(e=>e.id))};
       }
       const token=this.generation,results=await Promise.all(this.workers.map((w,i)=>{
         const provinces=this.provinces[i],added=state.enterprises.filter(e=>provinces.has(e.provinceId)&&!this.last.firms.has(e.id)),ids=new Set(added.map(e=>e.id));
-        return this.call(w,'Prepare',{period,expectedPeriod:period.year*12+period.month,cohorts:population.cohorts.filter(c=>provinces.has(c.territoryId)),cash:Object.fromEntries(state.households.filter(h=>provinces.has(h.provinceId)&&this.last.cash.get(h.id)!==h.cashMinor).map(h=>[h.id,h.cashMinor])),enterprises:added,firms:state.autonomy?.firms.filter(f=>ids.has(f.enterpriseId))});
+        return this.call(w,'Prepare',{period,expectedPeriod:period.year*12+period.month,cohorts:population.cohorts.filter(c=>provinces.has(c.territoryId)),cash:Object.fromEntries(state.households.filter(h=>provinces.has(h.provinceId)&&this.last.cash.get(h.id)!==h.cashMinor).map(h=>[h.id,h.cashMinor])),householdAccounts:Object.fromEntries(state.households.filter(h=>provinces.has(h.provinceId)&&h.accounts&&this.last.accounts.get(h.id)!==JSON.stringify(h.accounts)).map(h=>[h.id,h.accounts])),enterprises:added,firms:state.autonomy?.firms.filter(f=>ids.has(f.enterpriseId))});
       }));
       if(token!==this.generation)throw Error('Economy preparation cancelled');
       const mergeStart=performance.now(),prepared=partitions.merge(state,results.map(r=>r.state),hierarchy,period);
       this.metrics.months++;this.metrics.elapsedMs+=performance.now()-start;this.metrics.mergeMs+=performance.now()-mergeStart;this.metrics.workerPrepareMs+=results.reduce((n,r)=>n+r.metrics.prepareMs,0);this.metrics.peakWorkerHeapBytes=Math.max(this.metrics.peakWorkerHeapBytes,results.reduce((n,r)=>n+(r.metrics.heapUsedBytes||0),0));
-      this.last={month:prepared.state.stats.monthsProcessed,stateRef:prepared.state,cash:new Map(prepared.state.households.map(h=>[h.id,h.cashMinor])),firms:new Set(prepared.state.enterprises.map(e=>e.id))};return prepared;
+      this.last={month:prepared.state.stats.monthsProcessed,stateRef:prepared.state,accounts:new Map(prepared.state.households.map(h=>[h.id,JSON.stringify(h.accounts)])),cash:new Map(prepared.state.households.map(h=>[h.id,h.cashMinor])),firms:new Set(prepared.state.enterprises.map(e=>e.id))};return prepared;
     }catch(error){this.reset();throw error;}finally{this.busy=false;}
   }
 }

@@ -17,5 +17,5 @@ function days(s){const d=s.clock.date;return ordinal({year:d.year+(d.month===12?
 function month(s){s.step(days(s));return s.economySummary();}
 const farmer=e=>e.householdEconomy.rows.find(r=>r.householdId==='household-local');
 const stock=(row,good)=>row.inventories.find(s=>s.goodId===good);
-function edit(s,mutate){const v=s.snapshot();mutate(v.systems.economy,v);s.load(v);}
+function edit(s,mutate){const v=s.snapshot();mutate(v.systems.economy,v);for(const h of v.systems.economy.households)if(h.accounts&&h.cashMinor!==h.accounts.rural.cashMinor+h.accounts.urban.cashMinor)delete h.accounts;s.load(v);}
 module.exports={create,month,days,farmer,stock,edit};
