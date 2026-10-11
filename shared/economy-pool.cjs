@@ -11,6 +11,7 @@ class EconomyPool{
     if(this.disposed||this.busy)throw Error('Economy pool unavailable or busy');this.busy=true;const start=performance.now();
     try{
       economy.validateEconomyState(state,hierarchy);
+      if(state.transport){const prepared=economy.prepareValidatedMonth(state,population,hierarchy,period);this.metrics.physicalTransportSequentialMonths=(this.metrics.physicalTransportSequentialMonths||0)+1;this.metrics.months++;this.metrics.elapsedMs+=performance.now()-start;return prepared;}
       const signature=JSON.stringify(state.markets.map(m=>[m.id,m.provinceIds]));
       if(!this.last||this.last.month!==state.stats.monthsProcessed||this.last.stateRef!==state||this.signature!==signature){
         this.reset();this.signature=signature;this.groups=partitions.partitionMarkets(state,this.size);this.workers=this.groups.map(()=>this.makeWorker());

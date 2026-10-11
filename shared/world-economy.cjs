@@ -41,14 +41,16 @@ function generateMarkets(settlementState,population,hierarchy,adjacency,ownershi
   }
   return markets.sort((a,b)=>compare(a.id,b.id));
 }
-function generateWorld(scenario,hierarchy,adjacency,seed=1700){
+function generateWorld(scenario,hierarchy,adjacency,seed=1700,{physicalTransport=false}={}){
+  const vehicle=require('./physical-transport.cjs').content,goods=physicalTransport?[...registry.goods,vehicle.good]:registry.goods,recipeRows=physicalTransport?[...registry.recipes,vehicle.recipe]:registry.recipes,prices=physicalTransport?{...rules.prices,wagon:vehicle.priceMinor}:rules.prices,profiles=physicalTransport?{...rules.placement,[vehicle.recipe.id]:vehicle.placement}:rules.placement;
   validatePopulationScenario(scenario.population,hierarchy);
   if(hierarchy.id!=='mandate-provinces-v1'||scenario.scenario.version!==4||scenario.scenario.geography!==hierarchy.id)fail('incompatible source scenario');
   if(scenario.economy||scenario.settlements)fail('source already has economy/settlements');
   const settlementState=settlements.generateSettlements(scenario.population,hierarchy,scenario.countries,seed);
   const markets=generateMarkets(settlementState,scenario.population,hierarchy,adjacency,scenario.ownership),mass=settlements.totals(scenario.population,hierarchy);
   const atProvince=new Map();for(const row of settlementState.rows){if(!atProvince.has(row.provinceId))atProvince.set(row.provinceId,[]);atProvince.get(row.provinceId).push(row);}
-  const households=[],enterprises=[],recipes=new Map(registry.recipes.map(r=>[r.id,r]));
+  if(physicalTransport)for(const m of markets)m.goods.push({goodId:'wagon',priceMinor:vehicle.priceMinor});
+  const households=[],enterprises=[],recipes=new Map(recipeRows.map(r=>[r.id,r]));
   const available=new Map(settlementState.rows.map(r=>[r.id,Math.floor(r.population/2)]));
   for(const market of markets){
     const rows=market.provinceIds.flatMap(id=>atProvince.get(id)||[]),people=number(market.provinceIds.reduce((n,id)=>n+BigInt(mass.get(id).urban)+BigInt(mass.get(id).rural),0n));
@@ -63,8 +65,8 @@ function generateWorld(scenario,hierarchy,adjacency,seed=1700){
     const eligibleIds=new Set(eligible.map(s=>s.id)),selected=eligible.filter(s=>!s.excludes.some(id=>eligibleIds.has(id)));
     for(const sector of selected){
       const batches=number((BigInt(people)+BigInt(sector.perPeople)-1n)/BigInt(sector.perPeople));
-      for(const recipeId of sector.recipeIds){
-        const recipe=recipes.get(recipeId),profile=rules.placement[recipeId];if(!recipe||!profile)fail('unknown production profile');
+      for(const recipeId of physicalTransport&&sector.id===vehicle.initialSector?[...sector.recipeIds,vehicle.recipe.id]:sector.recipeIds){
+        const recipe=recipes.get(recipeId),profile=profiles[recipeId];if(!recipe||!profile)fail('unknown production profile');
         const candidates=[...rows].sort((a,b)=>{
           const preferred=r=>(r.specializations.includes(profile.specialization)?2:0)+(r.classification===profile.classification?1:0);
           return preferred(b)-preferred(a)||available.get(b.id)-available.get(a.id)||compare(a.id,b.id);
@@ -82,10 +84,10 @@ function generateWorld(scenario,hierarchy,adjacency,seed=1700){
           if(!row.specializations.includes(profile.specialization))row.specializations.push(profile.specialization);
           const enterpriseId=`enterprise-${market.id.slice(7)}-${recipeId}-${i+1}`;
           let monthlyCost=BigInt(recipe.workersPerBatch)*BigInt(rules.wagePerWorkerMinor);
-          for(const input of recipe.inputs)monthlyCost+=BigInt(input.quantity)*BigInt(rules.prices[input.goodId]);
-          const inventories=registry.goods.map(g=>{
+          for(const input of recipe.inputs)monthlyCost+=BigInt(input.quantity)*BigInt(prices[input.goodId]);
+          const inventories=goods.map(g=>{
             const input=recipe.inputs.find(i=>i.goodId===g.id),quantity=input?number(BigInt(capacityBatches)*BigInt(input.quantity)*2n):g.id===recipe.output.goodId?number(BigInt(capacityBatches)*BigInt(recipe.output.quantity)):0;
-            return {goodId:g.id,quantity,bookValueMinor:number(BigInt(quantity)*BigInt(rules.prices[g.id]))};
+            return {goodId:g.id,quantity,bookValueMinor:number(BigInt(quantity)*BigInt(prices[g.id]))};
           });
           enterprises.push({id:enterpriseId,provinceId:row.provinceId,ownerRef:{kind:'household',id:'household-'+row.provinceId.slice(9)},recipeId,capacityBatches,wagePerWorkerMinor:rules.wagePerWorkerMinor,cashMinor:number(BigInt(capacityBatches)*monthlyCost*BigInt(rules.workingCapitalMonths)),inventories});
           settlementState.placements.push({enterpriseId,settlementId:row.id,kind:profile.external?'external':'settlement'});
@@ -93,7 +95,7 @@ function generateWorld(scenario,hierarchy,adjacency,seed=1700){
       }
     }
   }
-  const economy=canonicalize({version:1,rules:{foodGoodId:'food',foodPerPersonNumerator:1,foodPerPersonDenominator:100,laborParticipationBps:5000,maxPriceAdjustmentBps:100,profitPayoutBps:0,consumerNeeds:structuredClone(rules.consumerNeeds)},goods:structuredClone(registry.goods),recipes:structuredClone(registry.recipes),markets,households,enterprises});
+  const economy=canonicalize({version:1,rules:{foodGoodId:'food',foodPerPersonNumerator:1,foodPerPersonDenominator:100,laborParticipationBps:5000,maxPriceAdjustmentBps:100,profitPayoutBps:0,consumerNeeds:structuredClone(rules.consumerNeeds)},goods:structuredClone(goods),recipes:structuredClone(recipeRows),markets,households,enterprises});
   settlements.canonicalizeSettlements(settlementState);
   validateEconomyScenario(economy,hierarchy);settlements.validateSettlements(settlementState,scenario.population,hierarchy,economy);
   return {settlements:settlementState,economy};

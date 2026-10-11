@@ -15,9 +15,11 @@ function start({now}={}){
     beginMonth(period){if(row)throw Error('Diagnostics month still open');row={period:{...period},phases:{},counters:{},logistics:null};},
     openRoutes(e){
       const period=e.stats.lastCompletedPeriod;route={period:period.year*12+period.month,opening:e.trade.routing.cargo.length,created:0,createdQuantity:0,delivered:0,deliveredQuantity:0,cancelled:0,advancedOld:0,stalled:0,stalledQuantity:0,blocked:{labor:0,capacity:0},delivery:durations(),byGood:{},repeatRequests:{requests:0,requestedQuantity:0,pendingQuantity:0},foodRetargets:{attempts:0,increased:0,reopenedAfterFulfilled:0},unobservedRemovals:0};
-      for(const c of e.trade.routing.cargo)if(!tracked.has(c.id))tracked.set(c.id,{born:null,first:route.period,stalls:0});
+      for(const c of e.trade.routing.cargo)if(!tracked.has(c.id))tracked.set(c.id,{born:e.transport&&c.haul[1]?c.haul[1]:null,first:route.period,stalls:c.haul?.[2]||0});
     },
     created(c){tracked.set(c.id,{born:route.period,first:route.period,stalls:0});route.created++;route.createdQuantity+=c.quantity;const good=route.byGood[c.goodId]??={...durations(),created:0,delivered:0,stalled:0};good.created++;},
+    split(parent,child){const meta=tracked.get(parent.id);if(meta)tracked.set(child.id,{...meta});route.split=(route.split||0)+1;},
+    merged(child,parent){const childMeta=tracked.get(child.id),meta=tracked.get(parent.id);if(meta&&childMeta)meta.stalls=Math.max(meta.stalls,childMeta.stalls);tracked.delete(child.id);route.merged=(route.merged||0)+1;},
     delivered(c){
       const meta=tracked.get(c.id),good=route.byGood[c.goodId]??={...durations(),created:0,delivered:0,stalled:0};route.delivered++;route.deliveredQuantity+=c.quantity;good.delivered++;
       for(const d of [route.delivery,good])if(meta?.born!==null&&meta?.born!==undefined){const elapsed=route.period-meta.born;d.knownCompleted++;d.sumServiceMonths+=elapsed+1;d.maxServiceMonths=Math.max(d.maxServiceMonths,elapsed+1);d.sumElapsedMonths+=elapsed;d.maxElapsedMonths=Math.max(d.maxElapsedMonths,elapsed);}else d.unknownCompleted++;
@@ -35,7 +37,7 @@ function start({now}={}){
       }
       for(const id of tracked.keys())if(!live.has(id)){tracked.delete(id);route.unobservedRemovals++;}
       for(const d of [route.delivery,...Object.values(route.byGood)]){d.meanServiceMonths=d.knownCompleted?d.sumServiceMonths/d.knownCompleted:null;d.meanElapsedMonths=d.knownCompleted?d.sumElapsedMonths/d.knownCompleted:null;}
-      row.logistics={...route,active:live.size,quantity,remainingQuantityEdges,escrowMinor,unknownAge,age:ages,observedAgeLowerBound:observedAges,maxConsecutiveStalls,activeByGood:byGood,activeByRouteEdges:byEdges,activeByPosition:byPosition};route=null;
+      row.logistics={...route,...(e.transport?{transport:require('./physical-transport.cjs').summary(e)}:{}),active:live.size,quantity,remainingQuantityEdges,escrowMinor,unknownAge,age:ages,observedAgeLowerBound:observedAges,maxConsecutiveStalls,activeByGood:byGood,activeByRouteEdges:byEdges,activeByPosition:byPosition};route=null;
     },
     endMonth(){if(!row)throw Error('Diagnostics month not open');months.push(row);const completed=row;row=null;return completed;},
     stop(){if(active===trace)active=null;tracked.clear();return {version:1,coverage:'sequential-only',months};}
